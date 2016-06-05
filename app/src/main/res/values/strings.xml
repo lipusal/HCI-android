@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Volando</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_flights">Your flights</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+</resources>
