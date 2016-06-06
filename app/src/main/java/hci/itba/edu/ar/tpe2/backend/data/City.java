@@ -1,4 +1,4 @@
-package hci.itba.edu.ar.tpe2.backend;
+package hci.itba.edu.ar.tpe2.backend.data;
 
 import java.io.Serializable;
 

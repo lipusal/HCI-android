@@ -16,10 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import hci.itba.edu.ar.tpe2.backend.API;
-import hci.itba.edu.ar.tpe2.backend.City;
-import hci.itba.edu.ar.tpe2.backend.Language;
-import hci.itba.edu.ar.tpe2.backend.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Language;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 public class FlightsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {

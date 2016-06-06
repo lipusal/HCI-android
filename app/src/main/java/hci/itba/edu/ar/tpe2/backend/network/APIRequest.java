@@ -1,10 +1,8 @@
-package hci.itba.edu.ar.tpe2.backend;
+package hci.itba.edu.ar.tpe2.backend.network;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-
-import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Language;
+import hci.itba.edu.ar.tpe2.backend.network.API;
+
 /**
  * Class used for storing essential data for proper app functionality (e.g. cities, airports,
  * languages, currencies) in the device's internal storage.

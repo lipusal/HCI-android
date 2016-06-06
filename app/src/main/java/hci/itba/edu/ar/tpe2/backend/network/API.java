@@ -1,4 +1,4 @@
-package hci.itba.edu.ar.tpe2.backend;
+package hci.itba.edu.ar.tpe2.backend.network;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,8 +6,9 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 
-import java.util.HashMap;
-import java.util.Map;
+import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Language;
 
 public class API {
     //    private static API instance = new API();
@@ -16,7 +17,7 @@ public class API {
     }
 
     public enum Service {
-        misc, geo, booking, review
+        misc, geo, booking, review, status
     }
 
     public static final String API_BASE_URL = "http://eiffel.itba.edu.ar/hci/service4/",
