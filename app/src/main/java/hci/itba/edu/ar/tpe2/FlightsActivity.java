@@ -1,6 +1,7 @@
 package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,9 +21,12 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, TextFragment.OnFragmentInteractionListener {
+
+    private TextFragment textFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,18 +34,22 @@ public class FlightsActivity extends AppCompatActivity
         setContentView(R.layout.activity_flights);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        final TextView text = (TextView) findViewById(R.id.flightsText);
 
+        //Add the text fragment
+        if(savedInstanceState == null) {    //Creating for the first time
+            textFragment = new TextFragment();
+//            textFragment.setArguments(getIntent().getExtras());   //Pass it any parameters we might have received via Intent
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit(); //Add it
+        }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        System.out.println("Creating app");
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                text.setText("");
+                textFragment.clear();
                 API.loadCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
                     @Override
                     public void execute(Context c, City[] cities) {
-                        text.append("\n" + cities.length + " cities available.\n");
+                        textFragment.appendText("\n" + cities.length + " cities available.\n");
                         for(City city : cities) {
                             Log.i("VOLANDO", city.toString());
                         }
@@ -50,7 +58,7 @@ public class FlightsActivity extends AppCompatActivity
                 API.loadLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
                     @Override
                     public void execute(Context c, Language[] langs) {
-                        text.append("\n" + langs.length + " languages available.\n");
+                        textFragment.appendText("\n" + langs.length + " languages available.\n");
                         for (Language l : langs) {
                             Log.i("VOLANDO", l.toString());
                         }
@@ -124,5 +132,13 @@ public class FlightsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    /**
+     * Needs to be implemented for Text Fragment to work.
+     */
+    public void onFragmentInteraction(Uri uri) {
+        System.out.println("Some interaction happened with the TextFragment");
     }
 }
