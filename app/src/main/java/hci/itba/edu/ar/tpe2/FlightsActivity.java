@@ -15,7 +15,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.data.City;
@@ -46,7 +45,7 @@ public class FlightsActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 textFragment.clear();
-                API.loadCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
                     @Override
                     public void execute(Context c, City[] cities) {
                         textFragment.appendText("\n" + cities.length + " cities available.\n");
@@ -55,7 +54,7 @@ public class FlightsActivity extends AppCompatActivity
                         }
                     }
                 });
-                API.loadLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
+                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
                     @Override
                     public void execute(Context c, Language[] langs) {
                         textFragment.appendText("\n" + langs.length + " languages available.\n");
