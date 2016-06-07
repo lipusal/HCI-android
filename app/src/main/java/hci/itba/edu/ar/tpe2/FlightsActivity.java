@@ -16,6 +16,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
@@ -45,25 +46,31 @@ public class FlightsActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 textFragment.clear();
-                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+//                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+//                    @Override
+//                    public void execute(Context c, City[] cities) {
+//                        textFragment.appendText("\n" + cities.length + " cities available.\n");
+//                        for(City city : cities) {
+//                            Log.i("VOLANDO", city.toString());
+//                        }
+//                    }
+//                });
+//                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
+//                    @Override
+//                    public void execute(Context c, Language[] langs) {
+//                        textFragment.appendText("\n" + langs.length + " languages available.\n");
+//                        for (Language l : langs) {
+//                            Log.i("VOLANDO", l.toString());
+//                        }
+//                    }
+//                });
+                API.getInstance().getFlightStatus("8R", 8700, FlightsActivity.this, new NetworkRequestCallback<FlightStatus>() {
                     @Override
-                    public void execute(Context c, City[] cities) {
-                        textFragment.appendText("\n" + cities.length + " cities available.\n");
-                        for(City city : cities) {
-                            Log.i("VOLANDO", city.toString());
-                        }
+                    public void execute(Context c, FlightStatus param) {
+                        textFragment.setText(param.toString());
                     }
                 });
-                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
-                    @Override
-                    public void execute(Context c, Language[] langs) {
-                        textFragment.appendText("\n" + langs.length + " languages available.\n");
-                        for (Language l : langs) {
-                            Log.i("VOLANDO", l.toString());
-                        }
-                    }
-                });
-                Snackbar.make(view, "Loading data cities and languages...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Loading flight info...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });

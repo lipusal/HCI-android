@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 
 /**
@@ -41,7 +42,7 @@ public class API {
     }
 
     //TODO use Flight object?
-    public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<String> callback) {
+    public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getflightstatus.name());
         params.putString("airline_id", airlineId);
@@ -49,23 +50,11 @@ public class API {
         new APIRequest(Service.status, params) {
             @Override
             protected void successCallback(String result) {
-                throw new UnsupportedOperationException("Unfinished method.");
-                //TODO extract meaninful information, pass it to an object and run the
-                //callback with it
-
-                int startIndex = result.indexOf("status") + 8,
-                        endIndex = result.lastIndexOf(']') + 1;
-                String data = result.substring(startIndex, endIndex);
                 Gson g = new Gson();
-                Language[] langs = g.fromJson(data, Language[].class);
-                //TODO stop saving them here, save them in the callback if anything
-                if(new FileManager(context).saveLanguages(langs)) {
-                    if(callback != null) {
-                        callback.execute(context, "");
-                    }
-                }
-                else {
-                    Log.w(LOG_TAG, "Couldn't save languages.");
+                JsonObject responseJson = g.fromJson(result, JsonObject.class);
+                FlightStatus status = FlightStatus.fromJson(responseJson.getAsJsonObject("status"));
+                if (callback != null) {
+                    callback.execute(context, status);
                 }
             }
         }.execute();
@@ -145,10 +134,10 @@ public class API {
                 if(callback != null) {
                     Gson g = new Gson();
                     JsonObject json = g.fromJson(result, JsonObject.class);
-                    JsonElement e = json.get("total");
+                    JsonElement totalObj = json.get("total");
                     Integer total = null;
-                    if(e != null) {
-                        total = e.getAsInt();
+                    if (totalObj != null) {
+                        total = totalObj.getAsInt();
                     }
                     callback.execute(context, total);
                 }
