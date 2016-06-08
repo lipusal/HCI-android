@@ -1,87 +1,186 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 /**
- * There has got to be a better way than making a POJO here to process all this data.
- * TODO fill with fields as appropriate to use GSON
+ * Ugly POJO used to hold flight status data.
  */
 public class FlightStatus {
-    /*
-    {
-	"meta": {
-		"uuid": "ef88e0bb-8465-4d3b-86d2-e296a2fc2638",
-		"time": "92.403ms"
-	},
-	"status": {
-		"id": 94588,
-		"number": 8700,
-		"airline": {
-			"id": "8R",
-			"name": "SOL",
-			"logo": "http://eiffel.itba.edu.ar/hci/service4/images/8R.png"
-		},
-		"status": "L",
-		"departure": {
-			"airport": {
-				"id": "EZE",
-				"description": "Aeropuerto Ezeiza Ministro Pistarini, Buenos Aires,
-				Argentina",
-				"time_zone": "-03:00",
-				"latitude": -34.8126,
-				"longitude": -58.5397,
-				"city": {
-					"id": "BUE",
-					"name": "Buenos Aires, Ciudad de Buenos Aires",
-					"latitude": -34.8126,
-					"longitude": -58.5397,
-					"country": {
-						"id": "AR",
-						"name": "Argentina"
-					}
-				},
-				"terminal": "I",
-				"gate": "11"
-			},
-			"scheduled_time": "2016-06-04 05:50:00",
-			"actual_time": "2016-06-04 05:50:00",
-			"scheduled_gate_time": "2016-06-04 05:00:00",
-			"actual_gate_time": "2016-06-04 05:00:00",
-			"gate_delay": null,
-			"estimate_runway_time": "2016-06-04 05:30:00",
-			"actual_runway_time": "2016-06-04 05:30:00",
-			"runway_delay": null
-		},
-		"arrival": {
-			"airport": {
-				"id": "TUC",
-				"description": "Aeropuerto Benjamin Matienzo, San Miguel de Tucuman,
-				Argentina",
-				"time_zone": "-03:00",
-				"latitude": -26.8357,
-				"longitude": -65.1083,
-				"city": {
-					"id": "TUC",
-					"name": "San Miguel de Tucuman, Tucuman",
-					"latitude": -26.8083,
-					"longitude": -65.2176,
-					"country": {
-						"id": "AR",
-						"name": "Argentina"
-					}
-				},
-				"terminal": "A",
-				"gate": "35",
-				"baggage": "1"
-			},
-			"scheduled_time": "2016-06-04 07:09:00",
-			"actual_time": "2016-06-04 07:21:00",
-			"scheduled_gate_time": "2016-06-04 07:59:00",
-			"actual_gate_time": "2016-06-04 08:11:00",
-			"gate_delay": null,
-			"estimate_runway_time": "2016-06-04 07:29:00",
-			"actual_runway_time": "2016-06-04 07:41:00",
-			"runway_delay": null
-		}
-	}
-}
-     */
+    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
+            prettyFormat = DateFormat.getDateTimeInstance();
+    private static final Map<String, String> validStatus = new HashMap<>();
+
+    static {
+        validStatus.put("S", "Scheduled");
+        validStatus.put("A", "Active");
+        validStatus.put("D", "Diverted");
+        validStatus.put("L", "Landed");
+        validStatus.put("C", "Canceled");
+    }
+
+    private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, airlineName;
+    private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
+            scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
+    private Integer flightId, flightNumber;
+    //TODO incorporate delays
+
+    private FlightStatus() {
+    }
+
+    public static FlightStatus fromJson(JsonObject statusObject) {
+        FlightStatus result = new FlightStatus();
+        JsonObject departure = statusObject.getAsJsonObject("departure"),
+                arrival = statusObject.getAsJsonObject("arrival");
+        result.status = statusObject.get("status").getAsString();
+        result.flightId = statusObject.get("id").getAsInt();
+        result.flightNumber = statusObject.get("number").getAsInt();
+        result.airlineName = statusObject.getAsJsonObject("airline").get("name").getAsString();
+        result.parseDeparture(departure);
+        result.parseArrival(arrival);
+        return result;
+    }
+
+    private void parseDeparture(JsonObject departureObject) {
+        parseDates(departureObject, "departure");
+    }
+
+    private void parseArrival(JsonObject arrivalObject) {
+        parseDates(arrivalObject, "arrival");
+    }
+
+    private void parseDates(JsonObject obj, String departureOrArrival) {
+        JsonObject airport = obj.getAsJsonObject("airport");
+        String timezone = airport.get("time_zone").getAsString();
+        if (departureOrArrival.equals("departure")) {
+            scheduledDepartureTime = parseDate(obj, "scheduled_time", timezone);
+            actualDepartureTime = parseDate(obj, "actual_time", timezone);
+            scheduledDepartureGateTime = parseDate(obj, "scheduled_gate_time", timezone);
+            actualDepartureGateTime = parseDate(obj, "scheduled_time", timezone);
+            scheduledDepartureRunwayTime = parseDate(obj, "estimate_runway_time", timezone);
+            actualDepartureRunwayTime = parseDate(obj, "actual_runway_time", timezone);
+            departureTerminal = airport.get("terminal").isJsonNull() ? null : obj.get("terminal").getAsString();
+            departureGate = airport.get("gate").isJsonNull() ? null : obj.get("gate").getAsString();
+        } else if (departureOrArrival.equals("arrival")) {
+            scheduledArrivalTime = parseDate(obj, "scheduled_time", timezone);
+            actualArrivalTime = parseDate(obj, "actual_time", timezone);
+            scheduledArrivalGateTime = parseDate(obj, "scheduled_gate_time", timezone);
+            actualArrivalGateTime = parseDate(obj, "scheduled_time", timezone);
+            scheduledArrivalRunwayTime = parseDate(obj, "estimate_runway_time", timezone);
+            actualArrivalRunwayTime = parseDate(obj, "actual_runway_time", timezone);
+            arrivalTerminal = airport.get("terminal").isJsonNull() ? null : obj.get("terminal").getAsString();
+            arrivalGate = airport.get("gate").isJsonNull() ? null : obj.get("gate").getAsString();
+        }
+    }
+
+    private Date parseDate(JsonObject arrivalOrDepartureObject, String dateTimeKey, String timezoneStr) {
+        Date result;
+        try {
+            JsonElement date = arrivalOrDepartureObject.get(dateTimeKey);
+            if (date.isJsonNull()) {
+                return null;
+            }
+            result = APIdateFormat.parse(date.getAsString() + " " + timezoneStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return result;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getDepartureTerminal() {
+        return departureTerminal;
+    }
+
+    public String getDepartureGate() {
+        return departureGate;
+    }
+
+    public Date getScheduledDepartureTime() {
+        return scheduledDepartureTime;
+    }
+
+    public Date getActualDepartureTime() {
+        return actualDepartureTime;
+    }
+
+    public Date getScheduledDepartureGateTime() {
+        return scheduledDepartureGateTime;
+    }
+
+    public Date getActualDepartureGateTime() {
+        return actualDepartureGateTime;
+    }
+
+    public Date getScheduledDepartureRunwayTime() {
+        return scheduledDepartureRunwayTime;
+    }
+
+    public Date getActualDepartureRunwayTime() {
+        return actualDepartureRunwayTime;
+    }
+
+    public String getArrivalTerminal() {
+        return arrivalTerminal;
+    }
+
+    public String getArrivalGate() {
+        return arrivalGate;
+    }
+
+    public Date getScheduledArrivalTime() {
+        return scheduledArrivalTime;
+    }
+
+    public Date getActualArrivalTime() {
+        return actualArrivalTime;
+    }
+
+    public Date getScheduledArrivalGateTime() {
+        return scheduledArrivalGateTime;
+    }
+
+    public Date getActualArrivalGateTime() {
+        return actualArrivalGateTime;
+    }
+
+    public Date getScheduledArrivalRunwayTime() {
+        return scheduledArrivalRunwayTime;
+    }
+
+    public Date getActualArrivalRunwayTime() {
+        return actualArrivalRunwayTime;
+    }
+
+    public String getAirlineName() {
+        return airlineName;
+    }
+
+    public Integer getFlightId() {
+        return flightId;
+    }
+
+    public Integer getFlightNumber() {
+        return flightNumber;
+    }
+
+    @Override
+    public String toString() {
+        return "Status for " + airlineName + " #" + flightNumber + ":\n" +
+                "\t-Status: " + validStatus.get(status) + "\n" +
+                "\t-Departs from " + departureTerminal + departureGate + " at " + prettyFormat.format(scheduledDepartureTime) + "\n" +
+                "\t-Arrives to " + arrivalTerminal + arrivalGate + " at " + prettyFormat.format(scheduledArrivalTime);
+    }
 }
