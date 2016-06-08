@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Country;
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 
@@ -23,11 +25,31 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
  * languages, currencies) in the device's internal storage.
  */
 public class FileManager {
-    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES};
+    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FOLLOWED_FLIGHTS};
     private Context context;
 
     public FileManager(Context c) {
         this.context = c;
+    }
+
+    public boolean saveCountries(Country[] countries) {
+        try {
+            return saveObjects(countries, StorageFile.COUNTRIES);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Country[] loadCountries() {
+        List<Country> result = new ArrayList<>();
+        try {
+            loadObjects(context, StorageFile.COUNTRIES, result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return result.toArray(new Country[0]);
     }
 
     public boolean saveCities(City[] cities) {
@@ -68,6 +90,26 @@ public class FileManager {
             return null;
         }
         return result.toArray(new Language[0]);
+    }
+
+    public boolean saveFlights(Collection<Flight> flights) {
+        try {
+            return saveObjects(flights.toArray(new Flight[] {}), StorageFile.FOLLOWED_FLIGHTS);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Flight> loadFlights() {
+        List<Flight> result = new ArrayList<>();
+        try {
+            loadObjects(context, StorageFile.FOLLOWED_FLIGHTS, result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return result;
     }
 
     private boolean saveObjects(Serializable[] objects, StorageFile destFile) throws IOException {

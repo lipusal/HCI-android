@@ -3,6 +3,7 @@ package hci.itba.edu.ar.tpe2.backend.data;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -14,7 +15,7 @@ import java.util.Map;
 /**
  * Ugly POJO used to hold flight status data.
  */
-public class FlightStatus {
+public class FlightStatus implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
     private static final Map<String, String> validStatus = new HashMap<>();

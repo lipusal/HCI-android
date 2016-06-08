@@ -1,10 +1,11 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,11 +16,15 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Country;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
@@ -35,6 +40,8 @@ public class FlightsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        init();
+
         //Add the text fragment
         if(savedInstanceState == null) {    //Creating for the first time
             textFragment = new TextFragment();
@@ -45,15 +52,7 @@ public class FlightsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
-//                    @Override
-//                    public void execute(Context c, City[] cities) {
-//                        textFragment.appendText("\n" + cities.length + " cities available.\n");
-//                        for (City city : cities) {
-//                            Log.d("VOLANDO", city.toString());
-//                        }
-//                    }
-//                });
+
 //                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
 //                    @Override
 //                    public void execute(Context c, Language[] langs) {
@@ -157,5 +156,54 @@ public class FlightsActivity extends AppCompatActivity
      */
     public void onFragmentInteraction(Uri uri) {
         System.out.println("Some interaction happened with the TextFragment");
+    }
+
+    /**
+     * Initializes necessary data. Some data depends on previous data (i.e. cities have countries
+     * inside, airports have cities inside) so it needs to be loaded asynchronously but one after
+     * the other, hence the ugly nesting.
+     */
+    private void init() {
+        final PersistentData data = PersistentData.getInstance();
+        //Load countries FIRST
+        if(data.getCountries() == null) {
+            API.getInstance().getAllCountries(FlightsActivity.this, new NetworkRequestCallback<Country[]>() {
+                @Override
+                public void execute(Context c, Country[] countries) {
+                    Map<String, Country> la = new HashMap<>(countries.length);
+                    for(Country country : countries) {
+                        la.put(country.getId(), country);
+                    }
+                    if(new FileManager(FlightsActivity.this).saveCountries(countries)) {
+                        Log.d("VOLANDO", countries.length + " countries saved.");
+                        data.setCountries(la);
+                        /**
+                         * Once done saving countries, get cities, setting their country to the
+                         * COMPLETE Country object (API returns incomplete objects for this method)
+                         */
+                        API.getInstance().getAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+                            @Override
+                            public void execute(Context c, City[] cities) {
+                                Map<String, City> la = new HashMap<>(cities.length);
+                                for(City city : cities) {
+                                    //City has an incomplete Country object stored. Replace it with the complete one.
+                                    city.setCountry(data.getCountries().get(city.getCountry().getId()));
+                                    la.put(city.getId(), city);
+                                }
+                                if(new FileManager(FlightsActivity.this).saveCities(cities)) {
+                                    Log.d("VOLANDO", cities.length + " cities saved.");
+                                }
+                                else {
+                                    Log.w("VOLANDO", "Couldn't save cities.");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        Log.w("VOLANDO", "Couldn't save cities.");
+                    }
+                }
+            });
+        }
     }
 }

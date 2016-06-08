@@ -1,6 +1,8 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
-public class Airport {
+import java.io.Serializable;
+
+public class Airport implements Serializable {
     private String id, description, time_zone;
     private City city;
 

@@ -29,6 +29,10 @@ public class City implements Serializable {
         return country;
     }
 
+    public void setCountry(Country completeCountry) {
+        this.country = completeCountry;
+    }
+
     public double getLongitude() {
         return longitude;
     }

@@ -9,6 +9,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.json.JSONObject;
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.Locale;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
@@ -35,7 +38,7 @@ public class API {
     private API() {}
 
     public enum Method {
-        getcities, getlanguages, getairports, getflightstatus
+        getcities, getlanguages, getairports, getflightstatus, getcountries
     }
 
     public enum Service {
@@ -122,7 +125,7 @@ public class API {
         }.execute();
     }
 
-    public void loadAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
+    public void getAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
         params.putString("method", Method.getcities.name());
@@ -140,13 +143,30 @@ public class API {
                         String data = result.substring(startIndex, endIndex);
                         City[] cities = gson.fromJson(data, City[].class);
                         //TODO stop saving them here, save them in the callback if anything
-                        if(new FileManager(context).saveCities(cities)) {
-                            if(callback != null) {
-                                callback.execute(context, cities);
-                            }
+                        if(callback != null) {
+                            callback.execute(context, cities);
                         }
-                        else {
-                            Log.w(LOG_TAG, "Couldn't save cities.");
+                    }
+                }.execute();
+            }
+        });
+    }
+
+    public void getAllCountries(final Context context, final NetworkRequestCallback<Country[]> callback) {
+        final Service service = Service.geo;
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getcountries.name());
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, Integer count) {
+                params.putString("page_size", Integer.toString(count));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String data) {
+                        JsonObject json = gson.fromJson(data, JsonObject.class);
+                        Country[] result = gson.fromJson(json.get("countries"), Country[].class);
+                        if(callback != null) {
+                            callback.execute(context, result);
                         }
                     }
                 }.execute();
