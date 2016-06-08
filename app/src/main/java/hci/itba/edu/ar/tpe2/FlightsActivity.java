@@ -72,8 +72,9 @@ public class FlightsActivity extends AppCompatActivity
 //                });
 
                 //Go to flights search activity
-                Intent i = new Intent(FlightsActivity.this, SearchActivity.class);
+                Intent i = new Intent(FlightsActivity.this, DealsMapActivity.class);
                 startActivity(i);
+
 //                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
 //                searchIntent.putExtra("from", "BUE");
 //                searchIntent.putExtra("to", "CUN");
