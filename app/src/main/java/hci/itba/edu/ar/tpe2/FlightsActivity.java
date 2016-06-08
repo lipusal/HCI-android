@@ -5,7 +5,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -16,10 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import java.util.Date;
+import java.util.List;
+
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.network.API;
-import hci.itba.edu.ar.tpe2.backend.data.City;
-import hci.itba.edu.ar.tpe2.backend.data.Language;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
@@ -46,32 +46,40 @@ public class FlightsActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 textFragment.clear();
-                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+//                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+//                    @Override
+//                    public void execute(Context c, City[] cities) {
+//                        textFragment.appendText("\n" + cities.length + " cities available.\n");
+//                        for (City city : cities) {
+//                            Log.d("VOLANDO", city.toString());
+//                        }
+//                    }
+//                });
+//                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
+//                    @Override
+//                    public void execute(Context c, Language[] langs) {
+//                        textFragment.appendText("\n" + langs.length + " languages available.\n");
+//                        for (Language l : langs) {
+//                            Log.d("VOLANDO", l.toString());
+//                        }
+//                    }
+//                });
+//                API.getInstance().getFlightStatus("8R", 8700, FlightsActivity.this, new NetworkRequestCallback<FlightStatus>() {
+//                    @Override
+//                    public void execute(Context c, FlightStatus status) {
+//                        textFragment.appendText(status.toString());
+//                        Log.d("VOLANDO", status.toString());
+//                    }
+//                });
+                API.getInstance().searchAllFlights("JFK", "LAX", "2016-08-01", null, FlightsActivity.this, new NetworkRequestCallback<List<Flight>>() {
                     @Override
-                    public void execute(Context c, City[] cities) {
-                        textFragment.appendText("\n" + cities.length + " cities available.\n");
-                        for (City city : cities) {
-                            Log.d("VOLANDO", city.toString());
+                    public void execute(Context c, List<Flight> flights) {
+                        for (Flight f : flights) {
+                            textFragment.appendText(f.toString() + "\n");
                         }
                     }
                 });
-                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
-                    @Override
-                    public void execute(Context c, Language[] langs) {
-                        textFragment.appendText("\n" + langs.length + " languages available.\n");
-                        for (Language l : langs) {
-                            Log.d("VOLANDO", l.toString());
-                        }
-                    }
-                });
-                API.getInstance().getFlightStatus("8R", 8700, FlightsActivity.this, new NetworkRequestCallback<FlightStatus>() {
-                    @Override
-                    public void execute(Context c, FlightStatus status) {
-                        textFragment.appendText(status.toString());
-                        Log.d("VOLANDO", status.toString());
-                    }
-                });
-                Snackbar.make(view, "Loading flight info...", Snackbar.LENGTH_LONG)
+                Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });

@@ -5,13 +5,21 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.util.Properties;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 
@@ -20,6 +28,9 @@ import hci.itba.edu.ar.tpe2.backend.data.Language;
  */
 public class API {
     private static API instance = new API();
+    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static Gson gson = new Gson();
+    private static final int DEFAULT_PAGE_SIZE = 30;
 
     private API() {}
 
@@ -41,6 +52,51 @@ public class API {
         return instance;
     }
 
+    public void searchAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
+        final Service service = Service.booking;
+        final Bundle params = new Bundle();
+        params.putString("method", "getonewayflights");
+        params.putString("from", departureID);
+        params.putString("to", arrivalID);
+        params.putString("dep_date", departureDate/*APIdateFormat.format(departureDate)*/);
+        if (airlineID != null) {
+            params.putString("airline_id", airlineID);
+        }
+        //TODO OK to hardcode these?
+        params.putString("adults", "1");
+        params.putString("children", "0");
+        params.putString("infants", "0");
+        //Count flights to make sure we get all of them at once
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, final Integer total) {
+                if (total == 0) {    //No flights found, don't make a 2nd request
+                    if (callback != null) {
+                        callback.execute(context, Collections.EMPTY_LIST);
+                    }
+                    return;
+                }
+                params.putString("page_size", Integer.toString(total));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String result) {
+                        if (callback == null) {
+                            Log.d("VOLANDO", "Requested flights with no callback, useless network request =(");
+                            return;
+                        }
+                        //Got all flights now, parse them
+                        JsonArray data = gson.fromJson(result, JsonObject.class).getAsJsonArray("flights");
+                        List<Flight> flights = new ArrayList<Flight>(total);
+                        for (JsonElement flight : data) {
+                            flights.add(Flight.fromJson(flight.getAsJsonObject()));
+                        }
+                        callback.execute(context, flights);
+                    }
+                }.execute();
+            }
+        });
+    }
+
     //TODO use Flight object?
     public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
         Bundle params = new Bundle();
@@ -50,8 +106,7 @@ public class API {
         new APIRequest(Service.status, params) {
             @Override
             protected void successCallback(String result) {
-                Gson g = new Gson();
-                JsonObject responseJson = g.fromJson(result, JsonObject.class);
+                JsonObject responseJson = API.gson.fromJson(result, JsonObject.class);
                 FlightStatus status = FlightStatus.fromJson(responseJson.getAsJsonObject("status"));
                 if (callback != null) {
                     callback.execute(context, status);
@@ -76,8 +131,7 @@ public class API {
                         int startIndex = result.indexOf("cities") + 8,   //Start at cities' [
                                 endIndex = result.lastIndexOf(']') + 1;         //End at cities' ]
                         String data = result.substring(startIndex, endIndex);
-                        Gson g = new Gson();
-                        City[] cities = g.fromJson(data, City[].class);
+                        City[] cities = gson.fromJson(data, City[].class);
                         //TODO stop saving them here, save them in the callback if anything
                         if(new FileManager(context).saveCities(cities)) {
                             if(callback != null) {
@@ -102,8 +156,7 @@ public class API {
                 int startIndex = result.indexOf("languages") + 11,
                         endIndex = result.lastIndexOf(']') + 1;
                 String data = result.substring(startIndex, endIndex);
-                Gson g = new Gson();
-                Language[] langs = g.fromJson(data, Language[].class);
+                Language[] langs = gson.fromJson(data, Language[].class);
                 //TODO stop saving them here, save them in the callback if anything
                 if(new FileManager(context).saveLanguages(langs)) {
                     if(callback != null) {
@@ -132,8 +185,7 @@ public class API {
             @Override
             protected void successCallback(String result) {
                 if(callback != null) {
-                    Gson g = new Gson();
-                    JsonObject json = g.fromJson(result, JsonObject.class);
+                    JsonObject json = gson.fromJson(result, JsonObject.class);
                     JsonElement totalObj = json.get("total");
                     Integer total = null;
                     if (totalObj != null) {
