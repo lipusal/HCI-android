@@ -32,13 +32,16 @@ public class SearchResultsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
+        if (savedInstanceState == null) {
+            title = (TextView) findViewById(R.id.search_results_title);
+            flightsList = (ListView) findViewById(R.id.flights_list);
+        }
+        //Search with passed parameters
+        title.setText("Searching...");
         final String from = getIntent().getStringExtra("from"),
                 to = getIntent().getStringExtra("to"),
                 departure = getIntent().getStringExtra("dep_date"),
                 airlineID = getIntent().getStringExtra("airline_id");
-        title = (TextView) findViewById(R.id.search_results_title);
-        title.setText("Searching...");
-        flightsList = (ListView) findViewById(R.id.flights_list);
         API.getInstance().searchAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
             @Override
             public void execute(Context c, List<Flight> result) {

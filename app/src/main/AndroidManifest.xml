@@ -25,9 +25,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SearchActivity" />
+
+        <activity
+            android:name=".SearchActivity"
+            android:label="@string/title_activity_search"
+        />
+
         <activity
             android:name=".SearchResultsActivity"
+            android:label="Results"
             android:parentActivityName=".SearchActivity"></activity>
     </application>
 

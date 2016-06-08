@@ -92,6 +92,13 @@ public class API {
                         }
                         callback.execute(context, flights);
                     }
+
+                    @Override
+                    protected void errorCallback(String result) {
+                        Log.w("VOLANDO", "Error searching flights:");
+                        Log.w("VOLANDO", result);
+                        callback.execute(context, Collections.EMPTY_LIST);
+                    }
                 }.execute();
             }
         });

@@ -16,7 +16,8 @@
         android:text="Search Results"
         android:id="@+id/search_results_title"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:gravity="center_horizontal" />
 
     <ListView
         android:layout_width="match_parent"

@@ -45,7 +45,6 @@ public class FlightsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                textFragment.clear();
 //                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
 //                    @Override
 //                    public void execute(Context c, City[] cities) {
@@ -73,13 +72,15 @@ public class FlightsActivity extends AppCompatActivity
 //                });
 
                 //Go to flights search activity
-                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
-                searchIntent.putExtra("from", "BUE");
-                searchIntent.putExtra("to", "CUN");
-                searchIntent.putExtra("dep_date", "2016-09-01");
-                startActivity(searchIntent);
-                Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent i = new Intent(FlightsActivity.this, SearchActivity.class);
+                startActivity(i);
+//                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
+//                searchIntent.putExtra("from", "BUE");
+//                searchIntent.putExtra("to", "CUN");
+//                searchIntent.putExtra("dep_date", "2016-09-01");
+//                startActivity(searchIntent);
+//                Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
             }
         });
 
@@ -128,13 +129,15 @@ public class FlightsActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
+        System.out.println("Selected item " + item.getTitle());
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         if (id == R.id.drawer_flights) {
-            // Handle the camera action
-        } else if (id == R.id.drawer_search) {
 
+        } else if (id == R.id.drawer_search) {
+            Intent i = new Intent(this, SearchActivity.class);
+            startActivity(i);
         } else if (id == R.id.drawer_map) {
 
         } else if (id == R.id.drawer_settings) {
