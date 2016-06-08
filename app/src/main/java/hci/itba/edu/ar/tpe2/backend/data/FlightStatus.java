@@ -164,6 +164,17 @@ public class FlightStatus {
         return actualArrivalRunwayTime;
     }
 
+    public String getAirlineName() {
+        return airlineName;
+    }
+
+    public Integer getFlightId() {
+        return flightId;
+    }
+
+    public Integer getFlightNumber() {
+        return flightNumber;
+    }
 
     @Override
     public String toString() {

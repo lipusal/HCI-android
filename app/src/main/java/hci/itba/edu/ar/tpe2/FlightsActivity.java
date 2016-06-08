@@ -1,6 +1,6 @@
 package hci.itba.edu.ar.tpe2;
 
-import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -71,14 +71,13 @@ public class FlightsActivity extends AppCompatActivity
 //                        Log.d("VOLANDO", status.toString());
 //                    }
 //                });
-                API.getInstance().searchAllFlights("JFK", "LAX", "2016-08-01", null, FlightsActivity.this, new NetworkRequestCallback<List<Flight>>() {
-                    @Override
-                    public void execute(Context c, List<Flight> flights) {
-                        for (Flight f : flights) {
-                            textFragment.appendText(f.toString() + "\n");
-                        }
-                    }
-                });
+
+                //Go to flights search activity
+                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
+                searchIntent.putExtra("from", "BUE");
+                searchIntent.putExtra("to", "CUN");
+                searchIntent.putExtra("dep_date", "2016-09-01");
+                startActivity(searchIntent);
                 Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }

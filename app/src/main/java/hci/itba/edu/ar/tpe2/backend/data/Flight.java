@@ -20,6 +20,7 @@ public class Flight {
     private Date departureDate, arrivalDate;
     private FlightStatus status;
     private double total;
+    //TODO put FlightStatus in here
 
     private Flight() {
     }
@@ -100,8 +101,16 @@ public class Flight {
         return departureDate;
     }
 
+    public String getPrettyDepartureDate() {
+        return prettyFormat.format(departureDate);
+    }
+
     public Date getArrivalDate() {
         return arrivalDate;
+    }
+
+    public String getPrettyArrivalDate() {
+        return prettyFormat.format(arrivalDate);
     }
 
     public FlightStatus getStatus() {

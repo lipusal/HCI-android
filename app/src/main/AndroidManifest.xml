@@ -13,8 +13,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyAp748kzFIPqNtm3pbBlHIJxe6obz0Gm_M"/>
-
+            android:value="AIzaSyAp748kzFIPqNtm3pbBlHIJxe6obz0Gm_M" />
 
         <activity
             android:name=".FlightsActivity"
@@ -22,9 +21,14 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".SearchActivity" />
+        <activity
+            android:name=".SearchResultsActivity"
+            android:parentActivityName=".SearchActivity"></activity>
     </application>
 
 </manifest>
