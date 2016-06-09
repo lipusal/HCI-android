@@ -123,6 +123,6 @@ public class Flight {
 
     @Override
     public String toString() {
-        return airlineID + " #" + number + ", " + departureAirport.getId() + "=>" + arrivalAirport.getId() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
+        return airlineID + " #" + number + ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
     }
 }

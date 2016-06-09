@@ -1,6 +1,6 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
-public class Airport {
+public class Airport extends Place {
     private String id, description, time_zone;
     private City city;
 
@@ -11,7 +11,8 @@ public class Airport {
         this.city = city;
     }
 
-    public String getId() {
+    @Override
+    public String getID() {
         return id;
     }
 
@@ -25,5 +26,15 @@ public class Airport {
 
     public City getCity() {
         return city;
+    }
+
+    @Override
+    public double getLatitude() {
+        return city.getLatitude();
+    }
+
+    @Override
+    public double getLongitude() {
+        return city.getLongitude();
     }
 }

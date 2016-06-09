@@ -23,6 +23,8 @@ import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
+import hci.itba.edu.ar.tpe2.backend.data.Place;
+import hci.itba.edu.ar.tpe2.backend.data.Review;
 
 /**
  * Singleton class used for making requests to the API.
@@ -36,7 +38,7 @@ public class API {
     private API() {}
 
     public enum Method {
-        getcities, getlanguages, getairports, getflightstatus, getlastminuteflightdeals
+        getcities, getlanguages, getairports, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
     }
 
     public enum Service {
@@ -53,7 +55,7 @@ public class API {
         return instance;
     }
 
-    public void searchAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
+    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
         final Service service = Service.booking;
         final Bundle params = new Bundle();
         params.putString("method", "getonewayflights");
@@ -123,7 +125,7 @@ public class API {
         }.execute();
     }
 
-    public void loadAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
+    public void getAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
         params.putString("method", Method.getcities.name());
@@ -179,23 +181,13 @@ public class API {
     }
 
     /**
-     * Gets last-minute flight deals from the specified city.
-     * @param from The city from which to search for deals.
+     * Gets last-minute flight deals from the specified place.
+     * @param from The place from which to search for deals, airport or city.
      * @param context The context under which to run the specified callback.
      * @param callback Function to run once network request is complete.
      */
-    public void getDeals(City from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
-        getDeals(from.getId(), context, callback);
-    }
-
-    /**
-     * Gets last-minute flight deals from the specified airport.
-     * @param from The airport from which to search for deals.
-     * @param context The context under which to run the specified callback.
-     * @param callback Function to run once network request is complete.
-     */
-    public void getDeals(Airport from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
-        getDeals(from.getId(), context, callback);
+    public void getDeals(Place from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        getDeals(from.getID(), context, callback);
     }
 
     /**
@@ -217,6 +209,71 @@ public class API {
                 Deal[] deals = g.fromJson(json.get("deals"), Deal[].class);
                 if(callback != null) {
                     callback.execute(context, deals);
+                }
+            }
+        }.execute();
+    }
+
+    public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.getairlinereviews.name());
+        params.putString("airline_id", flight.getAirlineID());
+        params.putString("flight_number", Integer.toString(flight.getNumber()));
+        params.putString("page_size", Integer.toString(pageSize));
+        params.putString("page", Integer.toString(pageNumber));
+        new APIRequest(Service.review, params) {
+            @Override
+            protected void successCallback(String result) {
+                JsonObject json = gson.fromJson(result, JsonObject.class);
+                JsonArray reviewsJson = json.getAsJsonArray("reviews");
+                Review[] reviews = new Review[reviewsJson.size()];
+                for (int i = 0; i < reviewsJson.size(); i++) {
+                    reviews[i] = Review.fromJson(reviewsJson.get(i).getAsJsonObject());
+                }
+                if(callback != null) {
+                    callback.execute(context, reviews);
+                }
+            }
+        }.execute();
+    }
+
+    public void getAllReviews(Flight flight, final Context context, final NetworkRequestCallback<Review[]> callback) {
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getairlinereviews.name());
+        params.putString("airline_id", flight.getAirlineID());
+        params.putString("flight_number", Integer.toString(flight.getNumber()));
+        final Service service = Service.review;
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, Integer count) {
+                params.putString("page_size", Integer.toString(count));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String result) {
+                        JsonObject json = gson.fromJson(result, JsonObject.class);
+                        JsonArray reviewsJson = json.getAsJsonArray("reviews");
+                        Review[] reviews = new Review[reviewsJson.size()];
+                        for (int i = 0; i < reviewsJson.size(); i++) {
+                            reviews[i] = Review.fromJson(reviewsJson.get(i).getAsJsonObject());
+                        }
+                        if(callback != null) {
+                            callback.execute(context, reviews);
+                        }
+                    }
+                }.execute();
+            }
+        });
+    }
+
+    public void submitReview(Review review, final Context context, final NetworkRequestCallback<Void> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.reviewairline2.name());
+        params.putString("review", review.toJson());
+        new APIRequest(Service.review, params) {
+            @Override
+            protected void successCallback(String result) {
+                if(callback != null) {
+                    callback.execute(context, null);
                 }
             }
         }.execute();
