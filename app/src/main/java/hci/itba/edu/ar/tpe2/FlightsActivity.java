@@ -1,5 +1,6 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,6 +19,7 @@ import android.view.MenuItem;
 import java.util.Date;
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -35,11 +37,14 @@ public class FlightsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Add the text fragment
-        if(savedInstanceState == null) {    //Creating for the first time
-            textFragment = new TextFragment();
+        //Creating for the first time
+        if(savedInstanceState == null) {
+            textFragment = new TextFragment();  //Add the text fragment
 //            textFragment.setArguments(getIntent().getExtras());   //Pass it any parameters we might have received via Intent
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit(); //Add it
+        }
+        else {
+            textFragment = (TextFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

@@ -13,13 +13,14 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 
@@ -35,7 +36,7 @@ public class API {
     private API() {}
 
     public enum Method {
-        getcities, getlanguages, getairports, getflightstatus
+        getcities, getlanguages, getairports, getflightstatus, getlastminuteflightdeals
     }
 
     public enum Service {
@@ -172,6 +173,50 @@ public class API {
                 }
                 else {
                     Log.w(LOG_TAG, "Couldn't save languages.");
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Gets last-minute flight deals from the specified city.
+     * @param from The city from which to search for deals.
+     * @param context The context under which to run the specified callback.
+     * @param callback Function to run once network request is complete.
+     */
+    public void getDeals(City from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        getDeals(from.getId(), context, callback);
+    }
+
+    /**
+     * Gets last-minute flight deals from the specified airport.
+     * @param from The airport from which to search for deals.
+     * @param context The context under which to run the specified callback.
+     * @param callback Function to run once network request is complete.
+     */
+    public void getDeals(Airport from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        getDeals(from.getId(), context, callback);
+    }
+
+    /**
+     * Gets last-minute flight deals from the specified origin.
+     *
+     * @param fromID Valid ID of origin (city or airport)
+     * @param context The context under which to run the specified callback.
+     * @param callback Function to run once network request is complete.
+     */
+    public void getDeals(String fromID, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.getlastminuteflightdeals.name());
+        params.putString("from", fromID);
+        new APIRequest(Service.booking, params) {
+            @Override
+            protected void successCallback(String result) {
+                Gson g = new Gson();
+                JsonObject json = g.fromJson(result, JsonObject.class);
+                Deal[] deals = g.fromJson(json.get("deals"), Deal[].class);
+                if(callback != null) {
+                    callback.execute(context, deals);
                 }
             }
         }.execute();
