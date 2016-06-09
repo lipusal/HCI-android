@@ -178,6 +178,16 @@ public class FlightStatus implements Serializable {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FlightStatus that = (FlightStatus) o;
+        return status.equals(that.status);
+
+    }
+
+    @Override
     public String toString() {
         return "Status for " + airlineName + " #" + flightNumber + ":\n" +
                 "\t-Status: " + validStatus.get(status) + "\n" +

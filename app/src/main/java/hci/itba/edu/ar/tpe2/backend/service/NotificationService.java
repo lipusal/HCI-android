@@ -4,7 +4,10 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 
@@ -18,7 +21,7 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  * {@code
  *   Intent intent = new Intent(this, NotificationService.class);
  *      intent.setAction(ACTION_NOTIFY_UPDATES);
- *      intent.putExtra(PARAM_AIRLINE_ID, "AA");
+ *      intent.putExtra(PARAM_FLIGHT, "AA");
  *      intent.putExtra(PARAM_FLIGHT_NUM, 1234);
  *      this.startService(intent);
  * }
@@ -26,39 +29,39 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-                                PARAM_AIRLINE_ID = "hci.itba.edu.ar.tpe2.backend.service.extra.AIRLINE_ID",
-                                PARAM_FLIGHT_NUM = "hci.itba.edu.ar.tpe2.backend.service.extra.FLIGHT_NUM",
-                                PARAM_PREV_STATUS = "hci.itba.edu.ar.tpe2.backend.service.extra.PREV_STATUS";
+            PARAM_FLIGHT = "hci.itba.edu.ar.tpe2.backend.service.extra.FLIGHT";
 
     public NotificationService() { super("NotificationService"); }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent != null && intent.getAction().equals(ACTION_NOTIFY_UPDATES)) {
-            String airlineID = intent.getStringExtra(PARAM_AIRLINE_ID),
-                    prevStatus = intent.getStringExtra(PARAM_PREV_STATUS);
-            int flightNum = intent.getIntExtra(PARAM_FLIGHT_NUM, -1);
-            if(airlineID != null && prevStatus != null && flightNum != -1) {
-                notifyUpdates(airlineID, flightNum, prevStatus);
-            }
+        if (intent != null && intent.getAction().equals(ACTION_NOTIFY_UPDATES) && intent.hasExtra(PARAM_FLIGHT)) {
+            Flight flight = (Flight) intent.getSerializableExtra(PARAM_FLIGHT);
+            notifyUpdates(flight);
         }
     }
 
-    private void notifyUpdates(final String airlineID, final int flightNum, String previousStatus) {
+    private void notifyUpdates(final Flight flight) {
         Bundle params = new Bundle();
-        params.putString("airline_id", airlineID);
-        params.putString("flight_number", Integer.toString(flightNum));
+        params.putString("airline_id", flight.getAirlineID());
+        params.putString("flight_number", Integer.toString(flight.getNumber()));
         new APIRequest(API.Service.status, params) {
             @Override
             protected void successCallback(String result) {
                 Gson g = new Gson();
-                //TODO Parse JSON, if flight status has changed since last time, notify, else do nothing
-                //TODO it would be nice if notifications stacked if there is more than 1 flight change
+                JsonObject json = g.fromJson(result, JsonObject.class);
+                FlightStatus newStatus = g.fromJson(json.get("status"), FlightStatus.class);
+                if (!newStatus.equals(flight.getStatus())) {
+                    //TODO send notification here
+                    //It would be nice if notifications stacked if there is more than 1 flight change
+                }
+                //TODO schedule a future Intent to check for updates again
+                //(hardcode something like 5 min for now, later use settings)
             }
 
             @Override
             protected void errorCallback(String result) {
-                super.errorCallback("Error getting status updates for " + airlineID + " #" + flightNum + ":\n" + result);
+                super.errorCallback("Error getting status updates for " + flight.getAirlineID() + " #" + flight.getNumber() + ":\n" + result);
             }
         };
     }
