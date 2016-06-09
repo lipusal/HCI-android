@@ -1,6 +1,8 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
-public class Airport extends Place {
+import java.io.Serializable;
+
+public class Airport extends Place implements Serializable {
     private String id, description, time_zone;
     private City city;
 
@@ -36,5 +38,9 @@ public class Airport extends Place {
     @Override
     public double getLongitude() {
         return city.getLongitude();
+    }
+
+    public void setCity(City city) {
+        this.city = city;
     }
 }

@@ -30,6 +30,10 @@ public class City extends Place implements Serializable {
         return country;
     }
 
+    public void setCountry(Country completeCountry) {
+        this.country = completeCountry;
+    }
+
     @Override
     public double getLongitude() {
         return longitude;

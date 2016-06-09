@@ -4,13 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Flight {
+public class Flight implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
 
@@ -119,6 +120,24 @@ public class Flight {
 
     public double getTotal() {
         return total;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Flight flight = (Flight) o;
+        if (id != flight.id) return false;
+        return departureDate != null ? departureDate.equals(flight.departureDate) : flight.departureDate == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (departureDate != null ? departureDate.hashCode() : 0);
+        return result;
     }
 
     @Override
