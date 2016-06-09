@@ -19,6 +19,7 @@ import java.util.Locale;
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Currency;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
@@ -38,7 +39,7 @@ public class API {
     private API() {}
 
     public enum Method {
-        getcities, getlanguages, getairports, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
+        getcities, getlanguages, getairports, getcurrencies, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
     }
 
     public enum Service {
@@ -150,6 +151,36 @@ public class API {
                         }
                         else {
                             Log.w(LOG_TAG, "Couldn't save cities.");
+                        }
+                    }
+                }.execute();
+            }
+        });
+    }
+
+    /**
+     * Gets all currencies as returned by the API.
+     *
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to run when the network request completes. It will be passed the
+     *                 returned currencies.
+     */
+    public void getAllCurrencies(final Context context, final NetworkRequestCallback<Currency[]> callback) {
+        final Service service = Service.misc;
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getcurrencies.name());
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, Integer currencyCount) {
+                params.putString("page_size", Integer.toString(currencyCount));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String result) {
+                        if(callback != null) {
+                            //TODO make all success callbacks work like this (don't process data if there's no callback)
+                            JsonObject json = gson.fromJson(result, JsonObject.class);
+                            Currency[] currencies = gson.fromJson(json.get("currencies"), Currency[].class);
+                            callback.execute(context, currencies);
                         }
                     }
                 }.execute();
