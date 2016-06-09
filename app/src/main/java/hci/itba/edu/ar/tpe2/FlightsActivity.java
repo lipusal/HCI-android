@@ -45,43 +45,9 @@ public class FlightsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                API.getInstance().loadAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
-//                    @Override
-//                    public void execute(Context c, City[] cities) {
-//                        textFragment.appendText("\n" + cities.length + " cities available.\n");
-//                        for (City city : cities) {
-//                            Log.d("VOLANDO", city.toString());
-//                        }
-//                    }
-//                });
-//                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
-//                    @Override
-//                    public void execute(Context c, Language[] langs) {
-//                        textFragment.appendText("\n" + langs.length + " languages available.\n");
-//                        for (Language l : langs) {
-//                            Log.d("VOLANDO", l.toString());
-//                        }
-//                    }
-//                });
-//                API.getInstance().getFlightStatus("8R", 8700, FlightsActivity.this, new NetworkRequestCallback<FlightStatus>() {
-//                    @Override
-//                    public void execute(Context c, FlightStatus status) {
-//                        textFragment.appendText(status.toString());
-//                        Log.d("VOLANDO", status.toString());
-//                    }
-//                });
-
                 //Go to flights search activity
-                Intent i = new Intent(FlightsActivity.this, DealsMapActivity.class);
+                Intent i = new Intent(FlightsActivity.this, SearchActivity.class);
                 startActivity(i);
-
-//                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
-//                searchIntent.putExtra("from", "BUE");
-//                searchIntent.putExtra("to", "CUN");
-//                searchIntent.putExtra("dep_date", "2016-09-01");
-//                startActivity(searchIntent);
-//                Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
             }
         });
 
@@ -90,9 +56,17 @@ public class FlightsActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
     }
 
     @Override
@@ -108,45 +82,48 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.flights, menu);
+//        getMenuInflater().inflate(R.menu.flights, menu);
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item) {
+//        // Handle action bar item clicks here. The action bar will
+//        // automatically handle clicks on the Home/Up button, so long
+//        // as you specify a parent activity in AndroidManifest.xml.
+//        int id = item.getItemId();
+//
+//        //noinspection SimplifiableIfStatement
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
+//
+//        return super.onOptionsItemSelected(item);
+//    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        System.out.println("Selected item " + item.getTitle());
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        Intent i = null;
         if (id == R.id.drawer_flights) {
-
+            i = new Intent(this, FlightsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         } else if (id == R.id.drawer_search) {
-            Intent i = new Intent(this, SearchActivity.class);
-            startActivity(i);
+            i = new Intent(this, SearchActivity.class);
         } else if (id == R.id.drawer_map) {
-
+            i = new Intent(this, DealsMapActivity.class);
         } else if (id == R.id.drawer_settings) {
 
         } else if (id == R.id.drawer_help) {
 
         }
 
+        if(i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(i);
+        }
+        //else, unrecognized option selected, close drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
