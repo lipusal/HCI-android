@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Locale;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
@@ -55,6 +56,17 @@ public class API {
         return instance;
     }
 
+    /**
+     * Queries the API for flights with the specified criteria.
+     *
+     * @param departureID   Valid origin ID (city or airport)
+     * @param arrivalID     Valid destinarion ID (city or airport)
+     * @param departureDate Departure date in YYYY-MM-DD format.
+     * @param airlineID     Search only flights with this airline ID (optional, specify null to ignore)
+     * @param context       The context under which to run the specified callback.
+     * @param callback      The callback to run, once flights have been fetched. The callback is passed
+     *                      the returned flights.
+     */
     public void searchAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
         final Service service = Service.booking;
         final Bundle params = new Bundle();
@@ -107,7 +119,14 @@ public class API {
         });
     }
 
-    //TODO use Flight object?
+    /**
+     * Queries the status of the flight with the specified information.
+     *
+     * @param airlineId The flight's airline ID.
+     * @param flightNum The flight number.
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     */
     public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getflightstatus.name());
@@ -125,6 +144,16 @@ public class API {
         }.execute();
     }
 
+    public void getFlightStatus(Flight flight, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
+        getFlightStatus(flight.getAirlineID(), flight.getNumber(), context, callback);
+    }
+
+    /**
+     * Fetches all cities provided by the API. Cities are passed to the specified callback.
+     *
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     */
     public void getAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
@@ -152,6 +181,12 @@ public class API {
         });
     }
 
+    /**
+     * Fetches all countries provided by the API. Countries are passed to the specified callback.
+     *
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     */
     public void getAllCountries(final Context context, final NetworkRequestCallback<Country[]> callback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
@@ -165,6 +200,34 @@ public class API {
                     protected void successCallback(String data) {
                         JsonObject json = gson.fromJson(data, JsonObject.class);
                         Country[] result = gson.fromJson(json.get("countries"), Country[].class);
+                        if (callback != null) {
+                            callback.execute(context, result);
+                        }
+                    }
+                }.execute();
+            }
+        });
+    }
+
+    /**
+     * Fetches all airports provided by the API. Airports are passed to the specified callback.
+     *
+     * @param context  Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     */
+    public void getAllAirports(final Context context, final NetworkRequestCallback<Airport[]> callback) {
+        final Service service = Service.geo;
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getairports.name());
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, Integer count) {
+                params.putString("page_size", Integer.toString(count));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String data) {
+                        JsonObject json = gson.fromJson(data, JsonObject.class);
+                        Airport[] result = gson.fromJson(json.get("airports"), Airport[].class);
                         if(callback != null) {
                             callback.execute(context, result);
                         }
@@ -174,6 +237,12 @@ public class API {
         });
     }
 
+    /**
+     * Fetches all languages provided by the API. Languages are passed to the specified callback.
+     *
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     */
     public void getLanguages(final Context context, final NetworkRequestCallback<Language[]> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getlanguages.name());

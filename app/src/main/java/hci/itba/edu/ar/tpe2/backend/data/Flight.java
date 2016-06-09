@@ -126,13 +126,18 @@ public class Flight implements Serializable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Flight flight = (Flight) o;
-        return id == flight.id;
+        if (id != flight.id) return false;
+        return departureDate != null ? departureDate.equals(flight.departureDate) : flight.departureDate == null;
+
     }
 
     @Override
     public int hashCode() {
-        return id;
+        int result = id;
+        result = 31 * result + (departureDate != null ? departureDate.hashCode() : 0);
+        return result;
     }
 
     @Override

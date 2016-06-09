@@ -20,11 +20,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
-import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
@@ -52,32 +52,9 @@ public class FlightsActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-//                API.getInstance().getLanguages(FlightsActivity.this, new NetworkRequestCallback<Language[]>() {
-//                    @Override
-//                    public void execute(Context c, Language[] langs) {
-//                        textFragment.appendText("\n" + langs.length + " languages available.\n");
-//                        for (Language l : langs) {
-//                            Log.d("VOLANDO", l.toString());
-//                        }
-//                    }
-//                });
-//                API.getInstance().getFlightStatus("8R", 8700, FlightsActivity.this, new NetworkRequestCallback<FlightStatus>() {
-//                    @Override
-//                    public void execute(Context c, FlightStatus status) {
-//                        textFragment.appendText(status.toString());
-//                        Log.d("VOLANDO", status.toString());
-//                    }
-//                });
-
                 //Go to flights search activity
                 Intent i = new Intent(FlightsActivity.this, SearchActivity.class);
                 startActivity(i);
-//                Intent searchIntent = new Intent(FlightsActivity.this, SearchResultsActivity.class);
-//                searchIntent.putExtra("from", "BUE");
-//                searchIntent.putExtra("to", "CUN");
-//                searchIntent.putExtra("dep_date", "2016-09-01");
-//                startActivity(searchIntent);
 //                Snackbar.make(view, "Searching JFK-LAX flights for 2016-08-01...", Snackbar.LENGTH_LONG)
 //                        .setAction("Action", null).show();
             }
@@ -165,8 +142,10 @@ public class FlightsActivity extends AppCompatActivity
      */
     private void init() {
         final PersistentData data = PersistentData.getInstance();
+        final FileManager fileManager = new FileManager(this);
         //Load countries FIRST
-        if(data.getCountries() == null) {
+        if (fileManager.loadCountries().length == 0) {
+            Log.e("VOLANDO", "Querying API for countries and cities and airports");
             API.getInstance().getAllCountries(FlightsActivity.this, new NetworkRequestCallback<Country[]>() {
                 @Override
                 public void execute(Context c, Country[] countries) {
@@ -174,7 +153,7 @@ public class FlightsActivity extends AppCompatActivity
                     for(Country country : countries) {
                         la.put(country.getId(), country);
                     }
-                    if(new FileManager(FlightsActivity.this).saveCountries(countries)) {
+                    if (fileManager.saveCountries(countries)) {
                         Log.d("VOLANDO", countries.length + " countries saved.");
                         data.setCountries(la);
                         /**
@@ -190,8 +169,30 @@ public class FlightsActivity extends AppCompatActivity
                                     city.setCountry(data.getCountries().get(city.getCountry().getId()));
                                     la.put(city.getId(), city);
                                 }
-                                if(new FileManager(FlightsActivity.this).saveCities(cities)) {
+                                if (fileManager.saveCities(cities)) {
                                     Log.d("VOLANDO", cities.length + " cities saved.");
+                                    data.setCities(la);
+                                    /**
+                                     * Once done saving cities, get airports, setting their city and country to the
+                                     * COMPLETE objects
+                                     */
+                                    API.getInstance().getAllAirports(FlightsActivity.this, new NetworkRequestCallback<Airport[]>() {
+                                        @Override
+                                        public void execute(Context c, Airport[] airports) {
+                                            Map<String, Airport> la = new HashMap<>(airports.length);
+                                            for (Airport airport : airports) {
+                                                //Airport has an incomplete City object stored. Replace it with the complete one.
+                                                airport.setCity(data.getCities().get(airport.getCity().getId()));
+                                                la.put(airport.getId(), airport);
+                                            }
+                                            if (fileManager.saveAirports(airports)) {
+                                                Log.d("VOLANDO", airports.length + " airports saved.");
+                                                data.setAirports(la);
+                                            } else {
+                                                Log.w("VOLANDO", "Couldn't save airports.");
+                                            }
+                                        }
+                                    });
                                 }
                                 else {
                                     Log.w("VOLANDO", "Couldn't save cities.");
@@ -200,10 +201,14 @@ public class FlightsActivity extends AppCompatActivity
                         });
                     }
                     else {
-                        Log.w("VOLANDO", "Couldn't save cities.");
+                        Log.w("VOLANDO", "Couldn't save countries.");
                     }
                 }
             });
+        }
+        if (data.getFollowedFlights() == null) {
+            data.setFollowedFlights(fileManager.loadFollowedFlights());
+            Log.d("VOLANDO", "Loaded " + data.getFollowedFlights().size() + " followed flights");
         }
     }
 }
