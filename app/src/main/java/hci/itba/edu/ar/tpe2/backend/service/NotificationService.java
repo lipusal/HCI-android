@@ -1,13 +1,22 @@
 package hci.itba.edu.ar.tpe2.backend.service;
 
+import android.app.AlarmManager;
 import android.app.IntentService;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import java.util.List;
+
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 
@@ -21,48 +30,64 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  * {@code
  *   Intent intent = new Intent(this, NotificationService.class);
  *      intent.setAction(ACTION_NOTIFY_UPDATES);
- *      intent.putExtra(PARAM_FLIGHT, "AA");
+ *      intent.putExtra(PARAM_FLIGHTS_LIST, "AA");
  *      intent.putExtra(PARAM_FLIGHT_NUM, 1234);
  *      this.startService(intent);
  * }
  * </pre>
  */
 public class NotificationService extends IntentService {
-    public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-            PARAM_FLIGHT = "hci.itba.edu.ar.tpe2.backend.service.extra.FLIGHT";
+    public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES";
 
     public NotificationService() { super("NotificationService"); }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        if (intent != null && intent.getAction().equals(ACTION_NOTIFY_UPDATES) && intent.hasExtra(PARAM_FLIGHT)) {
-            Flight flight = (Flight) intent.getSerializableExtra(PARAM_FLIGHT);
-            notifyUpdates(flight);
+        if (intent != null) {
+            //TODO ensure repeating alarm is sending the intent properly (see BootReceiver)
+            switch(intent.getAction()) {
+                case ACTION_NOTIFY_UPDATES:
+                    List<Flight> flights = PersistentData.getInstance().getFollowedFlights();
+                    notifyUpdates(flights);
+                    break;
+            }
         }
     }
 
-    private void notifyUpdates(final Flight flight) {
-        Bundle params = new Bundle();
-        params.putString("airline_id", flight.getAirlineID());
-        params.putString("flight_number", Integer.toString(flight.getNumber()));
-        new APIRequest(API.Service.status, params) {
-            @Override
-            protected void successCallback(String result) {
-                Gson g = new Gson();
-                JsonObject json = g.fromJson(result, JsonObject.class);
-                FlightStatus newStatus = g.fromJson(json.get("status"), FlightStatus.class);
-                if (!newStatus.equals(flight.getStatus())) {
-                    //TODO send notification here
-                    //It would be nice if notifications stacked if there is more than 1 flight change
+    private void notifyUpdates(final List<Flight> flights) {
+        final Gson g = new Gson();
+        final int[] requestsLeft = {flights.size()};
+        if(flights.size() > 0) {
+            Log.d("VOLANDO", "Fetching updates for " + flights.size() + " followed flights");
+        }
+        else {
+            Log.d("VOLANDO", "No followed flights, not checking updates");
+        }
+        //TODO make collection of notifications here. If notifications are needed, they will be added as requests complete
+        //Make an async network request for each flight that needs updates. Send all notifications at
+        //the same time once ALL updates have been completed.
+        for(final Flight flight : flights) {
+            Bundle params = new Bundle();
+            params.putString("airline_id", flight.getAirlineID());
+            params.putString("flight_number", Integer.toString(flight.getNumber()));
+            new APIRequest(API.Service.status, params) {
+                @Override
+                protected void successCallback(String result) {
+                    JsonObject json = g.fromJson(result, JsonObject.class);
+                    FlightStatus newStatus = g.fromJson(json.get("status"), FlightStatus.class);
+                    if (!newStatus.equals(flight.getStatus())) {
+                        //TODO make a new notification BUT DON'T SEND IT. Add it to the collection (see previous TODO)
+                    }
+                    if(requestsLeft[0]-- == 0) {  //Race condition?
+                        //TODO all updates completed, send all notifications here at the same time
+                    }
                 }
-                //TODO schedule a future Intent to check for updates again
-                //(hardcode something like 5 min for now, later use settings)
-            }
 
-            @Override
-            protected void errorCallback(String result) {
-                super.errorCallback("Error getting status updates for " + flight.getAirlineID() + " #" + flight.getNumber() + ":\n" + result);
-            }
-        };
+                @Override
+                protected void errorCallback(String result) {
+                    super.errorCallback("Error getting status updates for " + flight.getAirlineID() + " #" + flight.getNumber() + ":\n" + result);
+                }
+            };
+        }
     }
 }
