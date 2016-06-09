@@ -42,7 +42,7 @@ public class API {
     private API() {}
 
     public enum Method {
-        getcities, getlanguages, getairports, getcurrencies, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
+        getcities, getlanguages, getairports, getcountries, getcurrencies, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
     }
 
     public enum Service {
