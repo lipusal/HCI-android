@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
@@ -27,6 +28,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Place;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 
@@ -34,6 +36,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Review;
  * Singleton class used for making requests to the API.
  */
 public class API {
+    public static final int DEFAULT_RADIUS = 2;
     private static API instance = new API();
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static Gson gson = new Gson();
@@ -41,10 +44,16 @@ public class API {
 
     private API() {}
 
+    /**
+     * Supported API methods.
+     */
     public enum Method {
-        getcities, getlanguages, getairports, getcountries, getcurrencies, getflightstatus, getlastminuteflightdeals, getairlinereviews, reviewairline2
+        getcities, getairports, getcountries, getlanguages, getcurrencies, getflightstatus, getlastminuteflightdeals, getairportsbyposition, getcitiesbyposition, getairlinereviews, reviewairline2
     }
 
+    /**
+     * Services that the supported methods belong to.
+     */
     public enum Service {
         misc, geo, booking, review, status
     }
@@ -147,6 +156,11 @@ public class API {
         }.execute();
     }
 
+    /**
+     * Queries the status of the flight with the specified information.
+     *
+     * @see #getFlightStatus(String, int, Context, NetworkRequestCallback)
+     */
     public void getFlightStatus(Flight flight, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
         getFlightStatus(flight.getAirlineID(), flight.getNumber(), context, callback);
     }
@@ -300,6 +314,104 @@ public class API {
     }
 
     /**
+     * Gets all airports near the specified location within the specified radius. <b>NOTE:</b> API
+     * returns incomplete airports, this function maps the returned airports to the complete airport
+     * objects stored in local storage.
+     *
+     * @param latitude
+     * @param longitude
+     * @param radius In km
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to run when the network request completes. Will get passed the
+     *                 returned (complete) Airport objects.
+     */
+    public void getAirportsByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<Airport[]> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.getairportsbyposition.name());
+        params.putString("latitude", Double.toString(latitude));
+        params.putString("longitude", Double.toString(longitude));
+        params.putString("radius", Integer.toString(radius));
+        new APIRequest(Service.geo, params) {
+            @Override
+            protected void successCallback(String data) {
+                if(callback != null) {
+                    JsonObject json = gson.fromJson(data, JsonObject.class),
+                            flights = json.getAsJsonObject("flights");
+                    List<Airport> result = new ArrayList<>();
+                    Map<String, Airport> completeFlights = PersistentData.getInstance().getAirports();
+                    if(completeFlights == null) {
+                        throw new IllegalStateException("Flights not stored in local storage, can't search airports by location.");
+                    }
+                    for(JsonElement airport : json.getAsJsonArray("flights")) {
+                        result.add(completeFlights.get(airport.getAsJsonObject().get("id").getAsString()));
+                    }
+                    if(callback != null) {
+                        callback.execute(context, result.toArray(new Airport[0]));
+                    }
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Gets all airports within a {@code DEFAULT_RADIUS}-km radius.
+     *
+     * @see #getAirportsByLocation(double, double, int, Context, NetworkRequestCallback)
+     */
+    public void getAirportsByLocation(double latitude, double longitude, final Context context, final NetworkRequestCallback<Airport[]> callback) {
+        getAirportsByLocation(latitude, longitude, DEFAULT_RADIUS, context, callback);
+    }
+
+    /**
+     * Gets all cities near the specified location within the specified radius. <b>NOTE:</b> API
+     * returns incomplete cities, this function maps the returned cities to the complete city
+     * objects stored in local storage.
+     *
+     * @param latitude
+     * @param longitude
+     * @param radius In km
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to run when the network request completes. Will get passed the
+     *                 returned (complete) City objects.
+     */
+    public void getCitiesByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<City[]> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.getcitiesbyposition.name());
+        params.putString("latitude", Double.toString(latitude));
+        params.putString("longitude", Double.toString(longitude));
+        params.putString("radius", Integer.toString(radius));
+        new APIRequest(Service.geo, params) {
+            @Override
+            protected void successCallback(String data) {
+                if(callback != null) {
+                    JsonObject json = gson.fromJson(data, JsonObject.class),
+                            cities = json.getAsJsonObject("cities");
+                    List<City> result = new ArrayList<>();
+                    Map<String, City> completeCities = PersistentData.getInstance().getCities();
+                    if(completeCities == null) {
+                        throw new IllegalStateException("Cities not stored in local storage, can't search cities by location.");
+                    }
+                    for(JsonElement city : json.getAsJsonArray("cities")) {
+                        result.add(completeCities.get(city.getAsJsonObject().get("id").getAsString()));
+                    }
+                    if(callback != null) {
+                        callback.execute(context, result.toArray(new City[0]));
+                    }
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Gets all cities within a {@code DEFAULT_RADIUS}-km radius.
+     *
+     * @see #getCitiesByLocation(double, double, int, Context, NetworkRequestCallback)
+     */
+    public void getCitiesByLocation(double latitude, double longitude, final Context context, final NetworkRequestCallback<City[]> callback) {
+        getCitiesByLocation(latitude, longitude, DEFAULT_RADIUS, context, callback);
+    }
+
+    /**
      * Gets last-minute flight deals from the specified place.
      * @param from The place from which to search for deals, airport or city.
      * @param context The context under which to run the specified callback.
@@ -333,6 +445,16 @@ public class API {
         }.execute();
     }
 
+    /**
+     * Gets a subset of all reviews for the specified flight.
+     *
+     * @param flight The flight for which to search reviews.
+     * @param pageNumber The page number of reviews to fetch.
+     * @param pageSize The number of reviews per page.
+     * @param context The context under which to run the specified callback.
+     * @param callback Function to run once the network request completes. Will get passed the found
+     *                 reviews.
+     */
     public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getairlinereviews.name());
@@ -356,6 +478,14 @@ public class API {
         }.execute();
     }
 
+    /**
+     * Gets <b>all</b> the reviews for the specified flight.
+     *
+     * @param flight The flight for which to search for reviews.
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to run once the network request completes. Will get passed the
+     *                 found reviews.
+     */
     public void getAllReviews(Flight flight, final Context context, final NetworkRequestCallback<Review[]> callback) {
         final Bundle params = new Bundle();
         params.putString("method", Method.getairlinereviews.name());
@@ -384,6 +514,13 @@ public class API {
         });
     }
 
+    /**
+     * Submits the specified review to the server.
+     *
+     * @param review The review to publish.
+     * @param context Context under which to run the specified callback, if any.
+     * @param callback Function to run once the network request completes.
+     */
     public void submitReview(Review review, final Context context, final NetworkRequestCallback<Void> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.reviewairline2.name());
