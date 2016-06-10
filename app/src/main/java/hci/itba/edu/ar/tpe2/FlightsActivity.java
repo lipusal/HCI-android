@@ -19,8 +19,6 @@ import android.view.MenuItem;
 import java.util.HashMap;
 import java.util.Map;
 
-import hci.itba.edu.ar.tpe2.backend.data.Deal;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
@@ -165,7 +163,7 @@ public class FlightsActivity extends AppCompatActivity
                 public void execute(Context c, Country[] countries) {
                     Map<String, Country> la = new HashMap<>(countries.length);
                     for(Country country : countries) {
-                        la.put(country.getId(), country);
+                        la.put(country.getID(), country);
                     }
                     if (fileManager.saveCountries(countries)) {
                         Log.d("VOLANDO", countries.length + " countries saved.");
@@ -180,8 +178,8 @@ public class FlightsActivity extends AppCompatActivity
                                 Map<String, City> la = new HashMap<>(cities.length);
                                 for(City city : cities) {
                                     //City has an incomplete Country object stored. Replace it with the complete one.
-                                    city.setCountry(data.getCountries().get(city.getCountry().getId()));
-                                    la.put(city.getId(), city);
+                                    city.setCountry(data.getCountries().get(city.getCountry().getID()));
+                                    la.put(city.getID(), city);
                                 }
                                 if (fileManager.saveCities(cities)) {
                                     Log.d("VOLANDO", cities.length + " cities saved.");
@@ -196,8 +194,8 @@ public class FlightsActivity extends AppCompatActivity
                                             Map<String, Airport> la = new HashMap<>(airports.length);
                                             for (Airport airport : airports) {
                                                 //Airport has an incomplete City object stored. Replace it with the complete one.
-                                                airport.setCity(data.getCities().get(airport.getCity().getId()));
-                                                la.put(airport.getId(), airport);
+                                                airport.setCity(data.getCities().get(airport.getCity().getID()));
+                                                la.put(airport.getID(), airport);
                                             }
                                             if (fileManager.saveAirports(airports)) {
                                                 Log.d("VOLANDO", airports.length + " airports saved.");

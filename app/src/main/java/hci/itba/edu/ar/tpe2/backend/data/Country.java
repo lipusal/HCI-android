@@ -20,7 +20,7 @@ public class Country implements Serializable {
         hasCoords = false;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 
