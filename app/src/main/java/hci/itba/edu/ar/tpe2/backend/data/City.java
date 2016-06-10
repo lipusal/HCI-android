@@ -2,7 +2,7 @@ package hci.itba.edu.ar.tpe2.backend.data;
 
 import java.io.Serializable;
 
-public class City implements Serializable {
+public class City extends Place implements Serializable {
     private String id, name;
     private Country country;
     private double longitude, latitude;
@@ -17,7 +17,8 @@ public class City implements Serializable {
         this.has_airport = has_airport;
     }
 
-    public String getId() {
+    @Override
+    public String getID() {
         return id;
     }
 
@@ -29,10 +30,16 @@ public class City implements Serializable {
         return country;
     }
 
+    public void setCountry(Country completeCountry) {
+        this.country = completeCountry;
+    }
+
+    @Override
     public double getLongitude() {
         return longitude;
     }
 
+    @Override
     public double getLatitude() {
         return latitude;
     }
