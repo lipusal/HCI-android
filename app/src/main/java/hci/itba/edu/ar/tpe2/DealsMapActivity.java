@@ -1,9 +1,17 @@
 package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -20,10 +28,13 @@ import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
-public class DealsMapActivity extends FragmentActivity implements OnMapReadyCallback {
+public class DealsMapActivity extends FragmentActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleMap mMap;
     private Deal[] deals;
+    private GoogleApiClient mGoogleApiClient;
+    private double localLat;
+    private double localLong;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +44,15 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        // Create an instance of GoogleAPIClient.
+
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .addApi(LocationServices.API)
+                    .build();
+        }
     }
 
 
@@ -50,9 +70,9 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng buenosAires = new LatLng(-34, -58);
-        mMap.addMarker(new MarkerOptions().position(buenosAires).title("Marker in Buenos Aires").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(buenosAires));
+        LatLng localLatLng = new LatLng(localLat, localLong);
+        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in Buenos Aires").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(localLatLng));
         API.getInstance().getDeals("BUE", this, new NetworkRequestCallback<Deal[]>() {
             @Override
             public void execute(Context c, Deal[] param) {
@@ -62,19 +82,63 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
                 LatLng aux;
                 float average = 0;
                 int i = 0;
-                for(Deal d : deals){
+                for (Deal d : deals) {
                     average += d.getPrice();
                     i++;
                 }
                 average = average / i;
                 float colorValue;
-                for(Deal d : deals){
-                    aux = new LatLng(d.getCity().getLatitude(),d.getCity().getLongitude());
-                    colorValue = (float) (orderedDeals.indexOf(d)*120.0/(orderedDeals.size()-(orderedDeals.size()==1?0:1)));
+                for (Deal d : deals) {
+                    aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
+                    colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
                     mMap.addMarker(new MarkerOptions().position(aux).title(d.toString()).icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                 }
             }
         });
 
     }
+
+    @Override
+    public void onConnected(Bundle connectionHint) {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
+                mGoogleApiClient);
+        if (mLastLocation != null) {
+            localLat = mLastLocation.getLatitude();
+            localLong = mLastLocation.getLongitude();
+        }
+    }
+
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    @Override
+    protected void onStart() {
+        mGoogleApiClient.connect();
+        super.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        mGoogleApiClient.disconnect();
+        super.onStop();
+    }
+
 }

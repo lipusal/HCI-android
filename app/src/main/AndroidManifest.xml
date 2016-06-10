@@ -25,6 +25,8 @@ package="hci.itba.edu.ar.tpe2">
     <activity android:name=".SearchResultsActivity" android:label="Results"
         android:parentActivityName=".SearchActivity"></activity>
 
+
+
     <activity android:name="hci.itba.edu.ar.tpe2.DealsMapActivity" android:label="@string/title_activity_deals_map">
 
     </activity>
