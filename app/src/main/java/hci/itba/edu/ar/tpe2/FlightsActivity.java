@@ -1,10 +1,11 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,10 +16,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
+import hci.itba.edu.ar.tpe2.backend.data.City;
+import hci.itba.edu.ar.tpe2.backend.data.Country;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
@@ -35,11 +42,16 @@ public class FlightsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        init();
+
         //Add the text fragment
         if(savedInstanceState == null) {    //Creating for the first time
             textFragment = new TextFragment();
 //            textFragment.setArguments(getIntent().getExtras());   //Pass it any parameters we might have received via Intent
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit(); //Add it
+        }
+        else {
+            textFragment = (TextFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -135,5 +147,82 @@ public class FlightsActivity extends AppCompatActivity
      */
     public void onFragmentInteraction(Uri uri) {
         System.out.println("Some interaction happened with the TextFragment");
+    }
+
+    /**
+     * Initializes necessary data. Some data depends on previous data (i.e. cities have countries
+     * inside, airports have cities inside) so it needs to be loaded asynchronously but one after
+     * the other, hence the ugly nesting.
+     */
+    private void init() {
+        final PersistentData data = PersistentData.getInstance();
+        final FileManager fileManager = new FileManager(this);
+        //Load countries FIRST
+        if (fileManager.loadCountries().length == 0) {
+            Log.e("VOLANDO", "Querying API for countries and cities and airports");
+            API.getInstance().getAllCountries(FlightsActivity.this, new NetworkRequestCallback<Country[]>() {
+                @Override
+                public void execute(Context c, Country[] countries) {
+                    Map<String, Country> la = new HashMap<>(countries.length);
+                    for(Country country : countries) {
+                        la.put(country.getId(), country);
+                    }
+                    if (fileManager.saveCountries(countries)) {
+                        Log.d("VOLANDO", countries.length + " countries saved.");
+                        data.setCountries(la);
+                        /**
+                         * Once done saving countries, get cities, setting their country to the
+                         * COMPLETE Country object (API returns incomplete objects for this method)
+                         */
+                        API.getInstance().getAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
+                            @Override
+                            public void execute(Context c, City[] cities) {
+                                Map<String, City> la = new HashMap<>(cities.length);
+                                for(City city : cities) {
+                                    //City has an incomplete Country object stored. Replace it with the complete one.
+                                    city.setCountry(data.getCountries().get(city.getCountry().getId()));
+                                    la.put(city.getId(), city);
+                                }
+                                if (fileManager.saveCities(cities)) {
+                                    Log.d("VOLANDO", cities.length + " cities saved.");
+                                    data.setCities(la);
+                                    /**
+                                     * Once done saving cities, get airports, setting their city and country to the
+                                     * COMPLETE objects
+                                     */
+                                    API.getInstance().getAllAirports(FlightsActivity.this, new NetworkRequestCallback<Airport[]>() {
+                                        @Override
+                                        public void execute(Context c, Airport[] airports) {
+                                            Map<String, Airport> la = new HashMap<>(airports.length);
+                                            for (Airport airport : airports) {
+                                                //Airport has an incomplete City object stored. Replace it with the complete one.
+                                                airport.setCity(data.getCities().get(airport.getCity().getId()));
+                                                la.put(airport.getId(), airport);
+                                            }
+                                            if (fileManager.saveAirports(airports)) {
+                                                Log.d("VOLANDO", airports.length + " airports saved.");
+                                                data.setAirports(la);
+                                            } else {
+                                                Log.w("VOLANDO", "Couldn't save airports.");
+                                            }
+                                        }
+                                    });
+                                }
+                                else {
+                                    Log.w("VOLANDO", "Couldn't save cities.");
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        Log.w("VOLANDO", "Couldn't save countries.");
+                    }
+                }
+            });
+        }
+        if (data.getFollowedFlights() == null) {
+            data.setFollowedFlights(fileManager.loadFollowedFlights());
+            Log.d("VOLANDO", "Loaded " + data.getFollowedFlights().size() + " followed flights");
+        }
     }
 }
