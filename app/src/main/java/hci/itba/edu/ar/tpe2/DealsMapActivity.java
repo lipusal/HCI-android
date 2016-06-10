@@ -69,10 +69,6 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng localLatLng = new LatLng(localLat, localLong);
-        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in Buenos Aires").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(localLatLng));
         API.getInstance().getDeals("BUE", this, new NetworkRequestCallback<Deal[]>() {
             @Override
             public void execute(Context c, Deal[] param) {
@@ -116,6 +112,9 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
             localLat = mLastLocation.getLatitude();
             localLong = mLastLocation.getLongitude();
         }
+        LatLng localLatLng = new LatLng(localLat, localLong);
+        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in Buenos Aires").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(localLatLng));
     }
 
 
