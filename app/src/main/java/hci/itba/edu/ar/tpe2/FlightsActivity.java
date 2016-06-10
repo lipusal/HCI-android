@@ -181,7 +181,7 @@ public class FlightsActivity extends AppCompatActivity
                                 for(City city : cities) {
                                     //City has an incomplete Country object stored. Replace it with the complete one.
                                     city.setCountry(data.getCountries().get(city.getCountry().getId()));
-                                    la.put(city.getId(), city);
+                                    la.put(city.getID(), city);
                                 }
                                 if (fileManager.saveCities(cities)) {
                                     Log.d("VOLANDO", cities.length + " cities saved.");
@@ -196,8 +196,8 @@ public class FlightsActivity extends AppCompatActivity
                                             Map<String, Airport> la = new HashMap<>(airports.length);
                                             for (Airport airport : airports) {
                                                 //Airport has an incomplete City object stored. Replace it with the complete one.
-                                                airport.setCity(data.getCities().get(airport.getCity().getId()));
-                                                la.put(airport.getId(), airport);
+                                                airport.setCity(data.getCities().get(airport.getCity().getID()));
+                                                la.put(airport.getID(), airport);
                                             }
                                             if (fileManager.saveAirports(airports)) {
                                                 Log.d("VOLANDO", airports.length + " airports saved.");

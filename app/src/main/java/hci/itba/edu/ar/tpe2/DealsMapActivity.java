@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -35,6 +36,7 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
     private GoogleApiClient mGoogleApiClient;
     private double localLat;
     private double localLong;
+    private Airport closestAirport;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +115,14 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
             localLong = mLastLocation.getLongitude();
         }
         LatLng localLatLng = new LatLng(localLat, localLong);
-        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in Buenos Aires").icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        API.getInstance().getAirportsByLocation(localLatLng.latitude, localLatLng.longitude,10, this, new NetworkRequestCallback<Airport[]>() {
+            @Override
+            public void execute(Context c, Airport[] param) {
+               closestAirport = param[0]; //Discutir como devolvemos el mas cercano y demas
+            }
+        });
+        localLatLng = new LatLng(closestAirport.getLatitude(),closestAirport.getLongitude());
+        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in" + closestAirport.getCity().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(localLatLng));
     }
 
