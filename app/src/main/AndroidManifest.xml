@@ -45,7 +45,7 @@
             android:label="Deals Map" />
 
         <receiver
-            android:name=".backend.service.BootReceiver"
+            android:name=".backend.service.NotificationScheduler"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

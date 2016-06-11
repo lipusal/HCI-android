@@ -2,8 +2,11 @@ package hci.itba.edu.ar.tpe2;
 
 
 import android.annotation.TargetApi;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -22,6 +25,8 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
+import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 import hci.itba.edu.ar.tpe2.settings.SettingsWrapperActivity;
 
 /**
@@ -38,8 +43,8 @@ import hci.itba.edu.ar.tpe2.settings.SettingsWrapperActivity;
 public class SettingsActivity extends SettingsWrapperActivity {
 
     /**
-     * A preference value change listener that updates the preference's summary
-     * to reflect its new value.
+     * Preference change listener. Changes option summaries and applies requested changes (e.g.
+     * changing update frequency)
      */
     private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
         @Override
@@ -80,6 +85,16 @@ public class SettingsActivity extends SettingsWrapperActivity {
             } else {
                 // For all other preferences, set the summary to the value's simple string representation.
                 preference.setSummary(stringValue);
+            }
+
+            Context context = preference.getContext();
+            if (preference.getKey().equals(context.getString(R.string.pref_key_update_frequency))) { //Change the update frequency, or cancel the updates if requested.
+                long frequency = Long.parseLong(stringValue);
+                if (frequency != -1) {
+                    NotificationScheduler.setUpdates(context, frequency);
+                } else {  //Notifications disabled
+                    NotificationScheduler.cancelUpdates(context);
+                }
             }
             return true;
         }
@@ -163,8 +178,9 @@ public class SettingsActivity extends SettingsWrapperActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == android.R.id.home) {
-            finish();       //Finish settings activity when tapping the UP arrow, go back to activity that called
+
+        if (id == android.R.id.home) {  //Finish settings activity, go back to activity that called
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
