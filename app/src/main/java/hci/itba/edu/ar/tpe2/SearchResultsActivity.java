@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
-import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
@@ -42,7 +41,7 @@ public class SearchResultsActivity extends AppCompatActivity {
                 to = getIntent().getStringExtra("to"),
                 departure = getIntent().getStringExtra("dep_date"),
                 airlineID = getIntent().getStringExtra("airline_id");
-        API.getInstance().searchAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
+        API.getInstance().getAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
             @Override
             public void execute(Context c, List<Flight> result) {
                 flights = result;

@@ -3,6 +3,9 @@
     package="hci.itba.edu.ar.tpe2">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!--To set up the repeating alarm for the notifications-->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
 
     <application
         android:allowBackup="true"
@@ -31,11 +34,27 @@
             android:name=".SearchResultsActivity"
             android:label="Results"
             android:parentActivityName=".SearchActivity" />
+
         <activity
             android:name=".FlightDetailsActivity"
             android:label="@string/title_activity_flight_details"
             android:theme="@style/AppTheme.NoActionBar"
             android:parentActivityName=".FlightsActivity"></activity>
+
+
+        <receiver android:name=".backend.service.BootReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name=".backend.service.NotificationService"
+            android:exported="false"
+        />
+
+
     </application>
 
 </manifest>
