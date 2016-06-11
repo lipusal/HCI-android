@@ -31,14 +31,16 @@ public class SearchActivity extends AppCompatActivity
 
         //Creating for the first time
         if(savedInstanceState == null) {
+            //wat do
+        }
             searchButton = (Button) findViewById(R.id.search_button);
             fromField = (EditText) findViewById(R.id.from);
             toField = (EditText) findViewById(R.id.to);
             departureDateField = (EditText) findViewById(R.id.dep_date);
             airlineField = (EditText) findViewById(R.id.airline);
             toolbar = (Toolbar) findViewById(R.id.toolbar);
-        }
-//        setSupportActionBar(toolbar);
+            toolbar.setTitle(R.string.title_activity_search);
+            setSupportActionBar(toolbar);
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,10 +56,13 @@ public class SearchActivity extends AppCompatActivity
                         searchIntent.putExtra(SearchResultsActivity.PARAM_AIRLINE_ID, airline);
                     }
                     startActivity(searchIntent);
+                } else {
+                    //wat do
                 }
             }
         });
 
+            //Set up the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
