@@ -86,7 +86,7 @@ public class Flight implements Serializable {
         return number;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 

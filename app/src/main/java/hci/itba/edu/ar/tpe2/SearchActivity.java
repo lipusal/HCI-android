@@ -46,12 +46,12 @@ public class SearchActivity extends AppCompatActivity
                 if(validateFields()) {
                     //Go toField flights search activity
                     Intent searchIntent = new Intent(SearchActivity.this, SearchResultsActivity.class);
-                    searchIntent.putExtra("from", fromField.getText().toString());
-                    searchIntent.putExtra("to", toField.getText().toString());
-                    searchIntent.putExtra("dep_date", departureDateField.getText().toString());
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, fromField.getText().toString());
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_TO, toField.getText().toString());
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, departureDateField.getText().toString());
                     String airline = airlineField.getText().toString();
                     if(!airline.isEmpty()) {
-                        searchIntent.putExtra("airline_id", airline);
+                        searchIntent.putExtra(SearchResultsActivity.PARAM_AIRLINE_ID, airline);
                     }
                     startActivity(searchIntent);
                 }

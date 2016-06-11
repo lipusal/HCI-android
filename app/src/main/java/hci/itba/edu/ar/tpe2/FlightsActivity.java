@@ -226,7 +226,7 @@ public class FlightsActivity extends AppCompatActivity
             Country[] countries = fileManager.loadCountries();
             Map<String, Country> countriesMap = new HashMap<>(countries.length);
             for (Country c : countries) {
-                countriesMap.put(c.getId(), c);
+                countriesMap.put(c.getID(), c);
             }
             data.setCountries(countriesMap);
             //Cities

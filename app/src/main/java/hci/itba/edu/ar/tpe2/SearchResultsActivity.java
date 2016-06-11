@@ -1,11 +1,13 @@
 package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -18,6 +20,11 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 public class SearchResultsActivity extends AppCompatActivity {
+    public static final String PARAM_FROM = "FROM",
+            PARAM_TO = "TO",
+            PARAM_DEPARTURE_DATE = "DEP_DATE",
+            PARAM_AIRLINE_ID = "AIRLINE_ID";
+
     private String from, to, airlineId;
     private Date departure;
     private List<Flight> flights;
@@ -37,10 +44,10 @@ public class SearchResultsActivity extends AppCompatActivity {
         }
         //Search with passed parameters
         title.setText("Searching...");
-        final String from = getIntent().getStringExtra("from"),
-                to = getIntent().getStringExtra("to"),
-                departure = getIntent().getStringExtra("dep_date"),
-                airlineID = getIntent().getStringExtra("airline_id");
+        final String from = getIntent().getStringExtra(PARAM_FROM),
+                to = getIntent().getStringExtra(PARAM_TO),
+                departure = getIntent().getStringExtra(PARAM_DEPARTURE_DATE),
+                airlineID = getIntent().getStringExtra(PARAM_AIRLINE_ID);
         API.getInstance().getAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
             @Override
             public void execute(Context c, List<Flight> result) {
@@ -54,6 +61,17 @@ public class SearchResultsActivity extends AppCompatActivity {
                     flightsAdapter.notifyDataSetChanged();
                 }
                 title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
+            }
+        });
+
+        //Go to flight details activity when clicking on a flight
+        flightsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Flight clickedFlight = (Flight) parent.getItemAtPosition(position);
+                Intent detailsIntent = new Intent(SearchResultsActivity.this, FlightDetailsActivity.class);
+                detailsIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, clickedFlight);
+                startActivity(detailsIntent);
             }
         });
     }

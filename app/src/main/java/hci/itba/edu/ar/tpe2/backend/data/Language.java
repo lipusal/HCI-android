@@ -10,7 +10,7 @@ public class Language implements Serializable {
         this.name = name;
     }
 
-    public String getId() {
+    public String getID() {
         return id;
     }
 

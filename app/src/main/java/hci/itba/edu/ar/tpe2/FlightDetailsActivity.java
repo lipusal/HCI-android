@@ -1,9 +1,7 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,6 +18,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Flight;
 public class FlightDetailsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    public static final String PARAM_FLIGHT = "FLIGHT";
 
         TextView firstPartDetail;
         TextView originDetail;
@@ -34,6 +33,12 @@ public class FlightDetailsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Get info from the specified flight
+        Intent callerIntent = getIntent();
+        if (!callerIntent.hasExtra(PARAM_FLIGHT)) {
+            throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");
+        }
+        flight = (Flight) callerIntent.getSerializableExtra(PARAM_FLIGHT);
         Airport departureAirport = flight.getDepartureAirport();
         Airport arrivalAirport = flight.getArrivalAirport();
 
@@ -42,24 +47,23 @@ public class FlightDetailsActivity extends AppCompatActivity
         arrivalDetail = (TextView)findViewById(R.id.arrivalDetail);
         extraDetail = (TextView)findViewById(R.id.extraDetail);
 
-        flight = (Flight)getIntent().getSerializableExtra("flight");
 
-        firstPartDetail.setText(flight.getAirlineName()+"("+flight.getAirlineID()+")#"+flight.getId()+"" +
-                "\n" + departureAirport.getId()+ "->" + flight.getArrivalAirport().getId()+"\n" +
-                "Estado: "+flight.getStatus().getStatus());
+        firstPartDetail.setText(flight.getAirlineName() + "(" + flight.getAirlineID() + ")#" + flight.getID() + "" +
+                "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
+                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
         originDetail.setText("Origen\n" + //Usar spannableString para el size?
                 ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
                 departureAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyDepartureDate()+"\n" +
-                departureAirport.getId()+"  Terminal  " + " Puerta\n" +
-                flight.getPrettyDepartureDate()+ "   "+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()  );
+                departureAirport.getID() + "  Terminal  " + " Puerta\n" +
+                flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
 
         arrivalDetail.setText("Arrival\n" + //Usar spannableString para el size?
                 ""+ arrivalAirport.getDescription()+", "+arrivalAirport.getCity().getName()+", " +
                 arrivalAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyArrivalDate()+"\n" +
-                arrivalAirport.getId()+"  Terminal  " + " Puerta\n" +
-                flight.getPrettyArrivalDate()+ "   "+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()  );
+                arrivalAirport.getID() + "  Terminal  " + " Puerta\n" +
+                flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
 
         extraDetail.setText("Otros Detalles \n" +
                 "Vuelo directo \n" + //Hardcodeado?
@@ -111,26 +115,29 @@ public class FlightDetailsActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
+        Intent i = null;
+        if (id == R.id.drawer_flights) {
+            i = new Intent(this, FlightsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        } else if (id == R.id.drawer_search) {
+            i = new Intent(this, SearchActivity.class);
+        } else if (id == R.id.drawer_map) {
+            i = new Intent(this, DealsMapActivity.class);
+        } else if (id == R.id.drawer_settings) {
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.drawer_help) {
 
         }
 
+        if (i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(i);
+        }
+        //else, unrecognized option selected, close drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
