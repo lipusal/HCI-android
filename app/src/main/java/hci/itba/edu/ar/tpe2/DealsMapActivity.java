@@ -4,10 +4,11 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -34,8 +35,8 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
     private GoogleMap mMap;
     private Deal[] deals;
     private GoogleApiClient mGoogleApiClient;
-    private double localLat;
-    private double localLong;
+    private double latitude;
+    private double longitude;
     private Airport closestAirport;
 
     @Override
@@ -43,11 +44,10 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        // Create an instance of GoogleAPIClient.
 
+        // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -99,8 +99,8 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
     @Override
     public void onConnected(Bundle connectionHint) {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
+            // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
+            // Consider calling ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
             //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
             //                                          int[] grantResults)
@@ -108,39 +108,53 @@ public class DealsMapActivity extends FragmentActivity implements OnMapReadyCall
             // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        Location mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation != null) {
-            localLat = mLastLocation.getLatitude();
-            localLong = mLastLocation.getLongitude();
+        Location lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        if (lastKnownLocation != null) {
+            latitude = lastKnownLocation.getLatitude();
+            longitude = lastKnownLocation.getLongitude();
+            API.getInstance().getAirportsByLocation(latitude, longitude, 10, this, new NetworkRequestCallback<Airport[]>() {
+                @Override
+                public void execute(Context c, Airport[] nearbyAirports) {
+                    if (nearbyAirports.length == 0) {
+                        Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
+                    } else {
+                        Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
+                        closestAirport = nearbyAirports[0]; //TODO Discutir cómo devolvemos el mas cercano y demás
+                        LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
+                        //Add special marker in the found airport
+                        //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
+                        mMap.addMarker(new MarkerOptions().position(airportPosition).title("Marker in" + closestAirport.getCity().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                        //Move the camera to it
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
+                    }
+                }
+            });
+        } else {
+            Toast.makeText(DealsMapActivity.this, "WHER U AT BOI I CAN'T FIND U", Toast.LENGTH_SHORT).show();    //TODO remove plz
+            Log.w("VOLANDO", "Location is null");
         }
-        LatLng localLatLng = new LatLng(localLat, localLong);
-        API.getInstance().getAirportsByLocation(localLatLng.latitude, localLatLng.longitude,10, this, new NetworkRequestCallback<Airport[]>() {
-            @Override
-            public void execute(Context c, Airport[] param) {
-               closestAirport = param[0]; //Discutir como devolvemos el mas cercano y demas
-            }
-        });
-        localLatLng = new LatLng(closestAirport.getLatitude(),closestAirport.getLongitude());
-        mMap.addMarker(new MarkerOptions().position(localLatLng).title("Marker in" + closestAirport.getCity().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(localLatLng));
     }
 
 
     @Override
     public void onConnectionSuspended(int i) {
-
+        //TODO wat do jier?
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-
+        //TODO wat do jier?
     }
 
     @Override
     protected void onStart() {
-        mGoogleApiClient.connect();
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        mGoogleApiClient.connect();     //TODO this may not be necessary on EVERY resume, check docs (also, do we need to check the user's location on EVERY app start?)
+        super.onResume();
     }
 
     @Override

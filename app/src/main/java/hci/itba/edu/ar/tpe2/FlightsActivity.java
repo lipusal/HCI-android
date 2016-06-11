@@ -42,8 +42,6 @@ public class FlightsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        init();
-
         //Add the text fragment
         if(savedInstanceState == null) {    //Creating for the first time
             textFragment = new TextFragment();
@@ -89,6 +87,12 @@ public class FlightsActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        init();
     }
 
     @Override
@@ -157,8 +161,8 @@ public class FlightsActivity extends AppCompatActivity
     private void init() {
         final PersistentData data = PersistentData.getInstance();
         final FileManager fileManager = new FileManager(this);
-        //Load countries FIRST
-        if (fileManager.loadCountries().length == 0) {
+        //No persistent data stored in files, download from network
+        if (fileManager.loadCountries().length == 0) {  //Load countries FIRST, see method documentation
             Log.e("VOLANDO", "Querying API for countries and cities and airports");
             API.getInstance().getAllCountries(FlightsActivity.this, new NetworkRequestCallback<Country[]>() {
                 @Override
@@ -168,7 +172,7 @@ public class FlightsActivity extends AppCompatActivity
                         la.put(country.getId(), country);
                     }
                     if (fileManager.saveCountries(countries)) {
-                        Log.d("VOLANDO", countries.length + " countries saved.");
+                        Log.d("VOLANDO", countries.length + " countries saved from network.");
                         data.setCountries(la);
                         /**
                          * Once done saving countries, get cities, setting their country to the
@@ -184,7 +188,7 @@ public class FlightsActivity extends AppCompatActivity
                                     la.put(city.getID(), city);
                                 }
                                 if (fileManager.saveCities(cities)) {
-                                    Log.d("VOLANDO", cities.length + " cities saved.");
+                                    Log.d("VOLANDO", cities.length + " cities loaded from network.");
                                     data.setCities(la);
                                     /**
                                      * Once done saving cities, get airports, setting their city and country to the
@@ -200,7 +204,7 @@ public class FlightsActivity extends AppCompatActivity
                                                 la.put(airport.getID(), airport);
                                             }
                                             if (fileManager.saveAirports(airports)) {
-                                                Log.d("VOLANDO", airports.length + " airports saved.");
+                                                Log.d("VOLANDO", airports.length + " airports loaded from network.");
                                                 data.setAirports(la);
                                             } else {
                                                 Log.w("VOLANDO", "Couldn't save airports.");
@@ -219,10 +223,35 @@ public class FlightsActivity extends AppCompatActivity
                     }
                 }
             });
+        } else {  //Persistent data found, load from file
+            //Countries
+            Country[] countries = fileManager.loadCountries();
+            Map<String, Country> countriesMap = new HashMap<>(countries.length);
+            for (Country c : countries) {
+                countriesMap.put(c.getId(), c);
+            }
+            data.setCountries(countriesMap);
+            //Cities
+            City[] cities = fileManager.loadCities();
+            Map<String, City> citiesMap = new HashMap<>(cities.length);
+            for (City c : cities) {
+                citiesMap.put(c.getID(), c);
+            }
+            data.setCities(citiesMap);
+            //Airports
+            Airport[] airports = fileManager.loadAirports();
+            Map<String, Airport> airportsMap = new HashMap<>(airports.length);
+            for (Airport a : airports) {
+                airportsMap.put(a.getID(), a);
+            }
+            data.setAirports(airportsMap);
+            Log.d("VOLANDO", "Loaded " + countries.length + " countries, " + cities.length + " cities and " + airports.length + " airports from local storage.");
         }
         if (data.getFollowedFlights() == null) {
             data.setFollowedFlights(fileManager.loadFollowedFlights());
-            Log.d("VOLANDO", "Loaded " + data.getFollowedFlights().size() + " followed flights");
+            Log.d("VOLANDO", "Loaded " + data.getFollowedFlights().size() + " followed flights.");
+        } else {
+            Log.d("VOLANDO", "No followed flights stored.");
         }
     }
 }

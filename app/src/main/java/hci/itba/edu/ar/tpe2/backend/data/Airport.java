@@ -43,4 +43,9 @@ public class Airport extends Place implements Serializable {
     public void setCity(City city) {
         this.city = city;
     }
+
+    @Override
+    public String toString() {
+        return description + " (" + id + ")";
+    }
 }

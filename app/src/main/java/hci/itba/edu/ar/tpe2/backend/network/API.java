@@ -335,15 +335,15 @@ public class API {
             @Override
             protected void successCallback(String data) {
                 if(callback != null) {
-                    JsonObject json = gson.fromJson(data, JsonObject.class),
-                            flights = json.getAsJsonObject("flights");
+                    JsonObject json = gson.fromJson(data, JsonObject.class);
+                    JsonArray airports = json.getAsJsonArray("airports");
                     List<Airport> result = new ArrayList<>();
-                    Map<String, Airport> completeFlights = PersistentData.getInstance().getAirports();
-                    if(completeFlights == null) {
-                        throw new IllegalStateException("Flights not stored in local storage, can't search airports by location.");
+                    Map<String, Airport> completeAirports = PersistentData.getInstance().getAirports();
+                    if (completeAirports == null) {
+                        throw new IllegalStateException("Airports not stored in local storage, can't search airports by location.");
                     }
-                    for(JsonElement airport : json.getAsJsonArray("flights")) {
-                        result.add(completeFlights.get(airport.getAsJsonObject().get("id").getAsString()));
+                    for (JsonElement airport : airports) {
+                        result.add(completeAirports.get(airport.getAsJsonObject().get("id").getAsString()));
                     }
                     if(callback != null) {
                         callback.execute(context, result.toArray(new Airport[0]));
