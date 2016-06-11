@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!--To set up the repeating alarm for the notifications-->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 
     <application
@@ -38,6 +39,11 @@
             android:name=".SearchResultsActivity"
             android:label="Results"
             android:parentActivityName=".SearchActivity" />
+
+        <activity
+            android:name=".DealsMapActivity"
+            android:label="Deals Map"
+            />
 
         <receiver android:name=".backend.service.BootReceiver"
             android:enabled="true">

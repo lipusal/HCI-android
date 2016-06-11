@@ -15,7 +15,7 @@ package hci.itba.edu.ar.tpe2.backend.data;
  *     </li>
  * </ul>
  */
-public class Deal {
+public class Deal implements Comparable<Deal> {
     private City city;
     private double price;
 
@@ -35,5 +35,10 @@ public class Deal {
     @Override
     public String toString() {
         return "Deal to " + city.getName() + " for $" + price;
+    }
+
+    @Override
+    public int compareTo(Deal another) {
+        return Double.compare(another.price, price);
     }
 }
