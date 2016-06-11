@@ -69,8 +69,8 @@ public class SearchResultsActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Flight clickedFlight = (Flight) parent.getItemAtPosition(position);
-                Intent detailsIntent = new Intent(SearchResultsActivity.this, FlightDetailsActivity.class);
-                detailsIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, clickedFlight);
+                Intent detailsIntent = new Intent(SearchResultsActivity.this, FlightDetailMainActivity.class);
+                detailsIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, clickedFlight);
                 startActivity(detailsIntent);
             }
         });

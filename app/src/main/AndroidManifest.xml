@@ -3,10 +3,9 @@
     package="hci.itba.edu.ar.tpe2">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!--To set up the repeating alarm for the notifications-->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- To set up the repeating alarm for the notifications -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
 
     <application
         android:allowBackup="true"
@@ -28,7 +27,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".SearchActivity"
             android:label="@string/title_activity_search" />
@@ -36,31 +34,31 @@
             android:name=".SearchResultsActivity"
             android:label="Results"
             android:parentActivityName=".SearchActivity" />
-
         <activity
             android:name=".FlightDetailsActivity"
             android:label="@string/title_activity_flight_details"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".FlightsActivity"></activity>
-
-
+            android:parentActivityName=".FlightsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".DealsMapActivity"
-            android:label="Deals Map"
-            />
+            android:label="Deals Map" />
 
-        <receiver android:name=".backend.service.BootReceiver"
+        <receiver
+            android:name=".backend.service.BootReceiver"
             android:enabled="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
         <service
             android:name=".backend.service.NotificationService"
-            android:exported="false"
-        />
+            android:exported="false" />
 
+        <activity
+            android:name=".FlightDetailMainActivity"
+            android:label="@string/title_activity_flight_detail_main"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
