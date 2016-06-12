@@ -2,6 +2,7 @@ package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -9,8 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.Date;
 import java.util.List;
@@ -49,20 +54,26 @@ public class SearchResultsActivity extends AppCompatActivity {
                 departure = getIntent().getStringExtra(PARAM_DEPARTURE_DATE),
                 airlineID = getIntent().getStringExtra(PARAM_AIRLINE_ID);
         API.getInstance().getAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
-            @Override
-            public void execute(Context c, List<Flight> result) {
-                flights = result;
-                if (flightsAdapter == null) {
-                    flightsAdapter = new FlightAdapter(SearchResultsActivity.this, flights);
-                    flightsList.setAdapter(flightsAdapter);
-                } else {
-                    flightsAdapter.clear();
-                    flightsAdapter.addAll(flights);
-                    flightsAdapter.notifyDataSetChanged();
-                }
-                title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
-            }
-        });
+                    @Override
+                    public void execute(Context c, List<Flight> result) {
+                        flights = result;
+                        if (flightsAdapter == null) {
+                            flightsAdapter = new FlightAdapter(SearchResultsActivity.this, flights);
+                            flightsList.setAdapter(flightsAdapter);
+                        } else {
+                            flightsAdapter.clear();
+                            flightsAdapter.addAll(flights);
+                            flightsAdapter.notifyDataSetChanged();
+                        }
+                        title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
+                    }
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        title.setText("Network error, couldn't find flights =(");
+                    }
+                });
 
         //Go to flight details activity when clicking on a flight
         flightsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -86,12 +97,14 @@ public class SearchResultsActivity extends AppCompatActivity {
         public View getView(int position, View destination, ViewGroup parent) {
             Flight flight = getItem(position);
             if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
-                destination = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+                destination = LayoutInflater.from(getContext()).inflate(R.layout.activity_flights_list_item, parent, false);
             }
             //Fill in the list item with data
-            TextView title = (TextView) destination.findViewById(android.R.id.text1);//,
-//                    subtitle = (TextView) destination.findViewById(android.R.id.text2);
+            TextView title = (TextView) destination.findViewById(R.id.text1);//,
             title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
+            ImageView icon = (ImageView) destination.findViewById(R.id.icon);
+            ImageLoader.getInstance().displayImage(flight.getAirline().getLogoURL(), icon);
+//                    subtitle = (TextView) destination.findViewById(android.R.id.text2);
 //            subtitle.setText(flight.getPrettyDepartureDate());
             return destination;
         }

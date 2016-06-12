@@ -16,6 +16,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -279,5 +282,8 @@ public class FlightsActivity extends AppCompatActivity
         } else {
             Log.d("VOLANDO", "No followed flights stored.");
         }
+        //Configure the image loader GLOBALLY. Other activities can use it after this
+        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+        ImageLoader.getInstance().init(config);
     }
 }
