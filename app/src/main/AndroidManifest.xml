@@ -27,6 +27,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/title_activity_search"
@@ -56,6 +57,10 @@
             android:name=".backend.service.NotificationService"
             android:exported="false" />
 
+        <activity
+            android:name=".FlightDetailMainActivity"
+            android:label="@string/title_activity_flight_detail_main"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings"></activity>
