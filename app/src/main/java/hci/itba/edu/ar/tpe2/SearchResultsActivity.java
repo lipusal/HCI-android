@@ -91,7 +91,7 @@ public class SearchResultsActivity extends AppCompatActivity {
             //Fill in the list item with data
             TextView title = (TextView) destination.findViewById(android.R.id.text1);//,
 //                    subtitle = (TextView) destination.findViewById(android.R.id.text2);
-            title.setText(flight.getAirlineName() + " #" + flight.getNumber());
+            title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
 //            subtitle.setText(flight.getPrettyDepartureDate());
             return destination;
         }

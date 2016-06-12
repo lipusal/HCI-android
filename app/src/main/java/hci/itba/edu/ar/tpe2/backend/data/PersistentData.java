@@ -11,6 +11,7 @@ public class PersistentData {
     private Map<String, Country> countries;
     private Map<String, Currency> currencies;
     private Map<String, Airport> airports;
+    private Map<String, Airline> airlines;
 
     public static PersistentData getInstance() {
         return instance;
@@ -56,6 +57,14 @@ public class PersistentData {
 
     public void setAirports(Map<String, Airport> airports) {
         this.airports = airports;
+    }
+
+    public Map<String, Airline> getAirlines() {
+        return airlines;
+    }
+
+    public void setAirlines(Map<String, Airline> airlines) {
+        this.airlines = airlines;
     }
 
     //    public void addFollowedFlight(Flight f) {

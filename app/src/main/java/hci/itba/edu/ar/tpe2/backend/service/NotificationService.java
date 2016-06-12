@@ -75,7 +75,7 @@ public class NotificationService extends IntentService {
         //the same time once ALL updates have been completed.
         for(final Flight flight : flights) {
             Bundle params = new Bundle();
-            params.putString("airline_id", flight.getAirlineID());
+            params.putString("airline_id", flight.getAirline().getID());
             params.putString("flight_number", Integer.toString(flight.getNumber()));
             new APIRequest(API.Service.status, params) {
                 @Override
@@ -92,7 +92,7 @@ public class NotificationService extends IntentService {
 
                 @Override
                 protected void errorCallback(String result) {
-                    super.errorCallback("Error getting status updates for " + flight.getAirlineID() + " #" + flight.getNumber() + ":\n" + result);
+                    super.errorCallback("Error getting status updates for " + flight.getAirline().getID() + " #" + flight.getNumber() + ":\n" + result);
                 }
             };
         }

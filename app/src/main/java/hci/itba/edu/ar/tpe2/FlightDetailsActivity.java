@@ -48,7 +48,7 @@ public class FlightDetailsActivity extends AppCompatActivity
         extraDetail = (TextView)findViewById(R.id.extraDetail);
 
 
-        firstPartDetail.setText(flight.getAirlineName() + "(" + flight.getAirlineID() + ")#" + flight.getID() + "" +
+        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getID() + "" +
                 "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
                 "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
         originDetail.setText("Origen\n" + //Usar spannableString para el size?
