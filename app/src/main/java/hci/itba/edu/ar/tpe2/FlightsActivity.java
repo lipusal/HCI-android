@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
@@ -128,7 +129,7 @@ public class FlightsActivity extends AppCompatActivity
         } else if (id == R.id.drawer_map) {
             i = new Intent(this, DealsMapActivity.class);
         } else if (id == R.id.drawer_settings) {
-
+            i = new Intent(this, SettingsActivity.class);
         } else if (id == R.id.drawer_help) {
 
         }
@@ -161,7 +162,7 @@ public class FlightsActivity extends AppCompatActivity
         final FileManager fileManager = new FileManager(this);
         //No persistent data stored in files, download from network
         if (fileManager.loadCountries().length == 0) {  //Load countries FIRST, see method documentation
-            Log.e("VOLANDO", "Querying API for countries and cities and airports");
+            Log.w("VOLANDO", "Querying API for countries and cities and airports");
             API.getInstance().getAllCountries(FlightsActivity.this, new NetworkRequestCallback<Country[]>() {
                 @Override
                 public void execute(Context c, Country[] countries) {
@@ -243,7 +244,34 @@ public class FlightsActivity extends AppCompatActivity
                 airportsMap.put(a.getID(), a);
             }
             data.setAirports(airportsMap);
-            Log.d("VOLANDO", "Loaded " + countries.length + " countries, " + cities.length + " cities and " + airports.length + " airports from local storage.");
+            //Airlines
+            Airline[] airlines = fileManager.loadAirlines();
+            Map<String, Airline> airlinesMap = new HashMap<>(airlines.length);
+            for (Airline a : airlines) {
+                airlinesMap.put(a.getID(), a);
+            }
+            data.setAirlines(airlinesMap);
+            Log.d("VOLANDO", "Loaded " + countries.length + " countries, " + cities.length + " cities, " + airports.length + " airports and " + airlines.length + " airlines from local storage.");
+        }
+        //Load airlines
+        if (fileManager.loadAirlines().length == 0) {
+            Log.w("VOLANDO", "Querying API for airlines");
+            API.getInstance().getAllAirlines(this, new NetworkRequestCallback<Airline[]>() {
+                @Override
+                public void execute(Context c, Airline[] airlines) {
+                    Map<String, Airline> la = new HashMap<>(airlines.length);
+                    for (Airline airline : airlines) {
+                        la.put(airline.getID(), airline);
+                        System.out.println(airline.toString());
+                    }
+                    if (fileManager.saveAirlines(airlines)) {
+                        Log.d("VOLANDO", airlines.length + " airlines loaded from network.");
+                        data.setAirlines(la);
+                    } else {
+                        Log.w("VOLANDO", "Couldn't save airlines.");
+                    }
+                }
+            });
         }
         if (data.getFollowedFlights() == null) {
             data.setFollowedFlights(fileManager.loadFollowedFlights());

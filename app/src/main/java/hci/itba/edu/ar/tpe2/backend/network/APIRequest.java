@@ -58,7 +58,7 @@ public abstract class APIRequest {
     protected abstract void successCallback(String result);
 
     protected void errorCallback(String result) {
-        Log.e(API.LOG_TAG, "Error: " + result);
+        Log.e(API.LOG_TAG, "API error: " + result);
     }
 
     private String performRequest(String request) throws IOException {

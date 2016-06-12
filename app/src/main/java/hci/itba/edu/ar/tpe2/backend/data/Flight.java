@@ -15,19 +15,20 @@ public class Flight implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
 
-    private String airlineName, airlineID, durationStr;
+    private String durationStr;
     private int number, id;
+    private Airline airline;
     private Airport departureAirport, arrivalAirport;
     private Date departureDate, arrivalDate;
     private FlightStatus status;
     private double total;
-    //TODO put FlightStatus in here
 
     private Flight() {
     }
 
     public static Flight fromJson(JsonObject flightObj) {
         Flight result = new Flight();
+        Gson g = new Gson();
         JsonObject outboundRoute = result.getOutboundRoute(flightObj),
                 outboundSegment = result.getOutboundSegment(outboundRoute);
         //Parse basic info
@@ -35,11 +36,9 @@ public class Flight implements Serializable {
         result.total = flightObj.getAsJsonObject("price").getAsJsonObject("total").get("total").getAsDouble();
         result.id = outboundSegment.get("id").getAsInt();
         result.number = outboundSegment.get("number").getAsInt();
-        result.airlineID = outboundSegment.getAsJsonObject("airline").get("id").getAsString();
-        result.airlineName = outboundSegment.getAsJsonObject("airline").get("name").getAsString();
+        result.airline = PersistentData.getInstance().getAirlines().get(outboundSegment.getAsJsonObject("airline").get("id").getAsString());
         result.durationStr = outboundRoute.get("duration").getAsString();
         //Parse departureDate/arrivalDate Airport objects
-        Gson g = new Gson();
         result.departureAirport = g.fromJson(outboundSegment.getAsJsonObject("departure").get("airport"), Airport.class);
         result.arrivalAirport = g.fromJson(outboundSegment.getAsJsonObject("arrival").get("airport"), Airport.class);
         //Parse departureDate/arrivalDate dates
@@ -70,12 +69,8 @@ public class Flight implements Serializable {
         return result;
     }
 
-    public String getAirlineName() {
-        return airlineName;
-    }
-
-    public String getAirlineID() {
-        return airlineID;
+    public Airline getAirline() {
+        return airline;
     }
 
     public String getDurationStr() {
@@ -142,6 +137,6 @@ public class Flight implements Serializable {
 
     @Override
     public String toString() {
-        return airlineID + " #" + number + ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
+        return airline.getID() + " #" + number + ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
     }
 }

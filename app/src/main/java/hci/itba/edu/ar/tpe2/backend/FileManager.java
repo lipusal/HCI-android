@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
@@ -29,7 +30,7 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
  * languages, currencies) in the device's internal storage.
  */
 public class FileManager {
-    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FLIGHTS}
+    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FLIGHTS, AIRLINES}
 
     ;
     private Context context;
@@ -136,6 +137,26 @@ public class FileManager {
             return new Airport[0];
         }
         return result.toArray(new Airport[]{});
+    }
+
+    public boolean saveAirlines(Airline[] airlines) {
+        try {
+            return saveObjects(airlines, StorageFile.AIRLINES);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Airline[] loadAirlines() {
+        List<Airline> result = new ArrayList<>();
+        try {
+            loadObjects(context, StorageFile.AIRLINES, result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new Airline[0];
+        }
+        return result.toArray(new Airline[]{});
     }
 
     private boolean saveObjects(Serializable[] objects, StorageFile destFile) throws IOException {

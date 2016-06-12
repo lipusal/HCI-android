@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
@@ -44,7 +45,7 @@ public class NotificationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            //TODO ensure repeating alarm is sending the intent properly (see BootReceiver)
+            //TODO ensure repeating alarm is sending the intent properly (see NotificationScheduler)
             switch(intent.getAction()) {
                 case ACTION_NOTIFY_UPDATES:
                     List<Flight> flights = PersistentData.getInstance().getFollowedFlights();
@@ -54,9 +55,15 @@ public class NotificationService extends IntentService {
         }
     }
 
+    /**
+     * Checks for changes in the status of the specified flights, and sends notifications for any
+     * flights whose status changed.
+     *
+     * @param flights The flights for which to check for status changes.
+     */
     private void notifyUpdates(final List<Flight> flights) {
         final Gson g = new Gson();
-        final int[] requestsLeft = {flights.size()};
+        final AtomicInteger requestsLeft = new AtomicInteger(flights.size());       //To avoid race condition when waiting for all AsyncTasks to complete
         if(flights.size() > 0) {
             Log.d("VOLANDO", "Fetching updates for " + flights.size() + " followed flights");
         }
@@ -68,7 +75,7 @@ public class NotificationService extends IntentService {
         //the same time once ALL updates have been completed.
         for(final Flight flight : flights) {
             Bundle params = new Bundle();
-            params.putString("airline_id", flight.getAirlineID());
+            params.putString("airline_id", flight.getAirline().getID());
             params.putString("flight_number", Integer.toString(flight.getNumber()));
             new APIRequest(API.Service.status, params) {
                 @Override
@@ -78,14 +85,14 @@ public class NotificationService extends IntentService {
                     if (!newStatus.equals(flight.getStatus())) {
                         //TODO make a new notification BUT DON'T SEND IT. Add it to the collection (see previous TODO)
                     }
-                    if(requestsLeft[0]-- == 0) {  //Race condition?
+                    if(requestsLeft.decrementAndGet() == 0) {   //Avoids race condition
                         //TODO all updates completed, send all notifications here at the same time
                     }
                 }
 
                 @Override
                 protected void errorCallback(String result) {
-                    super.errorCallback("Error getting status updates for " + flight.getAirlineID() + " #" + flight.getNumber() + ":\n" + result);
+                    super.errorCallback("Error getting status updates for " + flight.getAirline().getID() + " #" + flight.getNumber() + ":\n" + result);
                 }
             };
         }

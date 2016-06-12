@@ -11,7 +11,7 @@ public class Review {
 
     public Review(Flight flight, int overallScore, String comment) {
         flightNumber = flight.getNumber();
-        airlineID = flight.getAirlineID();
+        airlineID = flight.getAirline().getID();
         this.comment = comment;
         //Map all fields to overall
         friendliness = food = punctuality = mileage_program = comfort = quality_price = overall = overallScore; //TODO verify it works properly

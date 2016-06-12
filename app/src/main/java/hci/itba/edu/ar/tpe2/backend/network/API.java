@@ -20,6 +20,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Currency;
@@ -48,7 +49,7 @@ public class API {
      * Supported API methods.
      */
     public enum Method {
-        getcities, getairports, getcountries, getlanguages, getcurrencies, getflightstatus, getlastminuteflightdeals, getairportsbyposition, getcitiesbyposition, getairlinereviews, reviewairline2
+        getairlines, getcities, getairports, getcountries, getlanguages, getcurrencies, getflightstatus, getlastminuteflightdeals, getairportsbyposition, getcitiesbyposition, getairlinereviews, reviewairline2
     }
 
     /**
@@ -162,7 +163,35 @@ public class API {
      * @see #getFlightStatus(String, int, Context, NetworkRequestCallback)
      */
     public void getFlightStatus(Flight flight, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
-        getFlightStatus(flight.getAirlineID(), flight.getNumber(), context, callback);
+        getFlightStatus(flight.getAirline().getID(), flight.getNumber(), context, callback);
+    }
+
+    /**
+     * Fetches all airlines provided by the API. Airlines are passed to the specified callback.
+     *
+     * @param context Context under which to run the specified callback.
+     * @param callback Function to execute when network request completes.
+     */
+    public void getAllAirlines(final Context context, final NetworkRequestCallback<Airline[]> callback) {
+        final Service service = Service.misc;
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getairlines.name());
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+            @Override
+            public void execute(Context c, Integer airlineCount) {
+                params.putString("page_size", Integer.toString(airlineCount));
+                new APIRequest(service, params) {
+                    @Override
+                    protected void successCallback(String result) {
+                        JsonObject data = gson.fromJson(result, JsonObject.class);
+                        Airline[] airlines = gson.fromJson(data.get("airlines"), Airline[].class);
+                        if(callback != null) {
+                            callback.execute(context, airlines);
+                        }
+                    }
+                }.execute();
+            }
+        });
     }
 
     /**
@@ -458,7 +487,7 @@ public class API {
     public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> callback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getairlinereviews.name());
-        params.putString("airline_id", flight.getAirlineID());
+        params.putString("airline_id", flight.getAirline().getID());
         params.putString("flight_number", Integer.toString(flight.getNumber()));
         params.putString("page_size", Integer.toString(pageSize));
         params.putString("page", Integer.toString(pageNumber));
@@ -489,7 +518,7 @@ public class API {
     public void getAllReviews(Flight flight, final Context context, final NetworkRequestCallback<Review[]> callback) {
         final Bundle params = new Bundle();
         params.putString("method", Method.getairlinereviews.name());
-        params.putString("airline_id", flight.getAirlineID());
+        params.putString("airline_id", flight.getAirline().getID());
         params.putString("flight_number", Integer.toString(flight.getNumber()));
         final Service service = Service.review;
         count(service, params, context, new NetworkRequestCallback<Integer>() {
