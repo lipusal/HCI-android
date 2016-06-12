@@ -79,7 +79,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
 
         adapter.addFragment(new FlightDetailsFragment(), "Detalles");
-        adapter.addFragment(new FlightCommentsFragment(), "Comentarios");
+        adapter.addFragment(new FlightReviewsFragment(), "Comentarios");
 
         viewPager.setAdapter(adapter);
     }
@@ -168,5 +168,9 @@ public class FlightDetailMainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public Flight getFlight(){
+        return flight;
     }
 }
