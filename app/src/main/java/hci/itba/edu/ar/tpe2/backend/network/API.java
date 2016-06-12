@@ -77,10 +77,13 @@ public class API {
      * @param departureDate Departure date in YYYY-MM-DD format.
      * @param airlineID     Search only flights with this airline ID (optional, specify null to ignore)
      * @param context       The context under which to run the specified callback.
-     * @param callback      The callback to run, once flights have been fetched. The callback is passed
-     *                      the returned flights.
+     * @param successCallback   The callback to run, once flights have been successfully fetched.
+     *                          Callback is passed the returned flights.
+     * @param errorCallback     The callback to run if there was an error (i.e. network timeout).
+     *                          Callback will be passed the resulting JSON or default API request
+     *                          error message.
      */
-    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
+    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.booking;
         final Bundle params = new Bundle();
         params.putString("method", "getonewayflights");
@@ -99,8 +102,8 @@ public class API {
             @Override
             public void execute(Context c, final Integer total) {
                 if (total == 0) {    //No flights found, don't make a 2nd request
-                    if (callback != null) {
-                        callback.execute(context, Collections.EMPTY_LIST);
+                    if (successCallback != null) {
+                        successCallback.execute(context, Collections.EMPTY_LIST);
                     }
                     return;
                 }
@@ -108,7 +111,7 @@ public class API {
                 new APIRequest(service, params) {
                     @Override
                     protected void successCallback(String result) {
-                        if (callback == null) {
+                        if (successCallback == null) {
                             Log.d("VOLANDO", "Requested flights with no callback, useless network request =(");
                             return;
                         }
@@ -118,16 +121,41 @@ public class API {
                         for (JsonElement flight : data) {
                             flights.add(Flight.fromJson(flight.getAsJsonObject()));
                         }
-                        callback.execute(context, flights);
+                        successCallback.execute(context, flights);
                     }
 
                     @Override
                     protected void errorCallback(String result) {
-                        Log.w("VOLANDO", "Error searching flights:");
+                        errorCallback.execute(context, result);
+                        successCallback.execute(context, Collections.EMPTY_LIST);
+                        /*Log.w("VOLANDO", "Error searching flights:");
                         Log.w("VOLANDO", result);
-                        callback.execute(context, Collections.EMPTY_LIST);
+                        successCallback.execute(context, Collections.EMPTY_LIST);*/
                     }
                 }.execute();
+            }
+        });
+    }
+
+    /**
+     * Queries the API for flights with the specified criteria. If there's a network error, calls
+     * the success callback with an empty result set.
+     *
+     * @param departureID     Valid origin ID (city or airport)
+     * @param arrivalID       Valid destinarion ID (city or airport)
+     * @param departureDate   Departure date in YYYY-MM-DD format.
+     * @param airlineID       Search only flights with this airline ID (optional, specify null to ignore)
+     * @param context         The context under which to run the specified callback.
+     * @param successCallback The callback to run, once flights have been successfully fetched.
+     *                        Callback is passed the returned flights.
+     */
+    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> successCallback) {
+        getAllFlights(departureID, arrivalID, departureDate, airlineID, context, successCallback, new NetworkRequestCallback<String>() {
+            @Override
+            public void execute(Context c, String param) {
+                Log.w("VOLANDO", "Error searching flights:");
+                Log.w("VOLANDO", param);
+                successCallback.execute(context, Collections.EMPTY_LIST);
             }
         });
     }
