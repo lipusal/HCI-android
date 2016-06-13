@@ -21,11 +21,11 @@ public class FlightStatus implements Serializable {
     private static final Map<String, String> validStatus = new HashMap<>();
 
     static {
-        validStatus.put("S", "Scheduled");
-        validStatus.put("A", "Active");
-        validStatus.put("D", "Diverted");
-        validStatus.put("L", "Landed");
-        validStatus.put("C", "Canceled");
+        validStatus.put("S", "scheduled");
+        validStatus.put("A", "active");
+        validStatus.put("D", "diverted");
+        validStatus.put("L", "landed");
+        validStatus.put("C", "canceled");
     }
 
     private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, airlineName;
@@ -189,9 +189,6 @@ public class FlightStatus implements Serializable {
 
     @Override
     public String toString() {
-        return "Status for " + airlineName + " #" + flightNumber + ":\n" +
-                "\t-Status: " + validStatus.get(status) + "\n" +
-                "\t-Departs from " + departureTerminal + departureGate + " at " + prettyFormat.format(scheduledDepartureTime) + "\n" +
-                "\t-Arrives to " + arrivalTerminal + arrivalGate + " at " + prettyFormat.format(scheduledArrivalTime);
+        return validStatus.get(status);
     }
 }

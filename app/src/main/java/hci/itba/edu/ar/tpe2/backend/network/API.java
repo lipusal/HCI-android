@@ -77,10 +77,13 @@ public class API {
      * @param departureDate Departure date in YYYY-MM-DD format.
      * @param airlineID     Search only flights with this airline ID (optional, specify null to ignore)
      * @param context       The context under which to run the specified callback.
-     * @param callback      The callback to run, once flights have been fetched. The callback is passed
-     *                      the returned flights.
+     * @param successCallback   The callback to run, once flights have been successfully fetched.
+     *                          Callback is passed the returned flights.
+     * @param errorCallback     The callback to run if there was an error (i.e. network timeout).
+     *                          Callback will be passed the resulting JSON or default API request
+     *                          error message.
      */
-    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> callback) {
+    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.booking;
         final Bundle params = new Bundle();
         params.putString("method", "getonewayflights");
@@ -96,38 +99,69 @@ public class API {
         params.putString("infants", "0");
         //Count flights to make sure we get all of them at once
         count(service, params, context, new NetworkRequestCallback<Integer>() {
-            @Override
-            public void execute(Context c, final Integer total) {
-                if (total == 0) {    //No flights found, don't make a 2nd request
-                    if (callback != null) {
-                        callback.execute(context, Collections.EMPTY_LIST);
-                    }
-                    return;
-                }
-                params.putString("page_size", Integer.toString(total));
-                new APIRequest(service, params) {
                     @Override
-                    protected void successCallback(String result) {
-                        if (callback == null) {
-                            Log.d("VOLANDO", "Requested flights with no callback, useless network request =(");
+                    public void execute(Context c, final Integer total) {
+                        if (total == 0) {    //No flights found, don't make a 2nd request
+                            if (successCallback != null) {
+                                successCallback.execute(context, Collections.EMPTY_LIST);
+                            }
                             return;
                         }
-                        //Got all flights now, parse them
-                        JsonArray data = gson.fromJson(result, JsonObject.class).getAsJsonArray("flights");
-                        List<Flight> flights = new ArrayList<Flight>(total);
-                        for (JsonElement flight : data) {
-                            flights.add(Flight.fromJson(flight.getAsJsonObject()));
-                        }
-                        callback.execute(context, flights);
-                    }
+                        params.putString("page_size", Integer.toString(total));
+                        new APIRequest(service, params) {
+                            @Override
+                            protected void successCallback(String result) {
+                                if (successCallback == null) {
+                                    Log.d("VOLANDO", "Requested flights with no callback, useless network request =(");
+                                    return;
+                                }
+                                //Got all flights now, parse them
+                                JsonArray data = gson.fromJson(result, JsonObject.class).getAsJsonArray("flights");
+                                List<Flight> flights = new ArrayList<Flight>(total);
+                                for (JsonElement flight : data) {
+                                    flights.add(Flight.fromJson(flight.getAsJsonObject()));
+                                }
+                                successCallback.execute(context, flights);
+                            }
 
-                    @Override
-                    protected void errorCallback(String result) {
-                        Log.w("VOLANDO", "Error searching flights:");
+                            @Override
+                            protected void errorCallback(String result) {
+                                errorCallback.execute(context, result);
+                                successCallback.execute(context, Collections.EMPTY_LIST);
+                        /*Log.w("VOLANDO", "Error searching flights:");
                         Log.w("VOLANDO", result);
-                        callback.execute(context, Collections.EMPTY_LIST);
+                        successCallback.execute(context, Collections.EMPTY_LIST);*/
+                            }
+                        }.execute();
                     }
-                }.execute();
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        errorCallback.execute(c, param);
+                    }
+                });
+    }
+
+    /**
+     * Queries the API for flights with the specified criteria. If there's a network error, calls
+     * the success callback with an empty result set.
+     *
+     * @param departureID     Valid origin ID (city or airport)
+     * @param arrivalID       Valid destinarion ID (city or airport)
+     * @param departureDate   Departure date in YYYY-MM-DD format.
+     * @param airlineID       Search only flights with this airline ID (optional, specify null to ignore)
+     * @param context         The context under which to run the specified callback.
+     * @param successCallback The callback to run, once flights have been successfully fetched.
+     *                        Callback is passed the returned flights.
+     */
+    public void getAllFlights(String departureID, String arrivalID, /*Date */String departureDate, String airlineID, final Context context, final NetworkRequestCallback<List<Flight>> successCallback) {
+        getAllFlights(departureID, arrivalID, departureDate, airlineID, context, successCallback, new NetworkRequestCallback<String>() {
+            @Override
+            public void execute(Context c, String param) {
+                Log.w("VOLANDO", "Error searching flights:");
+                Log.w("VOLANDO", param);
+                successCallback.execute(context, Collections.EMPTY_LIST);
             }
         });
     }
@@ -575,17 +609,41 @@ public class API {
      *                 the request's response.
      */
     public void count(Service service, Bundle requestParams, final Context context, final NetworkRequestCallback<Integer> callback) {
+        count(service, requestParams, context, callback, null);
+    }
+
+    /**
+     * Gets the count of results returned by the specified query, or {@code null} if the query
+     * doesn't specify a total, and passes it to the specified callback function.
+     *
+     * @param service         The service the request is for.
+     * @param requestParams   Request parameters.
+     * @param context         Context to run the callback with.
+     * @param successCallback Callback which will receive the total, or {@code null} if not specified in
+     *                        the request's response.
+     * @param errorCallback   Callback to run on network error. If null, will run default error handler.
+     */
+    public void count(Service service, Bundle requestParams, final Context context, final NetworkRequestCallback<Integer> successCallback, final NetworkRequestCallback<String> errorCallback) {
         new APIRequest(service, requestParams) {
             @Override
             protected void successCallback(String result) {
-                if(callback != null) {
+                if (successCallback != null) {
                     JsonObject json = gson.fromJson(result, JsonObject.class);
                     JsonElement totalObj = json.get("total");
                     Integer total = null;
                     if (totalObj != null) {
                         total = totalObj.getAsInt();
                     }
-                    callback.execute(context, total);
+                    successCallback.execute(context, total);
+                }
+            }
+
+            @Override
+            protected void errorCallback(String result) {
+                if (errorCallback == null) {
+                    super.errorCallback(result);
+                } else {
+                    errorCallback.execute(context, result);
                 }
             }
         }.execute();
