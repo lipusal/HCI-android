@@ -8,7 +8,7 @@
     <!-- Allows the user to choose a ringtone in the 'notification' category. -->
     <!-- NOTE: This preference will be enabled only when the checkbox above is checked. -->
     <RingtonePreference
-        android:defaultValue="content://settings/system/notification_sound"
+        android:defaultValue="@string/pref_default_ringtone"
         android:dependency="@string/pref_key_notify_on_update"
         android:key="@string/pref_key_notification_ringtone"
         android:ringtoneType="notification"

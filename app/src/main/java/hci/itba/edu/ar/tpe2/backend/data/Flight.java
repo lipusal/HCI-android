@@ -113,6 +113,10 @@ public class Flight implements Serializable {
         return status;
     }
 
+    public void setStatus(FlightStatus status) {
+        this.status = status;
+    }
+
     public double getTotal() {
         return total;
     }
