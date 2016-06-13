@@ -137,6 +137,6 @@ public class Flight implements Serializable {
 
     @Override
     public String toString() {
-        return airline.getID() + " #" + number + ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
+        return airline.getID() + " #" + number /*+ ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")"*/;
     }
 }

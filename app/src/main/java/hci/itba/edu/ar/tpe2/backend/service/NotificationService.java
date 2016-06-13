@@ -15,6 +15,7 @@ import com.google.gson.JsonObject;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
@@ -48,7 +49,7 @@ public class NotificationService extends IntentService {
             //TODO ensure repeating alarm is sending the intent properly (see NotificationScheduler)
             switch(intent.getAction()) {
                 case ACTION_NOTIFY_UPDATES:
-                    List<Flight> flights = PersistentData.getInstance().getFollowedFlights();
+                    List<Flight> flights = new FileManager(this).loadFollowedFlights();
                     notifyUpdates(flights);
                     break;
             }
@@ -75,6 +76,7 @@ public class NotificationService extends IntentService {
         //the same time once ALL updates have been completed.
         for(final Flight flight : flights) {
             Bundle params = new Bundle();
+            params.putString("method", API.Method.getflightstatus.name());
             params.putString("airline_id", flight.getAirline().getID());
             params.putString("flight_number", Integer.toString(flight.getNumber()));
             new APIRequest(API.Service.status, params) {
@@ -84,6 +86,7 @@ public class NotificationService extends IntentService {
                     FlightStatus newStatus = g.fromJson(json.get("status"), FlightStatus.class);
                     if (!newStatus.equals(flight.getStatus())) {
                         //TODO make a new notification BUT DON'T SEND IT. Add it to the collection (see previous TODO)
+                        Log.d("VOLANDO", "Status changed to " + newStatus.toString() + " for " + flight.toString());
                     }
                     if(requestsLeft.decrementAndGet() == 0) {   //Avoids race condition
                         //TODO all updates completed, send all notifications here at the same time
@@ -92,9 +95,9 @@ public class NotificationService extends IntentService {
 
                 @Override
                 protected void errorCallback(String result) {
-                    super.errorCallback("Error getting status updates for " + flight.getAirline().getID() + " #" + flight.getNumber() + ":\n" + result);
+                    super.errorCallback("Error getting status updates for " + flight.toString() + ":\n" + result);
                 }
-            };
+            }.execute();
         }
     }
 }

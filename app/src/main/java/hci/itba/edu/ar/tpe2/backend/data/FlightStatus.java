@@ -189,9 +189,6 @@ public class FlightStatus implements Serializable {
 
     @Override
     public String toString() {
-        return "Status for " + airlineName + " #" + flightNumber + ":\n" +
-                "\t-Status: " + validStatus.get(status) + "\n" +
-                "\t-Departs from " + departureTerminal + departureGate + " at " + prettyFormat.format(scheduledDepartureTime) + "\n" +
-                "\t-Arrives to " + arrivalTerminal + arrivalGate + " at " + prettyFormat.format(scheduledArrivalTime);
+        return validStatus.get(status);
     }
 }

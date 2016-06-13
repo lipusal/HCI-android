@@ -280,10 +280,12 @@ public class FlightsActivity extends AppCompatActivity
             data.setFollowedFlights(fileManager.loadFollowedFlights());
             Log.d("VOLANDO", "Loaded " + data.getFollowedFlights().size() + " followed flights.");
         } else {
-            Log.d("VOLANDO", "No followed flights stored.");
+            Log.d("VOLANDO", data.getFollowedFlights().size() + " flights saved in persistent data.");
         }
         //Configure the image loader GLOBALLY. Other activities can use it after this
-        ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
-        ImageLoader.getInstance().init(config);
+        if (!ImageLoader.getInstance().isInited()) {
+            ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
+            ImageLoader.getInstance().init(config);
+        }
     }
 }
