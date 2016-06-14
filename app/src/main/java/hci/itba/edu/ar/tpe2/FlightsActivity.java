@@ -5,20 +5,21 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,12 +31,13 @@ import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, TextFragment.OnFragmentInteractionListener {
 
-    private TextFragment textFragment;
+    private FlightsListFragment flightsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,12 +48,14 @@ public class FlightsActivity extends AppCompatActivity
 
         //Add the text fragment
         if(savedInstanceState == null) {    //Creating for the first time
-            textFragment = new TextFragment();
-//            textFragment.setArguments(getIntent().getExtras());   //Pass it any parameters we might have received via Intent
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit(); //Add it
+            flightsFragment = new FlightsListFragment();
+//            Bundle params = new Bundle();
+//            params.putSerializable(FlightsListFragment.PARAM_FLIGHTS_LIST, (Serializable) PersistentData.getInstance().getFollowedFlights());
+//            flightsFragment.setArguments(params);
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit(); //Add it
         }
         else {
-            textFragment = (TextFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
+            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
         }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
