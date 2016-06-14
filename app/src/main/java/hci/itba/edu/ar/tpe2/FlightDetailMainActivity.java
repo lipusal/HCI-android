@@ -1,5 +1,6 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -37,7 +38,7 @@ import info.androidhive.materialtabs.fragments.ThreeFragment;
 import info.androidhive.materialtabs.fragments.TwoFragment;
 */
 public class FlightDetailMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightReviewsFragment.OnFragmentInteractionListener  {
 
     public static final String PARAM_FLIGHT = "FLIGHT";
     private Toolbar toolbar;
@@ -50,6 +51,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flight_detail_main);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -65,12 +67,10 @@ public class FlightDetailMainActivity extends AppCompatActivity
             throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");
         }
         flight = (Flight) callerIntent.getSerializableExtra(PARAM_FLIGHT);
-
+        setTitle(flight.getAirline().getID()+"#"+flight.getNumber());
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+                this, drawer, toolbar, R.string.navigation_drawer_open, v
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -83,6 +83,11 @@ public class FlightDetailMainActivity extends AppCompatActivity
         adapter.addFragment(new FlightReviewsFragment(), "Comentarios");
 
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
     }
 
     class ViewPagerAdapter extends FragmentPagerAdapter {

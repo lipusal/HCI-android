@@ -4,10 +4,48 @@
     android:layout_height="match_parent"
     tools:context="hci.itba.edu.ar.tpe2.FlightDetailsFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
 
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:padding="15dp"
+            tools:context="hci.itba.edu.ar.tpe2.SearchActivity">
+            <TextView
+                android:id="@+id/firstPartDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true" />
+            <TextView
+                android:id="@+id/originDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/firstPartDetail"
+                android:layout_alignStart="@+id/firstPartDetail"
+                android:layout_marginTop="10dp" />
+            <TextView
+                android:id="@+id/arrivalDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/originDetail"
+                android:layout_alignStart="@+id/originDetail"
+                android:layout_marginTop="10dp" />
+
+            <TextView
+                android:id="@+id/extraDetail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/arrivalDetail"
+                android:layout_alignStart="@+id/arrivalDetail"
+                android:layout_marginTop="10dp" />
+
+
+
+
+        </RelativeLayout>
+    </ScrollView>
 </FrameLayout>

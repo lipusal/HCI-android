@@ -108,7 +108,7 @@ public class FlightReviewsFragment extends Fragment {
                     reviewsAdapter.addAll(reviews);
                     reviewsAdapter.notifyDataSetChanged();
                 }
-                title.setText("NADA, BORRAR?!?!!");
+                title.setText("NADA, BORRAR?!?!!, cant" + reviews.size());
             }
         });
 

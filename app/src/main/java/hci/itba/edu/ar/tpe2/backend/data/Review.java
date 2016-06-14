@@ -25,7 +25,7 @@ public class Review {
         Review result = new Review();
         JsonObject numbers = json.getAsJsonObject("rating");
         result.airlineID = json.getAsJsonObject("flight").getAsJsonObject("airline").get("id").getAsString();
-        result.flightNumber = json.getAsJsonObject("flight").getAsJsonObject("airline").get("id").getAsInt();
+        result.flightNumber = json.getAsJsonObject("flight").get("number").getAsInt();
         result.overall = numbers.get("overall").getAsInt();
         result.friendliness = numbers.get("friendliness").getAsInt();
         result.food = numbers.get("food").getAsInt();

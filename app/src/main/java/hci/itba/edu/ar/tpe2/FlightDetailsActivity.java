@@ -34,6 +34,9 @@ public class FlightDetailsActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //Get info from the specified flight
+
+
+
         Intent callerIntent = getIntent();
         if (!callerIntent.hasExtra(PARAM_FLIGHT)) {
             throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");

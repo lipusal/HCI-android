@@ -7,6 +7,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import hci.itba.edu.ar.tpe2.backend.data.Airport;
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 
 /**
@@ -29,6 +33,15 @@ public class FlightDetailsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    public static final String PARAM_FLIGHT = "FLIGHT";
+
+    TextView firstPartDetail;
+    TextView originDetail;
+    TextView arrivalDetail;
+    TextView extraDetail;
+    Flight flight;
+
+
     public FlightDetailsFragment() {
         // Required empty public constructor
     }
@@ -45,8 +58,8 @@ public class FlightDetailsFragment extends Fragment {
     public static FlightDetailsFragment newInstance(String param1, String param2) {
         FlightDetailsFragment fragment = new FlightDetailsFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+     //   args.putString(ARG_PARAM1, param1);
+     //   args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -55,8 +68,8 @@ public class FlightDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+    //        mParam1 = getArguments().getString(ARG_PARAM1);
+    //        mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -64,7 +77,46 @@ public class FlightDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_flight_details, container, false);
+        View view;
+        view=inflater.inflate(R.layout.fragment_flight_details, container, false);
+
+        final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
+        final Flight flight = activity.getFlight();
+
+        Airport departureAirport = flight.getDepartureAirport();
+        Airport arrivalAirport = flight.getArrivalAirport();
+
+        firstPartDetail = (TextView)view.findViewById(R.id.firstPartDetail);
+        originDetail = (TextView)view.findViewById(R.id.originDetail);
+        arrivalDetail = (TextView)view.findViewById(R.id.arrivalDetail);
+        extraDetail = (TextView)view.findViewById(R.id.extraDetail);
+
+
+        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
+                "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
+                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
+        originDetail.setText("Origen\n" + //Usar spannableString para el size?
+                ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
+                departureAirport.getCity().getCountry().getName()+"" +
+                flight.getPrettyDepartureDate()+"\n" +
+                departureAirport.getID() + "  Terminal  " + " Puerta\n" +
+                flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
+
+        arrivalDetail.setText("Arrival\n" + //Usar spannableString para el size?
+                ""+ arrivalAirport.getDescription()+", "+arrivalAirport.getCity().getName()+", " +
+                arrivalAirport.getCity().getCountry().getName()+"" +
+                flight.getPrettyArrivalDate()+"\n" +
+                arrivalAirport.getID() + "  Terminal  " + " Puerta\n" +
+                flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
+
+        extraDetail.setText("Otros Detalles \n" +
+                "Vuelo directo \n" + //Hardcodeado?
+                "Duracion: "+ flight.getDurationStr() + "\n" +
+                "Recolection de equipage "+ "Donde? \n" +
+                "Precio: " + flight.getTotal() + "\n" +
+                "Puntaje: " + "puntaje?");
+
+        return view;
     }
 
     // TODO: Rename method, update argument and hook method into UI event
