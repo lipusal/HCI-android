@@ -1,35 +1,32 @@
 package hci.itba.edu.ar.tpe2.fragment;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
-import hci.itba.edu.ar.tpe2.backend.FileManager;
+import hci.itba.edu.ar.tpe2.FlightDetailsActivity;
+import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 /**
  * A fragment representing a list of Flights.
  * <p/><p/>
- * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
- * interface.
+ * Activities containing this fragment MAY implement the {@link OnFragmentInteractionListener}
+ * interface. If not implemented, fragment falls back to standard behavior defined in
+ * {@link DefaultInteractionHandler}.
  */
 public class FlightsListFragment extends ListFragment {
-    public static final String PARAM_FLIGHTS_LIST = "FLIGHTS_LIST";
+    public static final String PARAM_FLIGHTS_LIST = "hci.itba.edu.ar.tpe2.fragment.FlightsListFragment.FLIGHTS_LIST";
 
     private OnFragmentInteractionListener interactionListener;
     private List<Flight> flights;
-
-    public static FlightsListFragment newInstance(List<Flight> flights) {
-        FlightsListFragment fragment = new FlightsListFragment();
-        Bundle params = new Bundle();
-        params.putSerializable(PARAM_FLIGHTS_LIST, (Serializable) flights);     //Cast should be safe, http://stackoverflow.com/questions/1387954/how-to-serialize-a-list-in-java
-        return fragment;
-    }
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -37,22 +34,45 @@ public class FlightsListFragment extends ListFragment {
      */
     public FlightsListFragment() {}
 
+    public static FlightsListFragment newInstance(List<Flight> flights) {
+        FlightsListFragment result = new FlightsListFragment();
+        if(flights != null) {
+            Bundle params = new Bundle();
+            params.putSerializable(PARAM_FLIGHTS_LIST, (Serializable) flights);
+            result.setArguments(params);
+        }
+        return result;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null && getArguments().containsKey(PARAM_FLIGHTS_LIST)) {
+            flights = (List<Flight>) getArguments().getSerializable(PARAM_FLIGHTS_LIST);
+        }
+        else {
+            if (flights == null) {
+                flights = Collections.EMPTY_LIST;
+            }
+        }
+        setListAdapter(new FlightAdapter(getActivity(), flights));
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        flights = new FileManager(activity).loadFollowedFlights();
-        setListAdapter(new FlightAdapter(activity, flights));
         try {
             interactionListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+//            throw new ClassCastException(activity.toString()
+//                    + " must implement OnFragmentInteractionListener");
+            interactionListener = new DefaultInteractionHandler();
         }
     }
 
@@ -63,29 +83,32 @@ public class FlightsListFragment extends ListFragment {
     }
 
     @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
-
-        if (interactionListener != null) {
-            // Notify the active callbacks interface (the activity, if the
-            // fragment is attached to one) that an item has been selected.
-//            interactionListener.onFlightsListFragmentInteraction(DummyContent.ITEMS.get(position).id);
-        }
+    public void onListItemClick(ListView listView, View view, int position, long id) {
+        interactionListener.onFlightClicked((Flight) listView.getItemAtPosition(position));
     }
 
     /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
+     * If you want to override interaction behavior, implement this interface.
      */
     public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        public void onFlightsListFragmentInteraction(String id);
+
+        /**
+         * Called when a flight is clicked. Default behavior is to start the {@link FlightDetailsActivity}
+         * with the clicked Flight.
+         *
+         * @param clickedFlight The clicked flight.
+         */
+        void onFlightClicked(Flight clickedFlight);
+    }
+
+    private class DefaultInteractionHandler implements OnFragmentInteractionListener {
+
+        @Override
+        public void onFlightClicked(Flight clickedFlight) {
+            Intent detailsIntent = new Intent(getActivity(), FlightDetailsActivity.class);
+            detailsIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, clickedFlight);
+            startActivity(detailsIntent);
+        }
     }
 
 }

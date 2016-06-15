@@ -2,7 +2,6 @@ package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -28,14 +27,14 @@ import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
-import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, TextFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener {
 
     private FlightsListFragment flightsFragment;
 
@@ -48,11 +47,8 @@ public class FlightsActivity extends AppCompatActivity
 
         //Add the text fragment
         if(savedInstanceState == null) {    //Creating for the first time
-            flightsFragment = new FlightsListFragment();
-//            Bundle params = new Bundle();
-//            params.putSerializable(FlightsListFragment.PARAM_FLIGHTS_LIST, (Serializable) PersistentData.getInstance().getFollowedFlights());
-//            flightsFragment.setArguments(params);
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit(); //Add it
+            flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
         }
         else {
             flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
@@ -149,14 +145,6 @@ public class FlightsActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    @Override
-    /**
-     * Needs to be implemented for Text Fragment to work.
-     */
-    public void onFragmentInteraction(Uri uri) {
-        System.out.println("Some interaction happened with the TextFragment");
     }
 
     /**

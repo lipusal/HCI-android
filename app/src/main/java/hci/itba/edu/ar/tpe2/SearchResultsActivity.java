@@ -19,6 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
 
 public class SearchResultsActivity extends AppCompatActivity {
     public static final String PARAM_FROM = "FROM",
@@ -34,23 +36,27 @@ public class SearchResultsActivity extends AppCompatActivity {
             PARAM_DEPARTURE_DATE = "DEP_DATE",
             PARAM_AIRLINE_ID = "AIRLINE_ID";
 
-    private String from, to, airlineId;
-    private Date departure;
     private List<Flight> flights;
 
     //View elements
-    private ListView flightsListView;
-    private FlightAdapter flightsAdapter;
     private TextView title;
+    private FlightsListFragment flightsFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
-        if (savedInstanceState == null) {
+
+        if (savedInstanceState == null) {    //Creating for the first time
             title = (TextView) findViewById(R.id.search_results_title);
-            flightsListView = (ListView) findViewById(R.id.flights_list);
+            if (flightsFragment == null) {
+                flightsFragment = FlightsListFragment.newInstance(null);
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+            }
+        } else {
+            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
         }
+
         //Search with passed parameters
         title.setText("Searching...");
         final String from = getIntent().getStringExtra(PARAM_FROM),
@@ -61,14 +67,8 @@ public class SearchResultsActivity extends AppCompatActivity {
                     @Override
                     public void execute(Context c, List<Flight> result) {
                         flights = result;
-                        if (flightsAdapter == null) {
-                            flightsAdapter = new FlightAdapter(SearchResultsActivity.this, flights);
-                            flightsListView.setAdapter(flightsAdapter);
-                        } else {
-                            flightsAdapter.clear();
-                            flightsAdapter.addAll(flights);
-                            flightsAdapter.notifyDataSetChanged();
-                        }
+                        FlightsListFragment newFragment = FlightsListFragment.newInstance(flights);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
                         title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
                     }
                 },
@@ -88,58 +88,5 @@ public class SearchResultsActivity extends AppCompatActivity {
 //        }
 //        flightsAdapter = new FlightAdapter(SearchResultsActivity.this, flights);
 //        flightsListView.setAdapter(flightsAdapter);
-
-        //Go to flight details activity when clicking on a flight
-        flightsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Flight clickedFlight = (Flight) parent.getItemAtPosition(position);
-                Intent detailsIntent = new Intent(SearchResultsActivity.this, FlightDetailsActivity.class);
-                detailsIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, clickedFlight);
-                startActivity(detailsIntent);
-            }
-        });
-    }
-
-    /**
-     * Adapter for populating lists with flights for the user to un/follow and see details of.
-     */
-    private class FlightAdapter extends ArrayAdapter<Flight> {
-
-        FlightAdapter(Context context, List<Flight> objects) {
-            super(context, 0, objects);
-        }
-
-        @Override
-        public View getView(int position, View destination, ViewGroup parent) {
-            final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-            final Flight flight = getItem(position);
-            if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
-                destination = LayoutInflater.from(getContext()).inflate(R.layout.activity_flights_list_item, parent, false);
-            }
-            //Logo
-            ImageView icon = (ImageView) destination.findViewById(R.id.icon);
-            ImageLoader.getInstance().displayImage(flight.getAirline().getLogoURL(), icon);
-            //Text
-            TextView title = (TextView) destination.findViewById(R.id.text1);
-            title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
-            //Star
-            final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
-            star.setImageResource(followedFlights.contains(flight) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
-            final View finalDestination = destination;      //Need to copy to use it in inner class
-            star.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (followedFlights.contains(flight)) {
-                        PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
-                        star.setImageResource(R.drawable.ic_star_off_24dp);
-                    } else {
-                        PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
-                        star.setImageResource(R.drawable.ic_star_on_24dp);
-                    }
-                }
-            });
-            return destination;
-        }
     }
 }
