@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import hci.itba.edu.ar.tpe2.FlightDetailsActivity;
+import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
@@ -111,8 +111,8 @@ public class NotificationService extends IntentService {
                             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
                         }
                         //Build its action and set it to the notification
-                        Intent baseIntent = new Intent(NotificationService.this, FlightDetailsActivity.class);
-                        baseIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, flight);
+                        Intent baseIntent = new Intent(NotificationService.this, FlightDetailMainActivity.class);
+                        baseIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flight);
                         //Set flags to take user back to Home when navigating back from details TODO this makes the application close when hitting back, user should be taken to home
 //                        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
                         //Build a pending intent with the recently constructed base intent and set it to the notification

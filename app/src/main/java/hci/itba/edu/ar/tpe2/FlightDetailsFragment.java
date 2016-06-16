@@ -92,29 +92,29 @@ public class FlightDetailsFragment extends Fragment {
         extraDetail = (TextView)view.findViewById(R.id.extraDetail);
 
 
-        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
+        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getID() + "" +
                 "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
                 "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
-        originDetail.setText("Origen\n" + //Usar spannableString para el size?
+        originDetail.setText(R.string.origin+"\n" + //Usar spannableString para el size?
                 ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
                 departureAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyDepartureDate()+"\n" +
-                departureAirport.getID() + "  Terminal  " + " Puerta\n" +
+                departureAirport.getID() + R.string.terminal + R.string.gate + "\n"+
                 flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
 
-        arrivalDetail.setText("Arrival\n" + //Usar spannableString para el size?
+        arrivalDetail.setText(R.string.arrival+"\n" + //Usar spannableString para el size?
                 ""+ arrivalAirport.getDescription()+", "+arrivalAirport.getCity().getName()+", " +
                 arrivalAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyArrivalDate()+"\n" +
-                arrivalAirport.getID() + "  Terminal  " + " Puerta\n" +
+                arrivalAirport.getID() + R.string.terminal + R.string.gate +
                 flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
 
-        extraDetail.setText("Otros Detalles \n" +
-                "Vuelo directo \n" + //Hardcodeado?
-                "Duracion: "+ flight.getDurationStr() + "\n" +
-                "Recolection de equipage "+ "Donde? \n" +
-                "Precio: " + flight.getTotal() + "\n" +
-                "Puntaje: " + "puntaje?");
+        extraDetail.setText(R.string.extra_details+"\n" +
+                R.string.direct_flight+"\n" + //Hardcodeado?
+                R.string.duration+ flight.getDurationStr() + "\n" +
+                R.string.equipage+ "Donde? \n" +
+                R.string.price + flight.getTotal() + "\n" +
+                R.string.score + "puntaje?Aca?  ");
 
         return view;
     }

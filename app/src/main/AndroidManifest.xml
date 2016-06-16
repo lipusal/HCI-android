@@ -35,10 +35,6 @@
             android:name=".SearchResultsActivity"
             android:label="Results"
             android:parentActivityName=".SearchActivity" />
-        <activity
-            android:name=".FlightDetailsActivity"
-            android:label="@string/title_activity_flight_details"
-            android:theme="@style/AppTheme.NoActionBar" />
         <!--
         android:excludeFromRecents="true"
         android:launchMode="singleTask"

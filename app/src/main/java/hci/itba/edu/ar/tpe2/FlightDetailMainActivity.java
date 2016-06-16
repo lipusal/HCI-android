@@ -1,6 +1,7 @@
 package hci.itba.edu.ar.tpe2;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -23,6 +24,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import android.content.Intent;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
@@ -30,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 
 /*
 import info.androidhive.materialtabs.R;
@@ -70,7 +74,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         setTitle(flight.getAirline().getID()+"#"+flight.getNumber());
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, v
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -133,6 +137,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.flight_detail_main, menu);
+
         return true;
     }
 
@@ -143,10 +148,30 @@ public class FlightDetailMainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+
+        if(id == R.id.action_follow){
+            final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            ImageView star = (ImageView) toolbar.findViewById(R.id.action_follow);
+
+
+            if (followedFlights.contains(flight)) {
+                PersistentData.getInstance().removeFollowedFlight(flight, this);
+                star.setImageResource(R.drawable.ic_star_off_24dp);
+            } else {
+                PersistentData.getInstance().addFollowedFlight(flight, this);
+                star.setImageResource(R.drawable.ic_star_on_24dp);
+            }
             return true;
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            this.invalidateOptionsMenu();
+        }
+
+
+
+
+
 
         return super.onOptionsItemSelected(item);
     }
