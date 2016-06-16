@@ -3,6 +3,7 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
@@ -13,6 +14,7 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailsActivity;
 import hci.itba.edu.ar.tpe2.FlightsActivity;
+import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 /**
@@ -55,7 +57,7 @@ public class FlightsListFragment extends ListFragment {
                 flights = Collections.EMPTY_LIST;
             }
         }
-        setListAdapter(new FlightAdapter(getActivity(), flights));
+        setListAdapter(new FlightAdapter(getActivity(), flights, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
     }
 
     @Override

@@ -1,6 +1,8 @@
 package hci.itba.edu.ar.tpe2.fragment;
 
 import android.content.Context;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,9 +23,11 @@ import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
  * Adapter for displaying list of flights.
  */
 public class FlightAdapter extends ArrayAdapter<Flight> {
+    private CoordinatorLayout mCoordinatorLayout;
 
-    FlightAdapter(Context context, List<Flight> objects) {
+    FlightAdapter(Context context, List<Flight> objects, CoordinatorLayout layoutWithFAB) {
         super(context, 0, objects);
+        mCoordinatorLayout = layoutWithFAB;
     }
 
     @Override
@@ -49,9 +53,23 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
                 if (followedFlights.contains(flight)) {
                     PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_off_24dp);
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
+                            star.setImageResource(R.drawable.ic_star_on_24dp);
+                        }
+                    }).show();
                 } else {
                     PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_on_24dp);
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
+                            star.setImageResource(R.drawable.ic_star_off_24dp);
+                        }
+                    }).show();
                 }
             }
         });
