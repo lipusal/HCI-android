@@ -43,6 +43,7 @@
         <activity
             android:name=".DealsMapActivity"
             android:label="Deals Map"
+            android:theme="@style/AppTheme.NoActionBar"
             />
 
         <receiver android:name=".backend.service.BootReceiver"
