@@ -84,17 +84,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-/**
-        int id = R.id.action_follow;
-        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-        if (followedFlights.contains(flight)) {
-            PersistentData.getInstance().removeFollowedFlight(flight, this);
-            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_off_24dp);
-        } else {
-            PersistentData.getInstance().addFollowedFlight(flight, this);
-            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_on_24dp);
-        }
-*/
+
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -155,6 +145,13 @@ public class FlightDetailMainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.flight_detail_main, menu);
 
+        int id = R.id.action_follow;
+        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
+        if (followedFlights.contains(flight)) {
+            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_on_24dp);
+        } else {
+            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_off_24dp);
+        }
         return true;
     }
 
@@ -178,9 +175,21 @@ public class FlightDetailMainActivity extends AppCompatActivity
             }
             return true;
         }
+        if(id == R.id.action_review){
+            Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
+            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flight);
+            reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+            startActivity(reviewIntent);
+            return true;
+        }
+        //Esto de aca abajo lo copie y pgue y me olvide, pero creo que servia para uqe se cambie el toolbar.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             this.invalidateOptionsMenu();
         }
+
+
+
 
 
 

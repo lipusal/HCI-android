@@ -12,11 +12,15 @@
     <string name="arrival">Destino</string>
     <string name="extra_details">Otros detalles</string>
     <string name="direct_flight">Vuelo directo</string>
-    <string name="duration">Duration</string>
-    <string name="equipage">Equipage</string>
-    <string name="price">Precio</string>
-    <string name="score">Puntaje</string>
+    <string name="duration">Duration: </string>
+    <string name="equipage">Equipage: </string>
+    <string name="price">Precio: </string>
+    <string name="score">Puntaje: </string>
     <string name="action_follow">Seguir</string>
+    <string name="action_review">Comentar</string>
+    <string name="title_activity_make_review">MakeReviewActivity</string>
+
+
 
 
 </resources>

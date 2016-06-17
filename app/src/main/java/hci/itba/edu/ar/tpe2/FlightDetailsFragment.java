@@ -101,22 +101,22 @@ public class FlightDetailsFragment extends Fragment {
                 ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
                 departureAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyDepartureDate()+"\n" +
-                departureAirport.getID() + R.string.terminal + R.string.gate + "\n"+
+                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n"+
                 flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
 
-        arrivalDetail.setText(R.string.arrival+"\n" + //Usar spannableString para el size?
+        arrivalDetail.setText(context.getString(R.string.arrival)+"\n" + //Usar spannableString para el size?
                 ""+ arrivalAirport.getDescription()+", "+arrivalAirport.getCity().getName()+", " +
                 arrivalAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyArrivalDate()+"\n" +
-                arrivalAirport.getID() + R.string.terminal + R.string.gate +
+                arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
                 flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
 
-        extraDetail.setText(R.string.extra_details+"\n" +
-                R.string.direct_flight+"\n" + //Hardcodeado?
-                R.string.duration+ flight.getDurationStr() + "\n" +
-                R.string.equipage+ "Donde? \n" +
-                R.string.price + flight.getTotal() + "\n" +
-                R.string.score + "puntaje?Aca?  ");
+        extraDetail.setText(context.getString(R.string.extra_details)+"\n" +
+                context.getString(R.string.direct_flight)+"\n" + //Hardcodeado?
+                context.getString(R.string.duration)+ flight.getDurationStr() + "\n" +
+                context.getString(R.string.equipage)+ "Donde? \n" +
+                context.getString(R.string.price) + flight.getTotal() + "\n" +
+                context.getString(R.string.score) + "puntaje?Aca?  ");
 
         return view;
     }
