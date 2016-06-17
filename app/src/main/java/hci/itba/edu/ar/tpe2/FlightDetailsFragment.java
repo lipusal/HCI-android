@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,11 +92,12 @@ public class FlightDetailsFragment extends Fragment {
         arrivalDetail = (TextView)view.findViewById(R.id.arrivalDetail);
         extraDetail = (TextView)view.findViewById(R.id.extraDetail);
 
+        FragmentActivity context = getActivity();
 
-        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getID() + "" +
+        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
                 "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
                 "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
-        originDetail.setText(R.string.origin+"\n" + //Usar spannableString para el size?
+        originDetail.setText(context.getString(R.string.origin)+"\n" + //Usar spannableString para el size?
                 ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
                 departureAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyDepartureDate()+"\n" +

@@ -72,12 +72,29 @@ public class FlightDetailMainActivity extends AppCompatActivity
         }
         flight = (Flight) callerIntent.getSerializableExtra(PARAM_FLIGHT);
         setTitle(flight.getAirline().getID()+"#"+flight.getNumber());
+
+
+
+
+
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+/**
+        int id = R.id.action_follow;
+        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
+        if (followedFlights.contains(flight)) {
+            PersistentData.getInstance().removeFollowedFlight(flight, this);
+            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_off_24dp);
+        } else {
+            PersistentData.getInstance().addFollowedFlight(flight, this);
+            toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_on_24dp);
+        }
+*/
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -146,21 +163,18 @@ public class FlightDetailMainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
 
         if(id == R.id.action_follow){
             final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-            ImageView star = (ImageView) toolbar.findViewById(R.id.action_follow);
-
-
             if (followedFlights.contains(flight)) {
                 PersistentData.getInstance().removeFollowedFlight(flight, this);
-                star.setImageResource(R.drawable.ic_star_off_24dp);
+                toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_off_24dp);
             } else {
                 PersistentData.getInstance().addFollowedFlight(flight, this);
-                star.setImageResource(R.drawable.ic_star_on_24dp);
+                toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_on_24dp);
             }
             return true;
         }
