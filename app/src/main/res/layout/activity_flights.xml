@@ -8,11 +8,6 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <include
-        layout="@layout/app_bar_flights"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -39,6 +34,11 @@
         </android.support.v4.widget.SwipeRefreshLayout>
     </RelativeLayout>
 
+    <include
+        layout="@layout/app_bar_flights"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
@@ -47,6 +47,5 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header_flights"
         app:menu="@menu/flights_activity_drawer" />
-
 
 </android.support.v4.widget.DrawerLayout>

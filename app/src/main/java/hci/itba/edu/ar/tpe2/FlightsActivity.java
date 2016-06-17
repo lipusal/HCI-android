@@ -1,14 +1,16 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -43,6 +45,12 @@ public class FlightsActivity extends AppCompatActivity
 
     private FlightsListFragment flightsFragment;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +108,15 @@ public class FlightsActivity extends AppCompatActivity
         else {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
         }
+
+        //(Re-)register refresh broadcast receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.FILTER_UPDATES_COMPLETE));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshCompleteBroadcastReceiver);
     }
 
     @Override
@@ -306,14 +323,9 @@ public class FlightsActivity extends AppCompatActivity
     public void onRefresh() {
         Intent intent = new Intent(this, NotificationService.class);
         intent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
+        intent.putExtra(NotificationService.PARAM_BROADCAST_WHEN_COMPLETE, true);
         startService(intent);
         swipeRefreshLayout.setRefreshing(true);
-        new Handler().postDelayed(new Runnable() {
-            @Override public void run() {
-                swipeRefreshLayout.setRefreshing(false);
-            }
-        }, 5000);
-        //TODO use broadcast to cancel refreshing animation
         //TODO disallow this when there are no flights
     }
 }
