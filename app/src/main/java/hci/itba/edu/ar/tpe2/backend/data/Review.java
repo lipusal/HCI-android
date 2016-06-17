@@ -10,6 +10,12 @@ public class Review {
     private Review() {}
 
     public Review(Flight flight, int overallScore, String comment) {
+        //TODO is recommended?
+        if(overallScore>5){
+            isRecommended=true;
+        }else{
+            isRecommended=false;
+        }
         flightNumber = flight.getNumber();
         airlineID = flight.getAirline().getID();
         this.comment = comment;
