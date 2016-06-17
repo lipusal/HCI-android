@@ -17,7 +17,6 @@ import android.view.ViewGroup;
  * to be used with AppCompat.
  */
 public abstract class SettingsWrapperActivity extends PreferenceActivity {
-
     private AppCompatDelegate mDelegate;
 
     @Override
