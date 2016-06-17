@@ -45,14 +45,6 @@ public class FlightsActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //Add the text fragment
-        if(savedInstanceState == null) {    //Creating for the first time
-            flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-        }
-        else {
-            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
-        }
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,6 +71,15 @@ public class FlightsActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
+
+        //Add/refresh the flights fragment
+        flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
+        if(flightsFragment == null) {    //Creating for the first time
+            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+        }
+        else {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+        }
     }
 
     @Override
