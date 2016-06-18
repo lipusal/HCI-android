@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -43,7 +44,9 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  * </pre>
  */
 public class NotificationService extends IntentService {
-    public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES";
+    public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
+                                FILTER_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.filter.UPDATES_COMPLETE",
+                                PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
 
     public NotificationService() { super("NotificationService"); }
 
@@ -53,7 +56,8 @@ public class NotificationService extends IntentService {
             //TODO ensure repeating alarm is sending the intent properly (see NotificationScheduler)
             switch(intent.getAction()) {
                 case ACTION_NOTIFY_UPDATES:
-                    notifyUpdates();
+                    boolean broadcast = intent.getBooleanExtra(PARAM_BROADCAST_WHEN_COMPLETE, false);
+                    notifyUpdates(broadcast);
                     break;
             }
         }
@@ -62,8 +66,9 @@ public class NotificationService extends IntentService {
     /**
      * Checks for changes in the user's followed flights, and sends notifications for any flights
      * whose status changed.
+     * @param broadcastOnComplete
      */
-    private void notifyUpdates() {
+    private void notifyUpdates(final boolean broadcastOnComplete) {
         final FileManager fileManager = new FileManager(this);
         final List<Flight> flights = fileManager.loadFollowedFlights();
         if(flights.size() > 0) {
@@ -71,6 +76,10 @@ public class NotificationService extends IntentService {
         }
         else {
             Log.d("VOLANDO", "No followed flights, not checking updates");
+            if(broadcastOnComplete) {
+                Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
+                LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            }
             return;
         }
         final Gson g = new Gson();
@@ -106,6 +115,10 @@ public class NotificationService extends IntentService {
                             for (Map.Entry<Integer, Notification> entry : notifications.entrySet()) {
                                 notifManager.notify(entry.getKey(), entry.getValue());
                             }
+                        }
+                        if(broadcastOnComplete) {
+                            Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
+                            LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
                         }
                     }
                 }

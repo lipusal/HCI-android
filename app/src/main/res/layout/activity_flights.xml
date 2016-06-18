@@ -8,11 +8,6 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
-    <include
-        layout="@layout/app_bar_flights"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -21,16 +16,28 @@
         tools:context="hci.itba.edu.ar.tpe2.FlightsActivity"
         android:paddingTop="55dp">
 
-        <FrameLayout
-            android:id="@+id/fragment_container"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
+        <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-        </FrameLayout>
+            android:layout_height="wrap_content"
+            android:id="@+id/swipe_refresh_layout">
+
+            <FrameLayout
+                android:id="@+id/fragment_container"
+                android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </FrameLayout>
+
+            <!--android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"-->
+        </android.support.v4.widget.SwipeRefreshLayout>
     </RelativeLayout>
+
+    <include
+        layout="@layout/app_bar_flights"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
@@ -40,6 +47,5 @@
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/drawer_header_flights"
         app:menu="@menu/flights_activity_drawer" />
-
 
 </android.support.v4.widget.DrawerLayout>
