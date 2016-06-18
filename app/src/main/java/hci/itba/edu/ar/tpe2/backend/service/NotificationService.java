@@ -134,10 +134,10 @@ public class NotificationService extends IntentService {
         if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), false)) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
-        switch(newStatus.getStatus()) {
+        switch (newStatus.getStatus()) {
             case "S":   //Scheduled
                 notifBuilder.setSmallIcon(R.drawable.ic_scheduled);
-                if(newStatus.getScheduledDepartureTime() != null) {
+                if (newStatus.getScheduledDepartureTime() != null) {
                     notifBuilder.setContentText(newStatus.getPrettyScheduledDepartureTime());
                 }
                 break;
@@ -159,8 +159,8 @@ public class NotificationService extends IntentService {
                 break;
         }
         //Build its action and set it to the notification
-        Intent baseIntent = new Intent(NotificationService.this, FlightDetailsActivity.class);
-        baseIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, updatedFlight);
+        Intent baseIntent = new Intent(NotificationService.this, FlightDetailMainActivity.class);
+        baseIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, updatedFlight);
         //Set flags to take user back to Home when navigating back from details
 //        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         //Build a pending intent with the recently constructed base intent and set it to the notification

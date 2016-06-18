@@ -68,7 +68,7 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
-        if(!NotificationScheduler.areUpdatesEnabled()) {
+        if (!NotificationScheduler.areUpdatesEnabled()) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             NotificationScheduler.setUpdates(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
         }
@@ -93,8 +93,7 @@ public class FlightsActivity extends AppCompatActivity
             }
 //            getSupportFragmentManager().executePendingTransactions();
 //            textFragment.getTextView().setCompoundDrawablesWithIntrinsicBounds(null, null, null, getDrawable(R.drawable.ic_flight));
-        }
-        else {
+        } else {
             flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
