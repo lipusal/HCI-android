@@ -37,8 +37,14 @@ public class FlightDetailsFragment extends Fragment {
     public static final String PARAM_FLIGHT = "FLIGHT";
 
     TextView firstPartDetail;
-    TextView originDetail;
-    TextView arrivalDetail;
+    TextView originDetail1;
+    TextView originDetail2;
+    TextView originDetail3;
+    TextView originTitle;
+    TextView arrivalDetail1;
+    TextView arrivalDetail2;
+    TextView arrivalDetail3;
+    TextView arrivalTitle;
     TextView extraDetail;
     Flight flight;
 
@@ -79,7 +85,7 @@ public class FlightDetailsFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view;
-        view=inflater.inflate(R.layout.fragment_flight_details, container, false);
+        view = inflater.inflate(R.layout.fragment_flight_details, container, false);
 
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
         final Flight flight = activity.getFlight();
@@ -88,8 +94,14 @@ public class FlightDetailsFragment extends Fragment {
         Airport arrivalAirport = flight.getArrivalAirport();
 
         firstPartDetail = (TextView)view.findViewById(R.id.firstPartDetail);
-        originDetail = (TextView)view.findViewById(R.id.originDetail);
-        arrivalDetail = (TextView)view.findViewById(R.id.arrivalDetail);
+        originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
+        originDetail2 = (TextView) view.findViewById(R.id.originDetail2);
+        originDetail3 = (TextView) view.findViewById(R.id.originDetail3);
+        originTitle = (TextView) view.findViewById(R.id.originTitle);
+        arrivalDetail1 = (TextView) view.findViewById(R.id.arrivalDetail1);
+        arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
+        arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
+        arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
         extraDetail = (TextView)view.findViewById(R.id.extraDetail);
 
         FragmentActivity context = getActivity();
@@ -97,20 +109,24 @@ public class FlightDetailsFragment extends Fragment {
         firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
                 "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
                 "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
-        originDetail.setText(context.getString(R.string.origin)+"\n" + //Usar spannableString para el size?
-                ""+ departureAirport.getDescription()+", "+departureAirport.getCity().getName()+", " +
+        originTitle.setText("Origen");
+        originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
+        originDetail1.setText(departureAirport.getDescription() + ", " + departureAirport.getCity().getName() + ", " +
                 departureAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyDepartureDate()+"\n" +
                 departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n"+
                 flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
-
-        arrivalDetail.setText(context.getString(R.string.arrival)+"\n" + //Usar spannableString para el size?
-                ""+ arrivalAirport.getDescription()+", "+arrivalAirport.getCity().getName()+", " +
+        originDetail2.setText("Ayy lmao");
+        originDetail3.setText("Dank");
+        arrivalTitle.setText("Destino");
+        arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
+        arrivalDetail1.setText(arrivalAirport.getDescription() + ", " + arrivalAirport.getCity().getName() + ", " +
                 arrivalAirport.getCity().getCountry().getName()+"" +
                 flight.getPrettyArrivalDate()+"\n" +
                 arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
                 flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
-
+        arrivalDetail2.setText("allo");
+        arrivalDetail3.setText("bpnjouir");
         extraDetail.setText(context.getString(R.string.extra_details)+"\n" +
                 context.getString(R.string.direct_flight)+"\n" + //Hardcodeado?
                 context.getString(R.string.duration)+ flight.getDurationStr() + "\n" +
