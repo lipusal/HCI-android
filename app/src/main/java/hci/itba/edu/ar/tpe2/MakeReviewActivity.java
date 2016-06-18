@@ -58,8 +58,6 @@ public class MakeReviewActivity extends AppCompatActivity
             public void onClick(View v) {
                 if(validateFields()) {
                     Review review = new Review(flight, score*2, reviewText.getText().toString());
-
-
                     API.getInstance().submitReview(review,MakeReviewActivity.this, new NetworkRequestCallback<Void>(){
                         @Override
                         public void execute(Context c, Void param) {
@@ -197,7 +195,7 @@ public class MakeReviewActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        //TODO use the new drawer
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
