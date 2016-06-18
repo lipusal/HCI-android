@@ -84,11 +84,11 @@ public class FlightsActivity extends AppCompatActivity
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(
-//                ContextCompat.getColor(this, R.color.colorAccent),
-//                ContextCompat.getColor(this, android.R.color.holo_blue_bright),
-                ContextCompat.getColor(this, android.R.color.holo_green_light),
-                ContextCompat.getColor(this, android.R.color.holo_orange_light),
-                ContextCompat.getColor(this, android.R.color.holo_red_light));
+                ContextCompat.getColor(this, R.color.colorAccent),
+                ContextCompat.getColor(this, R.color.colorPrimary));
+//                ContextCompat.getColor(this, android.R.color.holo_green_light),
+//                ContextCompat.getColor(this, android.R.color.holo_orange_light),
+//                ContextCompat.getColor(this, android.R.color.holo_red_light));
 
         if(!NotificationScheduler.areUpdatesEnabled()) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -103,9 +103,10 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
-        //Add/refresh the flights fragment
+        //Add/refresh the flights fragment, enable/disable swipe to refresh
         List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
         if (followedFlights.isEmpty()) {
+            swipeRefreshLayout.setEnabled(false);
             TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
@@ -117,6 +118,7 @@ public class FlightsActivity extends AppCompatActivity
 //            textFragment.getTextView().setCompoundDrawablesWithIntrinsicBounds(null, null, null, getDrawable(R.drawable.ic_flight));
         }
         else {
+            swipeRefreshLayout.setEnabled(true);
             flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
