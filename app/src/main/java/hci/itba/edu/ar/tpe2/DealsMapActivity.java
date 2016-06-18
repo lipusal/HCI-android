@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -22,6 +23,8 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.Arrays;
@@ -108,6 +112,37 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        googleMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+            // Use default InfoWindow frame
+            @Override
+            public View getInfoWindow(Marker arg0) {
+                return null;
+            }
+
+            @Override
+            public View getInfoContents(Marker arg0) {
+                View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
+
+                TextView title = (TextView) view.findViewById(R.id.title);
+                title.setText(arg0.getTitle());
+
+                ImageView image = (ImageView) view.findViewById(R.id.image);
+              /*  if (arg0.getTitle().compareTo("ITBA") == 0) {
+                    image.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.itba));
+                } else {
+                    image.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.buenos_aires));
+            }*/
+
+/*                LatLng latLng = arg0.getPosition();
+                TextView latitude = (TextView) view.findViewById(R.id.latitude);
+                latitude.setText(Double.toString(latLng.latitude));
+
+                TextView longitude = (TextView) view.findViewById(R.id.longitude);
+                longitude.setText(Double.toString(latLng.longitude));*/
+
+                return view;
+            }
+        });
         mMap = googleMap;
     }
 
@@ -143,6 +178,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                         LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
                         //Add special marker in the found airport
                         //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
+
                         mMap.addMarker(new MarkerOptions().position(airportPosition).title("Marker in" + closestAirport.getCity().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
                         //Move the camera to it
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
@@ -166,7 +202,12 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                                 for (Deal d : deals) {
                                     aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
                                     colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
-                                    mMap.addMarker(new MarkerOptions().position(aux).title(d.toString()).icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+//                                    mMap.addMarker(new MarkerOptions().position(aux).title(d.toString()).icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+                                    mMap.addMarker(new MarkerOptions()
+                                            .position(aux)
+                                            .title(d.toString())
+                                            .snippet(d.getCity().toString())
+                                            .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                                 }
                             }
                         });
