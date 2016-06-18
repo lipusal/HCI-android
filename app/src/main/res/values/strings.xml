@@ -6,6 +6,10 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
+
+    <string name="not_following_flights">No followed flights</string>
+    <string name="no_flights_found">No flights found</string>
+
     <string name="origin">Origen</string>
     <string name="terminal">  Terminal  </string>
     <string name="gate"> Puerta </string>
