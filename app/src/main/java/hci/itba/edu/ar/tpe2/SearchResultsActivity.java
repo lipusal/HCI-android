@@ -67,9 +67,13 @@ public class SearchResultsActivity extends AppCompatActivity {
                     @Override
                     public void execute(Context c, List<Flight> result) {
                         flights = result;
-                        FlightsListFragment newFragment = FlightsListFragment.newInstance(flights);
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
-                        title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
+                        if (result.isEmpty()) {
+                            title.setText(getString(R.string.no_flights_found));
+                        } else {
+                            FlightsListFragment newFragment = FlightsListFragment.newInstance(flights);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
+                            title.setText(result.size() + " " + from + "=>" + to + " flights for " + departure);
+                        }
                     }
                 },
                 new NetworkRequestCallback<String>() {
