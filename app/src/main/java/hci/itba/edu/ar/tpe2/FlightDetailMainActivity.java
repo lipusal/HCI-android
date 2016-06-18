@@ -74,9 +74,6 @@ public class FlightDetailMainActivity extends AppCompatActivity
         setTitle(flight.getAirline().getID()+"#"+flight.getNumber());
 
 
-
-
-
         /**
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -219,7 +216,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
         }
 
-        if(i != null) {
+        if (i != null) {
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }

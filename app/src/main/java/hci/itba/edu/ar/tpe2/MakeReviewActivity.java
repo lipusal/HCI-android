@@ -75,7 +75,7 @@ public class MakeReviewActivity extends AppCompatActivity
         /**
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
+         this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
@@ -212,7 +212,7 @@ public class MakeReviewActivity extends AppCompatActivity
 
         }
 
-        if(i != null) {
+        if (i != null) {
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }

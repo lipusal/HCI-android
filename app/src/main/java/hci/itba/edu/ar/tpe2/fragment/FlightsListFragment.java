@@ -34,11 +34,12 @@ public class FlightsListFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FlightsListFragment() {}
+    public FlightsListFragment() {
+    }
 
     public static FlightsListFragment newInstance(List<Flight> flights) {
         FlightsListFragment result = new FlightsListFragment();
-        if(flights != null) {
+        if (flights != null) {
             Bundle params = new Bundle();
             params.putSerializable(PARAM_FLIGHTS_LIST, (Serializable) flights);
             result.setArguments(params);
@@ -51,8 +52,7 @@ public class FlightsListFragment extends ListFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null && getArguments().containsKey(PARAM_FLIGHTS_LIST)) {
             flights = (List<Flight>) getArguments().getSerializable(PARAM_FLIGHTS_LIST);
-        }
-        else {
+        } else {
             if (flights == null) {
                 flights = Collections.EMPTY_LIST;
             }
