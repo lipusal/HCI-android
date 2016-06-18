@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
@@ -21,6 +22,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -38,13 +40,18 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.assist.FailReason;
+import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
+import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
@@ -90,6 +97,23 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+      /* mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                marker.
+                ImageView image = (ImageView) view.findViewById(R.id.image);
+                String url;
+                API.getInstance().getFlickrImg("Buenos Aires", DealsMapActivity.this, new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        url = param;
+                        ImageLoader.getInstance().displayImage(url,image);
+                    }
+                });
+
+            }
+        });*/
+
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -120,13 +144,58 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             }
 
             @Override
-            public View getInfoContents(Marker arg0) {
+            public View getInfoContents(final Marker marker) {
                 View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
 
                 TextView title = (TextView) view.findViewById(R.id.title);
-                title.setText(arg0.getTitle());
+                title.setText(marker.getTitle());
 
-                ImageView image = (ImageView) view.findViewById(R.id.image);
+                TextView price = (TextView) view.findViewById(R.id.price);
+                price.setText(marker.getSnippet());
+
+                final City city = PersistentData.getInstance().getCities().get(marker.getSnippet());
+                ImageView image = (ImageView) view.findViewById(R.id.image_marker);
+                if (!marker.getTitle().equals(closestAirport.toString())) {
+                    image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
+                } else {
+                    image.setVisibility(View.GONE);
+                }
+                /*if(city.getFlickrUrl() == null) {
+                    image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
+                }
+                else {
+                   // Bitmap bm = ImageLoader.getInstance().loadImageSync(city.getFlickrUrl());
+                    ImageLoader.getInstance().displayImage(city.getFlickrUrl(), image, new ImageLoadingListener() {
+                        @Override
+                        public void onLoadingStarted(String imageUri, View view) {
+                            Log.d("VOLANDO", "Downloading " + city.getFlickrUrl());
+                        }
+
+                        @Override
+                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
+                            Log.d("VOLANDO", "Failed to download " + city.getFlickrUrl());
+                        }
+
+                        @Override
+                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+                            ((ImageView) view).setImageBitmap(loadedImage);
+                            Log.d("VOLANDO", "Finished downloading " + city.getFlickrUrl());
+                            if(marker.isInfoWindowShown()) {
+                                Log.d("VOLANDO", "Re-showing info window for " + city.getID());
+                                marker.hideInfoWindow();
+                                marker.showInfoWindow();
+                            }
+                        }
+
+                        @Override
+                        public void onLoadingCancelled(String imageUri, View view) {
+                            Log.d("VOLANDO", "Cancelled download of " + city.getFlickrUrl());
+                        }
+                    });
+                   // image.setImageBitmap(bm);
+                }*/
+
+                //marker.setSnippet(city.getName());
               /*  if (arg0.getTitle().compareTo("ITBA") == 0) {
                     image.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.itba));
                 } else {
@@ -143,8 +212,17 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 return view;
             }
         });
+        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                marker.showInfoWindow();
+                return false;
+            }
+        });
         mMap = googleMap;
+        mMap.getUiSettings().setMapToolbarEnabled(false);
     }
+
 
     @TargetApi(Build.VERSION_CODES.M)
     @Override
@@ -179,7 +257,10 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                         //Add special marker in the found airport
                         //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
 
-                        mMap.addMarker(new MarkerOptions().position(airportPosition).title("Marker in" + closestAirport.getCity().toString()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                        mMap.addMarker(new MarkerOptions()
+                                .position(airportPosition)
+                                .title(closestAirport.toString())
+                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
                         //Move the camera to it
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
 
@@ -205,8 +286,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
 //                                    mMap.addMarker(new MarkerOptions().position(aux).title(d.toString()).icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                                     mMap.addMarker(new MarkerOptions()
                                             .position(aux)
-                                            .title(d.toString())
-                                            .snippet(d.getCity().toString())
+                                            .title(d.getCity().getName())
+                                            .snippet("$" + Double.toString(d.getPrice()))
                                             .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                                 }
                             }

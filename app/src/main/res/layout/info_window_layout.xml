@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:orientation="vertical">
 
     <TextView
         android:id="@+id/title"
+        android:layout_margin="0dp"
+        android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:textAppearanceSmall"
         android:textStyle="bold" />
 
-    <ImageView
-        android:id="@+id/image"
+    <TextView
+        android:id="@+id/price"
+        android:layout_margin="0dp"
+        android:layout_gravity="center_horizontal"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:textAppearance="?android:textAppearanceSmall"
+        android:layout_height="wrap_content"
+        android:textStyle="bold" />
+
+    <ImageView
+        android:id="@+id/image_marker"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="50dp"
+        android:layout_height="50dp" />
 
     <!--    <TextView
             android:id="@+id/latitude"

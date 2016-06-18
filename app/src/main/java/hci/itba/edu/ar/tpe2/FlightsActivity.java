@@ -2,6 +2,7 @@ package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -14,13 +15,18 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airline;
@@ -37,6 +43,11 @@ public class FlightsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FlightsListFragment flightsFragment;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +74,9 @@ public class FlightsActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
     @Override
@@ -72,12 +86,12 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
+
         //Add/refresh the flights fragment
         flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
-        if(flightsFragment == null) {    //Creating for the first time
+        if (flightsFragment == null) {    //Creating for the first time
             getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-        }
-        else {
+        } else {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
         }
     }
@@ -95,7 +109,23 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     public void onStart() {
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
         init();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Flights Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://hci.itba.edu.ar.tpe2/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
@@ -138,7 +168,7 @@ public class FlightsActivity extends AppCompatActivity
 
         }
 
-        if(i != null) {
+        if (i != null) {
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }
@@ -163,7 +193,7 @@ public class FlightsActivity extends AppCompatActivity
                 @Override
                 public void execute(Context c, Country[] countries) {
                     Map<String, Country> la = new HashMap<>(countries.length);
-                    for(Country country : countries) {
+                    for (Country country : countries) {
                         la.put(country.getID(), country);
                     }
                     if (fileManager.saveCountries(countries)) {
@@ -175,45 +205,53 @@ public class FlightsActivity extends AppCompatActivity
                          */
                         API.getInstance().getAllCities(FlightsActivity.this, new NetworkRequestCallback<City[]>() {
                             @Override
-                            public void execute(Context c, City[] cities) {
-                                Map<String, City> la = new HashMap<>(cities.length);
-                                for(City city : cities) {
+                            public void execute(Context c, final City[] cities) {
+                                final Map<String, City> la = new HashMap<>(cities.length);
+                                final AtomicInteger requestsLeft = new AtomicInteger(cities.length);
+                                for (final City city : cities) {
                                     //City has an incomplete Country object stored. Replace it with the complete one.
                                     city.setCountry(data.getCountries().get(city.getCountry().getID()));
                                     la.put(city.getID(), city);
-                                }
-                                if (fileManager.saveCities(cities)) {
-                                    Log.d("VOLANDO", cities.length + " cities loaded from network.");
-                                    data.setCities(la);
-                                    /**
-                                     * Once done saving cities, get airports, setting their city and country to the
-                                     * COMPLETE objects
-                                     */
-                                    API.getInstance().getAllAirports(FlightsActivity.this, new NetworkRequestCallback<Airport[]>() {
+                                    //
+                                    API.getInstance().getFlickrImg(city.getName(), FlightsActivity.this, new NetworkRequestCallback<String>() {
                                         @Override
-                                        public void execute(Context c, Airport[] airports) {
-                                            Map<String, Airport> la = new HashMap<>(airports.length);
-                                            for (Airport airport : airports) {
-                                                //Airport has an incomplete City object stored. Replace it with the complete one.
-                                                airport.setCity(data.getCities().get(airport.getCity().getID()));
-                                                la.put(airport.getID(), airport);
-                                            }
-                                            if (fileManager.saveAirports(airports)) {
-                                                Log.d("VOLANDO", airports.length + " airports loaded from network.");
-                                                data.setAirports(la);
-                                            } else {
-                                                Log.w("VOLANDO", "Couldn't save airports.");
+                                        public void execute(Context c, String param) {
+                                            city.setFlickrUrl(param);
+                                            if (requestsLeft.decrementAndGet() == 0) {      //All requests completed
+                                                if (fileManager.saveCities(cities)) {
+                                                    Log.d("VOLANDO", cities.length + " cities loaded from network.");
+                                                    data.setCities(la);
+                                                    /**
+                                                     * Once done saving cities, get airports, setting their city and country to the
+                                                     * COMPLETE objects
+                                                     */
+                                                    API.getInstance().getAllAirports(FlightsActivity.this, new NetworkRequestCallback<Airport[]>() {
+                                                        @Override
+                                                        public void execute(Context c, Airport[] airports) {
+                                                            Map<String, Airport> la = new HashMap<>(airports.length);
+                                                            for (Airport airport : airports) {
+                                                                //Airport has an incomplete City object stored. Replace it with the complete one.
+                                                                airport.setCity(data.getCities().get(airport.getCity().getID()));
+                                                                la.put(airport.getID(), airport);
+                                                            }
+                                                            if (fileManager.saveAirports(airports)) {
+                                                                Log.d("VOLANDO", airports.length + " airports loaded from network.");
+                                                                data.setAirports(la);
+                                                            } else {
+                                                                Log.w("VOLANDO", "Couldn't save airports.");
+                                                            }
+                                                        }
+                                                    });
+                                                } else {
+                                                    Log.w("VOLANDO", "Couldn't save cities.");
+                                                }
                                             }
                                         }
                                     });
                                 }
-                                else {
-                                    Log.w("VOLANDO", "Couldn't save cities.");
-                                }
                             }
                         });
-                    }
-                    else {
+                    } else {
                         Log.w("VOLANDO", "Couldn't save countries.");
                     }
                 }
@@ -280,5 +318,25 @@ public class FlightsActivity extends AppCompatActivity
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
             ImageLoader.getInstance().init(config);
         }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Flights Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app URL is correct.
+                Uri.parse("android-app://hci.itba.edu.ar.tpe2/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
     }
 }
