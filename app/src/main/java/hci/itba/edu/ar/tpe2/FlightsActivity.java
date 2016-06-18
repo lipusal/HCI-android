@@ -21,6 +21,7 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
@@ -28,11 +29,13 @@ import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
 import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
+import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -79,12 +82,25 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
         //Add/refresh the flights fragment
-        flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
-        if(flightsFragment == null) {    //Creating for the first time
-            getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+        List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
+        if (followedFlights.isEmpty()) {
+            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
+            if (flightsFragment == null) {    //Creating for the first time
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
+                flightsFragment = null;
+            }
+//            getSupportFragmentManager().executePendingTransactions();
+//            textFragment.getTextView().setCompoundDrawablesWithIntrinsicBounds(null, null, null, getDrawable(R.drawable.ic_flight));
         }
         else {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+            flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
+            if (flightsFragment == null) {    //Creating for the first time
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+            }
         }
     }
 

@@ -20,94 +20,60 @@ import hci.itba.edu.ar.tpe2.R;
  * create an instance of this fragment.
  */
 public class TextFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private String text;
+    private TextView textView;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
-    private TextView text;
+    public static TextFragment newInstance(String startingText) {
+        TextFragment result = new TextFragment();
+        result.text = startingText;
+        return result;
+    }
 
     public TextFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment TextFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static TextFragment newInstance(String param1, String param2) {
-        TextFragment fragment = new TextFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+//    @Override
+//    public void onCreate(Bundle savedInstanceState) {
+//        super.onCreate(savedInstanceState);
+//    }
 
     public void setText(String text) {
-        this.text.setText(text);
+        textView.setText(text);
+    }
+
+    public TextView getTextView() {
+        return textView;
     }
 
     public void appendText(String text) {
-        this.text.append(text);
+        textView.append(text);
     }
 
     public void clear() {
-        this.text.setText("");
+        textView.setText("");
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_text, container, false);
-        text = (TextView) v.findViewById(R.id.fragment_text);
-        setText("This is Text Fragment");
+        textView = (TextView) v.findViewById(R.id.fragment_text);
+        if(text != null) {
+            setText(text);
+        }
         return v;
     }
 
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
+//    @Override
+//    public void onAttach(Context context) {
+//        super.onAttach(context);
+//    }
+//
+//    @Override
+//    public void onDetach() {
+//        super.onDetach();
+//    }
 
     /**
      * This interface must be implemented by activities that contain this
@@ -119,8 +85,8 @@ public class TextFragment extends Fragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
-    }
+//    public interface OnFragmentInteractionListener {
+//        // TODO: Update argument type and name
+//        void onFragmentInteraction(Uri uri);
+//    }
 }
