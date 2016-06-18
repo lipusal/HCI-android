@@ -648,4 +648,34 @@ public class API {
             }
         }.execute();
     }
+
+    /**
+     * Queries Flickr for landscape images matching the specified query (usually a city or airport).
+     * The specified callback gets returned the URL of the first matching image, or {@code null} if
+     * none were found.
+     *
+     * @param query           Query for images to match.
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Callback to run when the network request completes. Will get passed
+     *                        the URL of the first matching image, or {@code null} if no images were
+     *                        found.
+     */
+    public void getFlickrImg(String query, final Context context, final NetworkRequestCallback<String> successCallback) {
+        new FlickrRequest(query) {
+            @Override
+            protected void successCallback(String result) {
+                JsonObject flickrData = gson.fromJson(result, JsonObject.class);
+                JsonArray photos = flickrData.getAsJsonObject("photos").getAsJsonArray("photo");
+                if (photos.size() == 0) {
+                    successCallback.execute(context, null);
+                } else {
+                    successCallback.execute(context, getFlickImageURL(photos.get(0).getAsJsonObject()));
+                }
+            }
+        }.execute();
+    }
+
+    private String getFlickImageURL(JsonObject imgObj) {
+        return "https://farm" + Integer.toString(imgObj.get("farm").getAsInt()) + ".staticflickr.com/" + imgObj.get("server").getAsString() + "/" + imgObj.get("id").getAsString() + "_" + imgObj.get("secret").getAsString() + "_c.jpg";
+    }
 }
