@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -91,7 +90,7 @@ public class FlightsActivity extends AppCompatActivity
                 ContextCompat.getColor(this, android.R.color.holo_orange_light),
                 ContextCompat.getColor(this, android.R.color.holo_red_light));
 
-        if(!NotificationScheduler.areUpdatesEnabled()) {
+        if (!NotificationScheduler.areUpdatesEnabled()) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             NotificationScheduler.setUpdates(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
         }
