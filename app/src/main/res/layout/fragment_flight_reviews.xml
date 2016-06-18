@@ -1,0 +1,35 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="hci.itba.edu.ar.tpe2.FlightCommentsFragment">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="15dp"
+        tools:context="hci.itba.edu.ar.tpe2.FlightCommentsFrangment">
+    <!-- android:layout_alignParentTop="true"-->
+    <!-- android:layout_centerHorizontal="true"-->
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Reviews Results"
+            android:id="@+id/reviews_results_title"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_horizontal" />
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/reviews_list"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/reviews_results_title" />
+    </RelativeLayout>
+
+
+</FrameLayout>

@@ -58,10 +58,10 @@
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:id="@+id/airline"
-            android:layout_alignTop="@+id/dep_date"
-            android:layout_alignEnd="@+id/to"
             android:inputType="text"
-            android:hint="Airline (optional)" />
+            android:hint="Airline (optional)"
+            android:layout_alignTop="@+id/dep_date"
+            android:layout_alignStart="@+id/to" />
 
         <Button
             android:layout_width="wrap_content"

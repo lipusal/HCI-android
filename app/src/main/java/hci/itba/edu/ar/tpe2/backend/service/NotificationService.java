@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import hci.itba.edu.ar.tpe2.FlightDetailsActivity;
+import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
@@ -101,7 +101,35 @@ public class NotificationService extends IntentService {
                     if (!newStatus.equals(flight.getStatus())) {
                         Log.d("VOLANDO", "Status changed to " + newStatus.toString() + " for " + flight.toString());
                         flight.setStatus(newStatus);
+/**
+ * Merge, quedarse con el head? Yo no habia hecho nada en flightDetails. Creo que es lo que habia antes de que juan ponga iconos y eso.
+<<<<<<< HEAD
 
+=======
+                        //Build the base notification
+                        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(NotificationService.this)
+                                .setSmallIcon(R.drawable.ic_star_on_24dp)
+                                .setContentTitle(flight.toString() + " " + newStatus.toString())
+                                .setContentText("This is not done yet")
+                                .setAutoCancel(true)                                                //Dismiss notification when clicking
+                                .setCategory(Notification.CATEGORY_STATUS)
+                                .setPriority(Notification.PRIORITY_HIGH)                            //Trigger heads-up
+                                .setTicker(flight.toString() + " " + newStatus.toString())          //Text to display when the notif first arrives
+                                //This mouthful gets the sound as set in settings, and falls back to default notification sound if not found TODO not working, plays no sound
+                                .setSound(Uri.parse(preferences.getString(NotificationService.this.getString(R.string.pref_key_update_frequency), NotificationService.this.getString(R.string.pref_default_ringtone))));
+                        if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), false)) {
+                            notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
+                        }
+                        //Build its action and set it to the notification
+                        Intent baseIntent = new Intent(NotificationService.this, FlightDetailMainActivity.class);
+                        baseIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flight);
+                        //Set flags to take user back to Home when navigating back from details TODO this makes the application close when hitting back, user should be taken to home
+//                        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
+                        //Build a pending intent with the recently constructed base intent and set it to the notification
+                        PendingIntent pendingIntent = PendingIntent.getActivity(NotificationService.this, 0, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                        notifBuilder.setContentIntent(pendingIntent);
+>>>>>>> flightDetails
+ */
                         //Add it to the map, notifications will be sent together
                         notifications.put(flight.getID(), buildNotification(flight));
                         changed[0] = true;
@@ -172,8 +200,8 @@ public class NotificationService extends IntentService {
                 break;
         }
         //Build its action and set it to the notification
-        Intent baseIntent = new Intent(NotificationService.this, FlightDetailsActivity.class);
-        baseIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, updatedFlight);
+        Intent baseIntent = new Intent(NotificationService.this, FlightDetailMainActivity.class);
+        baseIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, updatedFlight);
         //Set flags to take user back to Home when navigating back from details
 //        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         //Build a pending intent with the recently constructed base intent and set it to the notification

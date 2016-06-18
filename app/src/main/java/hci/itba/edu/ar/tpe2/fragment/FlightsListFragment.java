@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
-import hci.itba.edu.ar.tpe2.FlightDetailsActivity;
+import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
@@ -95,7 +95,7 @@ public class FlightsListFragment extends ListFragment {
     public interface OnFragmentInteractionListener {
 
         /**
-         * Called when a flight is clicked. Default behavior is to start the {@link FlightDetailsActivity}
+         * Called when a flight is clicked. Default behavior is to start the {@link FlightDetailMainActivity}
          * with the clicked Flight.
          *
          * @param clickedFlight The clicked flight.
@@ -107,8 +107,8 @@ public class FlightsListFragment extends ListFragment {
 
         @Override
         public void onFlightClicked(Flight clickedFlight) {
-            Intent detailsIntent = new Intent(getActivity(), FlightDetailsActivity.class);
-            detailsIntent.putExtra(FlightDetailsActivity.PARAM_FLIGHT, clickedFlight);
+            Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
+            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, clickedFlight);
             startActivity(detailsIntent);
         }
     }
