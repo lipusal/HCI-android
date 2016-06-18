@@ -21,17 +21,18 @@ public class FlightStatus implements Serializable {
     private static final Map<String, String> validStatus = new HashMap<>();
 
     static {
-        validStatus.put("S", "Scheduled");
-        validStatus.put("A", "Active");
-        validStatus.put("D", "Diverted");
-        validStatus.put("L", "Landed");
-        validStatus.put("C", "Canceled");
+        validStatus.put("S", "scheduled");
+        validStatus.put("A", "active");
+        validStatus.put("D", "diverted");
+        validStatus.put("L", "landed");
+        validStatus.put("C", "canceled");
     }
 
     private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, airlineName;
     private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     private Integer flightId, flightNumber;
+    private Airport destinationAirport;     //Can change from original if diverted
     //TODO incorporate delays
 
     private FlightStatus() {
@@ -45,6 +46,7 @@ public class FlightStatus implements Serializable {
         result.flightId = statusObject.get("id").getAsInt();
         result.flightNumber = statusObject.get("number").getAsInt();
         result.airlineName = statusObject.getAsJsonObject("airline").get("name").getAsString();
+        result.destinationAirport = PersistentData.getInstance().getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
         result.parseDeparture(departure);
         result.parseArrival(arrival);
         return result;
@@ -68,8 +70,8 @@ public class FlightStatus implements Serializable {
             actualDepartureGateTime = parseDate(obj, "scheduled_time", timezone);
             scheduledDepartureRunwayTime = parseDate(obj, "estimate_runway_time", timezone);
             actualDepartureRunwayTime = parseDate(obj, "actual_runway_time", timezone);
-            departureTerminal = airport.get("terminal").isJsonNull() ? null : obj.get("terminal").getAsString();
-            departureGate = airport.get("gate").isJsonNull() ? null : obj.get("gate").getAsString();
+            departureTerminal = airport.get("terminal").isJsonNull() ? null : airport.get("terminal").getAsString();
+            departureGate = airport.get("gate").isJsonNull() ? null : airport.get("gate").getAsString();
         } else if (departureOrArrival.equals("arrival")) {
             scheduledArrivalTime = parseDate(obj, "scheduled_time", timezone);
             actualArrivalTime = parseDate(obj, "actual_time", timezone);
@@ -77,8 +79,8 @@ public class FlightStatus implements Serializable {
             actualArrivalGateTime = parseDate(obj, "scheduled_time", timezone);
             scheduledArrivalRunwayTime = parseDate(obj, "estimate_runway_time", timezone);
             actualArrivalRunwayTime = parseDate(obj, "actual_runway_time", timezone);
-            arrivalTerminal = airport.get("terminal").isJsonNull() ? null : obj.get("terminal").getAsString();
-            arrivalGate = airport.get("gate").isJsonNull() ? null : obj.get("gate").getAsString();
+            arrivalTerminal = airport.get("terminal").isJsonNull() ? null : airport.get("terminal").getAsString();
+            arrivalGate = airport.get("gate").isJsonNull() ? null : airport.get("gate").getAsString();
         }
     }
 
@@ -113,24 +115,48 @@ public class FlightStatus implements Serializable {
         return scheduledDepartureTime;
     }
 
+    public String getPrettyScheduledDepartureTime() {
+        return prettyFormat.format(scheduledDepartureTime);
+    }
+
     public Date getActualDepartureTime() {
         return actualDepartureTime;
+    }
+
+    public String getPrettyActualDepartureTime()    {
+        return prettyFormat.format(actualDepartureTime);
     }
 
     public Date getScheduledDepartureGateTime() {
         return scheduledDepartureGateTime;
     }
 
+    public String getPrettyScheduledDepartureGateTime() {
+        return prettyFormat.format(scheduledDepartureGateTime);
+    }
+
     public Date getActualDepartureGateTime() {
         return actualDepartureGateTime;
+    }
+
+    public String getPrettyActualDepartureGateTime()    {
+        return prettyFormat.format(actualDepartureGateTime);
     }
 
     public Date getScheduledDepartureRunwayTime() {
         return scheduledDepartureRunwayTime;
     }
 
+    public String getPrettyScheduledDepartureRunwayTime()   {
+        return prettyFormat.format(scheduledDepartureRunwayTime);
+    }
+
     public Date getActualDepartureRunwayTime() {
         return actualDepartureRunwayTime;
+    }
+
+    public String getPrettyActualDepartureRunwayTime()  {
+        return prettyFormat.format(actualDepartureRunwayTime);
     }
 
     public String getArrivalTerminal() {
@@ -145,24 +171,48 @@ public class FlightStatus implements Serializable {
         return scheduledArrivalTime;
     }
 
+    public String getPrettyScheduledArrivalTime()   {
+        return prettyFormat.format(scheduledArrivalTime);
+    }
+
     public Date getActualArrivalTime() {
         return actualArrivalTime;
+    }
+
+    public String getPrettyActualArrivalTime()  {
+        return prettyFormat.format(actualArrivalTime);
     }
 
     public Date getScheduledArrivalGateTime() {
         return scheduledArrivalGateTime;
     }
 
+    public String getPrettyScheduledArrivalGateTime()   {
+        return prettyFormat.format(scheduledArrivalGateTime);
+    }
+
     public Date getActualArrivalGateTime() {
         return actualArrivalGateTime;
+    }
+
+    public String getPrettyActualArrivalGateTime()  {
+        return prettyFormat.format(actualArrivalGateTime);
     }
 
     public Date getScheduledArrivalRunwayTime() {
         return scheduledArrivalRunwayTime;
     }
 
+    public String getPrettyScheduledArrivalRunwayTime() {
+        return prettyFormat.format(scheduledArrivalRunwayTime);
+    }
+
     public Date getActualArrivalRunwayTime() {
         return actualArrivalRunwayTime;
+    }
+
+    public String getPrettyActualArrivalRunwayTime()    {
+        return prettyFormat.format(actualArrivalRunwayTime);
     }
 
     public String getAirlineName() {
@@ -177,6 +227,10 @@ public class FlightStatus implements Serializable {
         return flightNumber;
     }
 
+    public Airport getDestinationAirport() {
+        return destinationAirport;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -189,9 +243,6 @@ public class FlightStatus implements Serializable {
 
     @Override
     public String toString() {
-        return "Status for " + airlineName + " #" + flightNumber + ":\n" +
-                "\t-Status: " + validStatus.get(status) + "\n" +
-                "\t-Departs from " + departureTerminal + departureGate + " at " + prettyFormat.format(scheduledDepartureTime) + "\n" +
-                "\t-Arrives to " + arrivalTerminal + arrivalGate + " at " + prettyFormat.format(scheduledArrivalTime);
+        return validStatus.get(status);
     }
 }

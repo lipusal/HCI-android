@@ -113,6 +113,10 @@ public class Flight implements Serializable {
         return status;
     }
 
+    public void setStatus(FlightStatus status) {
+        this.status = status;
+    }
+
     public double getTotal() {
         return total;
     }
@@ -137,6 +141,6 @@ public class Flight implements Serializable {
 
     @Override
     public String toString() {
-        return airline.getID() + " #" + number + ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")";
+        return airline.getID() + " #" + number /*+ ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")"*/;
     }
 }

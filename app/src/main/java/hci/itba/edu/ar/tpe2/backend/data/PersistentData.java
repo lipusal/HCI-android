@@ -1,9 +1,16 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import android.content.Context;
+
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
+import hci.itba.edu.ar.tpe2.backend.FileManager;
+
+/**
+ * Class used to hold persistent data used across various activities.
+ */
 public class PersistentData {
     private static PersistentData instance = new PersistentData();
     private List<Flight> followedFlights;
@@ -67,17 +74,24 @@ public class PersistentData {
         this.airlines = airlines;
     }
 
-    //    public void addFollowedFlight(Flight f) {
-//        if(followedFlights == null) {
-//            throw new IllegalStateException("Followed flights have not been set, can't add flight.");
-//        }
-//        followedFlights.add(f);
-//    }
-//
-//    public boolean removeFollowedFlight(Flight f) {
-//        if(followedFlights == null) {
-//            throw new IllegalStateException("Followed flights have not been set, can't remove flight.");
-//        }
-//        return followedFlights.remove(f);
-//    }
+    public void addFollowedFlight(Flight f, Context context) {
+        if (followedFlights == null) {
+            throw new IllegalStateException("Followed flights have not been set, can't add flight.");
+        }
+        if (followedFlights.contains(f)) {
+            throw new IllegalArgumentException("Flight already followed: " + f.toString());
+        }
+        followedFlights.add(f);
+        FileManager fm = new FileManager(context);
+        fm.saveFollowedFlights(followedFlights);
+    }
+
+    public void removeFollowedFlight(Flight f, Context context) {
+        if (followedFlights == null) {
+            throw new IllegalStateException("Followed flights have not been set, can't remove flight.");
+        }
+        followedFlights.remove(f);
+        FileManager fm = new FileManager(context);
+        fm.saveFollowedFlights(followedFlights);
+    }
 }
