@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -53,7 +54,8 @@ public class SearchResultsActivity extends AppCompatActivity {
                 to = getIntent().getStringExtra(PARAM_TO),
                 departure = getIntent().getStringExtra(PARAM_DEPARTURE_DATE),
                 airlineID = getIntent().getStringExtra(PARAM_AIRLINE_ID);
-        API.getInstance().getAllFlights(from, to, departure, airlineID, this, new NetworkRequestCallback<List<Flight>>() {
+        API.getInstance().getAllFlights(from, to, departure, airlineID, this,
+                new NetworkRequestCallback<List<Flight>>() {
                     @Override
                     public void execute(Context c, List<Flight> result) {
                         flights = result;
@@ -72,6 +74,7 @@ public class SearchResultsActivity extends AppCompatActivity {
                     @Override
                     public void execute(Context c, String param) {
                         title.setText("Network error, couldn't find flights =(");
+                        flights = Collections.EMPTY_LIST;
                     }
                 });
 
