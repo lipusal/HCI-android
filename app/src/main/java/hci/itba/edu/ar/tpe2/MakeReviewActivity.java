@@ -48,6 +48,7 @@ public class MakeReviewActivity extends AppCompatActivity
         if(savedInstanceState == null) {
             //wat do
         }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         reviewButton = (Button) findViewById(R.id.review_button);
         reviewText = (EditText) findViewById(R.id.review_text);
         Intent callerIntent = getIntent();
@@ -73,15 +74,16 @@ public class MakeReviewActivity extends AppCompatActivity
             }
         });
 
-
+        /**
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+         */
 
 
         score = 0;
@@ -176,7 +178,7 @@ public class MakeReviewActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.make_review, menu);
         return true;
     }
-    /**
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
@@ -185,33 +187,38 @@ public class MakeReviewActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == android.R.id.home) {
+            finish();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
-    */
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        Intent i = null;
+        if (id == R.id.drawer_flights) {
+            i = new Intent(this, FlightsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        } else if (id == R.id.drawer_search) {
+            i = new Intent(this, SearchActivity.class);
+        } else if (id == R.id.drawer_map) {
+            i = new Intent(this, DealsMapActivity.class);
+        } else if (id == R.id.drawer_settings) {
+            i = new Intent(this, SettingsActivity.class);
+        } else if (id == R.id.drawer_help) {
 
         }
 
+        if(i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(i);
+        }
+        //else, unrecognized option selected, close drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;

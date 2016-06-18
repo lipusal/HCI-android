@@ -77,13 +77,14 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
 
 
-
+        /**
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+         */
 
     }
 
@@ -204,21 +205,25 @@ public class FlightDetailMainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        Intent i = null;
+        if (id == R.id.drawer_flights) {
+            i = new Intent(this, FlightsActivity.class);
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        } else if (id == R.id.drawer_search) {
+            i = new Intent(this, SearchActivity.class);
+        } else if (id == R.id.drawer_map) {
+            i = new Intent(this, DealsMapActivity.class);
+        } else if (id == R.id.drawer_settings) {
+            i = new Intent(this, SettingsActivity.class);
+        } else if (id == R.id.drawer_help) {
 
         }
 
+        if(i != null) {
+            i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            startActivity(i);
+        }
+        //else, unrecognized option selected, close drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
