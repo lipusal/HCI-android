@@ -34,12 +34,63 @@
             android:text="Points = 10!" />
 
 
+        <ImageButton
+            android:id="@+id/first_star_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_star_off_24dp"
+            android:background="@null"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/review_text"
+            android:layout_centerVertical="true" />
+        <ImageButton
+            android:id="@+id/second_star_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_star_off_24dp"
+            android:background="@null"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/review_text"
+            android:layout_marginStart="25dp"
+            android:layout_centerVertical="true" />
+        <ImageButton
+            android:id="@+id/third_star_button"
+            android:layout_marginStart="50dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_star_off_24dp"
+            android:background="@null"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/review_text"
+            android:layout_centerVertical="true" />
+        <ImageButton
+            android:id="@+id/fourth_star_button"
+            android:layout_marginStart="75dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_star_off_24dp"
+            android:background="@null"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/review_text"
+            android:layout_centerVertical="true" />
+        <ImageButton
+            android:layout_marginStart="100dp"
+            android:id="@+id/fifth_star_button"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_star_off_24dp"
+            android:background="@null"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/review_text"
+            android:layout_centerVertical="true" />
+
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dejar comentario"
             android:id="@+id/review_button"
-            android:layout_below="@+id/review_text"
+            android:layout_below="@+id/first_star_button"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp" />
     </RelativeLayout>

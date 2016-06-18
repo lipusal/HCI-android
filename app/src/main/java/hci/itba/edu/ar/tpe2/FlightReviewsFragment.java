@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.support.v7.app.AppCompatActivity;
@@ -164,14 +165,31 @@ public class FlightReviewsFragment extends Fragment {
         public View getView(int position, View destination, ViewGroup parent) {
             Review review = getItem(position);
 
-            if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
-                destination = LayoutInflater.from(getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+            if (destination == null) {
+                destination = LayoutInflater.from(getContext()).inflate(R.layout.review_list, parent, false);
             }
             //Fill in the list item with data
-            TextView title = (TextView) destination.findViewById(android.R.id.text1);//,
-//                    subtitle = (TextView) destination.findViewById(android.R.id.text2);
-            title.setText(review.getComment() + " \n" + review.getOverall() +"/5");
-//            subtitle.setText(flight.getPrettyDepartureDate());
+            TextView text = (TextView) destination.findViewById(R.id.textReview);//,
+
+            text.setText(review.getComment() + " \n" + review.getOverall() +"/5");
+            /*
+
+
+            */
+            int overall = review.getOverall();
+
+            ImageView firstStar = (ImageView) destination.findViewById(R.id.firstStar);
+            ImageView secondStar = (ImageView) destination.findViewById(R.id.secondStar);
+            ImageView thirdStar = (ImageView) destination.findViewById(R.id.thirdStar);
+            ImageView fourthStar = (ImageView) destination.findViewById(R.id.fourthStar);
+            ImageView fifthStar = (ImageView) destination.findViewById(R.id.fifthStar);
+
+            firstStar.setImageResource(overall>0?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+            secondStar.setImageResource(overall>1?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+            thirdStar.setImageResource(overall>2?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+            fourthStar.setImageResource(overall>3?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+            fifthStar.setImageResource(overall>4?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+
             return destination;
         }
     }

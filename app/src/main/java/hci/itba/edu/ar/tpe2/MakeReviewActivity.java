@@ -16,8 +16,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -28,7 +30,12 @@ public class MakeReviewActivity extends AppCompatActivity
     private EditText reviewText;
     private Button reviewButton;
     private Flight flight;
-
+    private int score;
+    private ImageButton firstStar;
+    private ImageButton secondStar;
+    private ImageButton thirdStar;
+    private ImageButton fourthStar;
+    private ImageButton fifthStar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +57,7 @@ public class MakeReviewActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if(validateFields()) {
-                    Review review = new Review(flight, 10, reviewText.getText().toString());
+                    Review review = new Review(flight, score*2, reviewText.getText().toString());
 
 
                     API.getInstance().submitReview(review,MakeReviewActivity.this, new NetworkRequestCallback<Void>(){
@@ -75,18 +82,82 @@ public class MakeReviewActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+
+        score = 0;
+        firstStar = (ImageButton) findViewById(R.id.first_star_button);
+        secondStar = (ImageButton) findViewById(R.id.second_star_button);
+        thirdStar = (ImageButton) findViewById(R.id.third_star_button);
+        fourthStar = (ImageButton) findViewById(R.id.fourth_star_button);
+        fifthStar = (ImageButton) findViewById(R.id.fifth_star_button);
+        firstStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                score = 1;
+                updateStars();
+            }
+
+        });
+        secondStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                score = 2;
+                updateStars();
+            }
+
+        });
+        thirdStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                score = 3;
+                updateStars();
+            }
+
+        });
+        fourthStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                score = 4;
+                updateStars();
+            }
+
+        });
+        fifthStar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                score = 5;
+                updateStars();
+            }
+
+        });
+
     }
+
+
 
     private boolean validateFields() {
         boolean valid = true;
         String text = reviewText.getText().toString();
 
+        if(score==0){
+            valid = false;
+            reviewText.setError("Ingrese el puntaje. Mover de lugar el error");
+        }
+
         if(text.isEmpty()) {
             reviewText.setError("Ingrese un comentario");
             valid = false;
         }
-        //Falta el puntaje
+
         return valid;
+    }
+
+    private void updateStars() {
+        firstStar.setImageResource(score>0?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+        secondStar.setImageResource(score>1?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+        thirdStar.setImageResource(score>2?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+        fourthStar.setImageResource(score>3?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+        fifthStar.setImageResource(score>4?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
     }
 
     @Override
