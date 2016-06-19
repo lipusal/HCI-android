@@ -83,15 +83,13 @@ public class SettingsActivity extends SettingsWrapperActivity {
                 preference.setSummary(stringValue);
             }
 
+            //React to changes in update frequency
             Context context = preference.getContext();
-            if (preference.getKey().equals(context.getString(R.string.pref_key_update_frequency))) { //Change the update frequency, or cancel the updates if requested.
-                long frequency = Long.parseLong(stringValue);
-                if (frequency != -1) {
-                    NotificationScheduler.setUpdateFrequency(context, frequency);
-                } else {  //Notifications disabled
-                    NotificationScheduler.cancelUpdates(context);
-                }
+            if (preference.getKey().equals(context.getString(R.string.pref_key_update_frequency))) {
+                Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);
+                context.sendBroadcast(i);
             }
+
             return true;
         }
     };
@@ -167,7 +165,7 @@ public class SettingsActivity extends SettingsWrapperActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
-                || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
+                || UpdatesPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
 
@@ -241,7 +239,7 @@ public class SettingsActivity extends SettingsWrapperActivity {
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DataSyncPreferenceFragment extends PreferenceFragment {
+    public static class UpdatesPreferenceFragment extends PreferenceFragment {
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -253,6 +251,15 @@ public class SettingsActivity extends SettingsWrapperActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_update_frequency)));
+            findPreference(getString(R.string.pref_key_update_on_cellular_network)).setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    //Let the notification scheduler do all the logic
+                    Intent intent = new Intent(NotificationScheduler.ACTION_UPDATE_OVER_NETWORK_SETTING_CHANGED);
+                    preference.getContext().sendBroadcast(intent);
+                    return true;
+                }
+            });
         }
 
         @Override

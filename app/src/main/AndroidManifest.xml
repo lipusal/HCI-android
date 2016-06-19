@@ -50,6 +50,8 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />   <!-- To start/stop fetching updates when dis/connecting -->
+                <action android:name="hci.itba.edu.ar.tpe2.backend.service.action.UPDATE_OVER_NETWORK_SETTING_CHANGED" />
+                <action android:name="hci.itba.edu.ar.tpe2.backend.service.action.UPDATE_FREQUENCY_SETTING_CHANGED" />
             </intent-filter>
         </receiver>
 

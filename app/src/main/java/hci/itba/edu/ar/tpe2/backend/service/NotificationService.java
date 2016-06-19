@@ -46,7 +46,7 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-            FILTER_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.filter.UPDATES_COMPLETE",
+            ACTION_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
             PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
 
     public NotificationService() { super("NotificationService"); }
@@ -54,7 +54,6 @@ public class NotificationService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
-            //TODO ensure repeating alarm is sending the intent properly (see NotificationScheduler)
             switch(intent.getAction()) {
                 case ACTION_NOTIFY_UPDATES:
                     boolean broadcast = intent.getBooleanExtra(PARAM_BROADCAST_WHEN_COMPLETE, false);
@@ -78,7 +77,7 @@ public class NotificationService extends IntentService {
         else {
             Log.d("VOLANDO", "No followed flights, not checking updates");
             if (broadcastOnComplete) {
-                Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
+                Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
             return;
@@ -99,19 +98,24 @@ public class NotificationService extends IntentService {
                 protected void successCallback(String result) {
                     JsonObject json = g.fromJson(result, JsonObject.class);
                     FlightStatus newStatus = FlightStatus.fromJson(json.getAsJsonObject("status"));
+                    boolean sendNotifications = PreferenceManager.getDefaultSharedPreferences(NotificationService.this).getBoolean(getString(R.string.pref_key_notify_on_update), true);
                     //Calculate differences and build notifications as appropriate
                     if (flight.getStatus() == null) {    //First time checking for update, notify as if it were a status change
                         flight.setStatus(newStatus);
-                        NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(NotificationService.this);
-                        buildNotificationForSatatusChange(notifBuilder, flight);
-                        notifications.put(flight.getID(), notifBuilder.build());
+                        if (sendNotifications) {
+                            NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(NotificationService.this);
+                            buildNotificationForSatatusChange(notifBuilder, flight);
+                            notifications.put(flight.getID(), notifBuilder.build());
+                        }
                         changed[0] = true;
                     } else {
                         Map<FlightStatusComparator.ComparableField, Object> statusDifferences = new FlightStatusComparator(flight.getStatus()).compare(newStatus);
                         if (!statusDifferences.isEmpty()) {
                             Log.d("VOLANDO", "Status changed for " + flight.toString());
                             flight.setStatus(newStatus);
-                            notifications.put(flight.getID(), buildNotification(flight, statusDifferences));
+                            if (sendNotifications) {
+                                notifications.put(flight.getID(), buildNotification(flight, statusDifferences));
+                            }
                             changed[0] = true;
                         }
                     }
@@ -127,7 +131,7 @@ public class NotificationService extends IntentService {
                             }
                         }
                         if (broadcastOnComplete) {
-                            Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
+                            Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
                             LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
                         }
                     }

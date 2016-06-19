@@ -23,8 +23,4 @@
     <string name="action_follow">Seguir</string>
     <string name="action_review">Comentar</string>
     <string name="title_activity_make_review">MakeReviewActivity</string>
-
-
-
-
 </resources>

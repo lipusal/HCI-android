@@ -93,8 +93,8 @@ public class FlightsActivity extends AppCompatActivity
 //                ContextCompat.getColor(this, android.R.color.holo_red_light));
 
         if (!NotificationScheduler.areUpdatesEnabled()) {
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            NotificationScheduler.setUpdateFrequency(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
+            Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);
+            sendBroadcast(i);
         }
     }
 
@@ -145,7 +145,7 @@ public class FlightsActivity extends AppCompatActivity
         }
 
         //(Re-)register refresh broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.FILTER_UPDATES_COMPLETE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
     }
 
     @Override
@@ -361,6 +361,5 @@ public class FlightsActivity extends AppCompatActivity
         intent.putExtra(NotificationService.PARAM_BROADCAST_WHEN_COMPLETE, true);
         startService(intent);
         swipeRefreshLayout.setRefreshing(true);
-        //TODO disallow this when there are no flights
     }
 }
