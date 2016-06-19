@@ -3,9 +3,8 @@
     package="hci.itba.edu.ar.tpe2">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <!-- To set up the repeating alarm for the notifications -->
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />    <!-- To set up the repeating alarm for the notifications -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />      <!-- For GPS -->
 
     <application
         android:allowBackup="true"
@@ -50,6 +49,7 @@
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />   <!-- To start/stop fetching updates when dis/connecting -->
             </intent-filter>
         </receiver>
 

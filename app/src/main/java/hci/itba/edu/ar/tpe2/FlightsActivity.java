@@ -94,7 +94,7 @@ public class FlightsActivity extends AppCompatActivity
 
         if (!NotificationScheduler.areUpdatesEnabled()) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            NotificationScheduler.setUpdates(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
+            NotificationScheduler.setUpdateFrequency(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
         }
     }
 

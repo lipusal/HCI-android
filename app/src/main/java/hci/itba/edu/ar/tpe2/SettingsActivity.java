@@ -2,11 +2,8 @@ package hci.itba.edu.ar.tpe2;
 
 
 import android.annotation.TargetApi;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -26,7 +23,6 @@ import android.view.MenuItem;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
-import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 import hci.itba.edu.ar.tpe2.settings.SettingsWrapperActivity;
 
 /**
@@ -91,7 +87,7 @@ public class SettingsActivity extends SettingsWrapperActivity {
             if (preference.getKey().equals(context.getString(R.string.pref_key_update_frequency))) { //Change the update frequency, or cancel the updates if requested.
                 long frequency = Long.parseLong(stringValue);
                 if (frequency != -1) {
-                    NotificationScheduler.setUpdates(context, frequency);
+                    NotificationScheduler.setUpdateFrequency(context, frequency);
                 } else {  //Notifications disabled
                     NotificationScheduler.cancelUpdates(context);
                 }
