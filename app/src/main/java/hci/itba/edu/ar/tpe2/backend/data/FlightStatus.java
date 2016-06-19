@@ -28,10 +28,11 @@ public class FlightStatus implements Serializable {
         validStatus.put("C", "canceled");
     }
 
-    private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, airlineName;
+    private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, baggageClaim;
     private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     private Integer flightId, flightNumber;
+    private Airline airline;
     private Airport destinationAirport;     //Can change from original if diverted
     //TODO incorporate delays
 
@@ -45,8 +46,9 @@ public class FlightStatus implements Serializable {
         result.status = statusObject.get("status").getAsString();
         result.flightId = statusObject.get("id").getAsInt();
         result.flightNumber = statusObject.get("number").getAsInt();
-        result.airlineName = statusObject.getAsJsonObject("airline").get("name").getAsString();
+        result.airline = PersistentData.getInstance().getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
         result.destinationAirport = PersistentData.getInstance().getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.parseDeparture(departure);
         result.parseArrival(arrival);
         return result;
@@ -215,8 +217,8 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualArrivalRunwayTime);
     }
 
-    public String getAirlineName() {
-        return airlineName;
+    public Airline getAirline() {
+        return airline;
     }
 
     public Integer getFlightId() {
@@ -229,6 +231,10 @@ public class FlightStatus implements Serializable {
 
     public Airport getDestinationAirport() {
         return destinationAirport;
+    }
+
+    public String getBaggageClaim() {
+        return baggageClaim;
     }
 
     @Override
