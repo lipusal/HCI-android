@@ -48,7 +48,7 @@ public class NotificationScheduler extends BroadcastReceiver {
                             Log.d("VOLANDO", "Re/connected to WiFi, setting automatic updates");
                             setDefaultUpdateFrequency(context);
                         } else {  //Mobile data, enable updates only if set in preferences
-                            boolean updateOverMobileData = preferences.getBoolean(context.getString(R.string.pref_key_update_on_cellular_network), true);
+                            boolean updateOverMobileData = preferences.getBoolean(context.getString(R.string.pref_key_update_on_cellular_network), Boolean.parseBoolean(context.getString(R.string.pref_default_update_on_cellular_network)));
                             if (updateOverMobileData) {
                                 Log.d("VOLANDO", "Re/connected to mobile data and updates enabled over mobile data, setting automatic updates");
                                 setDefaultUpdateFrequency(context);
@@ -64,7 +64,7 @@ public class NotificationScheduler extends BroadcastReceiver {
                 break;
             case ACTION_UPDATE_OVER_NETWORK_SETTING_CHANGED:
                 if (isConnected(context) && !isConnectedToWiFi(context)) {
-                    boolean updateOverMobileData = preferences.getBoolean(context.getString(R.string.pref_key_update_on_cellular_network), true);
+                    boolean updateOverMobileData = preferences.getBoolean(context.getString(R.string.pref_key_update_on_cellular_network), Boolean.parseBoolean(context.getString(R.string.pref_default_update_on_cellular_network)));
                     if (updateOverMobileData) {
                         Log.d("VOLANDO", "Enabled mobile data updates and connected to mobiile network, setting automatic updates");
                         setDefaultUpdateFrequency(context);
@@ -87,7 +87,7 @@ public class NotificationScheduler extends BroadcastReceiver {
      */
     private static void setDefaultUpdateFrequency(Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
-        long freq = Long.parseLong(preferences.getString(context.getString(R.string.pref_key_update_frequency), "-1"));
+        long freq = Long.parseLong(preferences.getString(context.getString(R.string.pref_key_update_frequency), context.getString(R.string.pref_default_update_frequency)));
         setUpdateFrequency(context, freq);
     }
 

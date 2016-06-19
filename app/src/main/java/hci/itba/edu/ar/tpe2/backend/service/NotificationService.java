@@ -98,7 +98,7 @@ public class NotificationService extends IntentService {
                 protected void successCallback(String result) {
                     JsonObject json = g.fromJson(result, JsonObject.class);
                     FlightStatus newStatus = FlightStatus.fromJson(json.getAsJsonObject("status"));
-                    boolean sendNotifications = PreferenceManager.getDefaultSharedPreferences(NotificationService.this).getBoolean(getString(R.string.pref_key_notify_on_update), true);
+                    boolean sendNotifications = PreferenceManager.getDefaultSharedPreferences(NotificationService.this).getBoolean(getString(R.string.pref_key_notify_on_update), Boolean.parseBoolean(getString(R.string.pref_default_notify_on_update)));
                     //Calculate differences and build notifications as appropriate
                     if (flight.getStatus() == null) {    //First time checking for update, notify as if it were a status change
                         flight.setStatus(newStatus);
@@ -167,9 +167,9 @@ public class NotificationService extends IntentService {
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setPriority(Notification.PRIORITY_HIGH)                            //Trigger heads-up
                 //This mouthful gets the sound as set in settings, and falls back to default notification sound if not found TODO not working, plays no sound
-                .setSound(Uri.parse(preferences.getString(NotificationService.this.getString(R.string.pref_key_update_frequency), NotificationService.this.getString(R.string.pref_default_ringtone))));
+                .setSound(Uri.parse(preferences.getString(NotificationService.this.getString(R.string.pref_key_notification_ringtone), NotificationService.this.getString(R.string.pref_default_ringtone))));
         //Set extra parameters
-        if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), false)) {
+        if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(getString(R.string.pref_default_vibrate_on_notify)))) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
         //Build content

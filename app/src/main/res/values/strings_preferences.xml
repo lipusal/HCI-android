@@ -9,6 +9,8 @@
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
     <string name="pref_title_vibrate">Vibrate</string>
+    <string name="pref_default_notify_on_update">true</string>
+    <string name="pref_default_vibrate_on_notify">true</string>
     <string name="pref_default_ringtone">content://settings/system/notification_sound</string>
 
     <!--Updates-->
@@ -16,8 +18,10 @@
     <string name="pref_key_update_on_cellular_network">update_on_cellular_network</string>
     <string name="pref_header_data_sync">Updates</string>
     <string name="pref_title_update_on_cellular_network">Update over cellular network</string>
+    <string name="pref_default_update_on_cellular_network">true</string>
     <string name="pref_summary_update_on_cellular_network">When WiFi is unavailable and cellular data is on</string>
     <string name="pref_title_update_frequency">Update frequency</string>
+    <string name="pref_default_update_frequency">300000</string>    <!-- 5 minutes -->
     <string-array name="pref_update_frequency_titles">
         <item>1 minute</item>
         <item>5 minutes</item>
