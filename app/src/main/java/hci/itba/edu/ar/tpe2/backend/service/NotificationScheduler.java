@@ -33,8 +33,7 @@ public class NotificationScheduler extends BroadcastReceiver {
             futureIntent = PendingIntent.getService(context, 0, baseIntent, 0);
             manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, frequency, futureIntent);
             Log.d("VOLANDO", "Set flight status update frequency to " + frequency);
-        }
-        else {
+        } else {
             Log.d("VOLANDO", "Flight status update frequency is -1, ignoring. If you wanted to cancel updates, call cancelUpdates()");
         }
     }

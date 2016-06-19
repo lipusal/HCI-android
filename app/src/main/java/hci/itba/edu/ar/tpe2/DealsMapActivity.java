@@ -46,6 +46,7 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
@@ -160,6 +161,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 } else {
                     image.setVisibility(View.GONE);
                 }
+
+
                 /*if(city.getFlickrUrl() == null) {
                     image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
                 }
@@ -215,8 +218,21 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                marker.showInfoWindow();
                 return false;
+            }
+        });
+
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener(){
+
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Intent searchIntent = new Intent(DealsMapActivity.this, SearchResultsActivity.class);
+                searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, closestAirport.getCity().getName());
+                String test = marker.getTitle();
+                searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, marker.getTitle());
+                searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, "2016-06-19");
+                startActivity(searchIntent);
+                return;
             }
         });
         mMap = googleMap;

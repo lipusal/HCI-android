@@ -105,7 +105,7 @@ public class FlightsActivity extends AppCompatActivity
 //                ContextCompat.getColor(this, android.R.color.holo_orange_light),
 //                ContextCompat.getColor(this, android.R.color.holo_red_light));
 
-        if(!NotificationScheduler.areUpdatesEnabled()) {
+        if (!NotificationScheduler.areUpdatesEnabled()) {
             SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
             NotificationScheduler.setUpdates(this, Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), "-1")));
         }
@@ -131,8 +131,7 @@ public class FlightsActivity extends AppCompatActivity
             }
 //            getSupportFragmentManager().executePendingTransactions();
 //            textFragment.getTextView().setCompoundDrawablesWithIntrinsicBounds(null, null, null, getDrawable(R.drawable.ic_flight));
-        }
-        else {
+        } else {
             swipeRefreshLayout.setEnabled(true);
             flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
             if (flightsFragment == null) {    //Creating for the first time

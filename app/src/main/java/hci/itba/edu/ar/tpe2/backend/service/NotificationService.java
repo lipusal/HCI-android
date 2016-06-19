@@ -45,8 +45,8 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-                                FILTER_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.filter.UPDATES_COMPLETE",
-                                PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
+            FILTER_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.filter.UPDATES_COMPLETE",
+            PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
 
     public NotificationService() { super("NotificationService"); }
 
@@ -76,7 +76,7 @@ public class NotificationService extends IntentService {
         }
         else {
             Log.d("VOLANDO", "No followed flights, not checking updates");
-            if(broadcastOnComplete) {
+            if (broadcastOnComplete) {
                 Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
@@ -116,7 +116,7 @@ public class NotificationService extends IntentService {
                                 notifManager.notify(entry.getKey(), entry.getValue());
                             }
                         }
-                        if(broadcastOnComplete) {
+                        if (broadcastOnComplete) {
                             Intent intent = new Intent(FILTER_UPDATES_COMPLETE);
                             LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
                         }
@@ -147,10 +147,10 @@ public class NotificationService extends IntentService {
         if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), false)) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
-        switch(newStatus.getStatus()) {
+        switch (newStatus.getStatus()) {
             case "S":   //Scheduled
                 notifBuilder.setSmallIcon(R.drawable.ic_scheduled);
-                if(newStatus.getScheduledDepartureTime() != null) {
+                if (newStatus.getScheduledDepartureTime() != null) {
                     notifBuilder.setContentText(newStatus.getPrettyScheduledDepartureTime());
                 }
                 break;

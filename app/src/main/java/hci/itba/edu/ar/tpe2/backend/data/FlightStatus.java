@@ -123,7 +123,7 @@ public class FlightStatus implements Serializable {
         return actualDepartureTime;
     }
 
-    public String getPrettyActualDepartureTime()    {
+    public String getPrettyActualDepartureTime() {
         return prettyFormat.format(actualDepartureTime);
     }
 
@@ -139,7 +139,7 @@ public class FlightStatus implements Serializable {
         return actualDepartureGateTime;
     }
 
-    public String getPrettyActualDepartureGateTime()    {
+    public String getPrettyActualDepartureGateTime() {
         return prettyFormat.format(actualDepartureGateTime);
     }
 
@@ -147,7 +147,7 @@ public class FlightStatus implements Serializable {
         return scheduledDepartureRunwayTime;
     }
 
-    public String getPrettyScheduledDepartureRunwayTime()   {
+    public String getPrettyScheduledDepartureRunwayTime() {
         return prettyFormat.format(scheduledDepartureRunwayTime);
     }
 
@@ -155,7 +155,7 @@ public class FlightStatus implements Serializable {
         return actualDepartureRunwayTime;
     }
 
-    public String getPrettyActualDepartureRunwayTime()  {
+    public String getPrettyActualDepartureRunwayTime() {
         return prettyFormat.format(actualDepartureRunwayTime);
     }
 
@@ -171,7 +171,7 @@ public class FlightStatus implements Serializable {
         return scheduledArrivalTime;
     }
 
-    public String getPrettyScheduledArrivalTime()   {
+    public String getPrettyScheduledArrivalTime() {
         return prettyFormat.format(scheduledArrivalTime);
     }
 
@@ -179,7 +179,7 @@ public class FlightStatus implements Serializable {
         return actualArrivalTime;
     }
 
-    public String getPrettyActualArrivalTime()  {
+    public String getPrettyActualArrivalTime() {
         return prettyFormat.format(actualArrivalTime);
     }
 
@@ -187,7 +187,7 @@ public class FlightStatus implements Serializable {
         return scheduledArrivalGateTime;
     }
 
-    public String getPrettyScheduledArrivalGateTime()   {
+    public String getPrettyScheduledArrivalGateTime() {
         return prettyFormat.format(scheduledArrivalGateTime);
     }
 
@@ -195,7 +195,7 @@ public class FlightStatus implements Serializable {
         return actualArrivalGateTime;
     }
 
-    public String getPrettyActualArrivalGateTime()  {
+    public String getPrettyActualArrivalGateTime() {
         return prettyFormat.format(actualArrivalGateTime);
     }
 
@@ -211,7 +211,7 @@ public class FlightStatus implements Serializable {
         return actualArrivalRunwayTime;
     }
 
-    public String getPrettyActualArrivalRunwayTime()    {
+    public String getPrettyActualArrivalRunwayTime() {
         return prettyFormat.format(actualArrivalRunwayTime);
     }
 
