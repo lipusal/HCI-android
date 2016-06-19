@@ -28,6 +28,18 @@
         android:gravity="center_vertical"
         android:layout_marginLeft="24dp" />
 
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+        android:minHeight="?android:attr/listPreferredItemHeightSmall"
+        android:gravity="center_vertical"
+        android:layout_alignEnd="@id/text1"
+        android:layout_marginLeft="24dp"/>
+
     <!--Star for following, push to right-->
     <ImageButton
         android:id="@+id/follow"

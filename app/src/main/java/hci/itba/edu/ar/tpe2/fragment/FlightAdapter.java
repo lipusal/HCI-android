@@ -17,7 +17,10 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 /**
  * Adapter for displaying list of flights.
@@ -43,6 +46,20 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
         //Text
         TextView title = (TextView) destination.findViewById(R.id.text1);
         title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
+
+        //Status
+        final TextView status = (TextView) destination.findViewById(R.id.status);
+        status.setText("loading");
+
+        API.getInstance().getFlightStatus(flight.getAirline().getID(),flight.getNumber(),destination.getContext(), new NetworkRequestCallback<FlightStatus>() {
+            @Override
+            public void execute(Context c, FlightStatus param) {
+                flight.setStatus(param);
+                status.setText(param.getStatus());
+            }
+        });
+
+
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
         star.setImageResource(followedFlights.contains(flight) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);

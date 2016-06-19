@@ -42,6 +42,7 @@ public class FlightReviewsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private boolean firstTime;
 
     private List<Review> reviews;
     //View elements
@@ -74,6 +75,7 @@ public class FlightReviewsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firstTime=true;
 
 //        if (getArguments() != null) {
   //          mParam1 = getArguments().getString(ARG_PARAM1);
@@ -82,18 +84,20 @@ public class FlightReviewsFragment extends Fragment {
 
 
     }
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view;
-        // Inflate the layout for this fragment
-        view =  inflater.inflate(R.layout.fragment_flight_reviews, container, false);
-        if (savedInstanceState == null) {
-            title = (TextView) view.findViewById(R.id.reviews_results_title);
-            reviewsList = (ListView) view.findViewById(R.id.reviews_list);
+    public void onResume(){
+        super.onResume();
+        setView();
+
+    }
+
+    private void setView() {
+        if(firstTime){
+            title.setText("Searching...");
+            firstTime=false;
+        }else{
+            title.setText("Updating...");
         }
-        title.setText("Searching...");
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
         final Flight flight = activity.getFlight();
 
@@ -109,12 +113,27 @@ public class FlightReviewsFragment extends Fragment {
                     reviewsAdapter.addAll(reviews);
                     reviewsAdapter.notifyDataSetChanged();
                 }
-                title.setText("NADA, BORRAR?!?!!, cant" + reviews.size());
+                title.setText("");
             }
         });
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view;
+        // Inflate the layout for this fragment
+        view =  inflater.inflate(R.layout.fragment_flight_reviews, container, false);
+        if (savedInstanceState == null) {
+            title = (TextView) view.findViewById(R.id.reviews_results_title);
+            reviewsList = (ListView) view.findViewById(R.id.reviews_list);
+        }
+        //setView();
 
         return view;
     }
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
