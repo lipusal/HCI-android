@@ -13,8 +13,8 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        tools:context="hci.itba.edu.ar.tpe2.FlightsActivity"
-        android:paddingTop="55dp">
+        android:paddingTop="55dp"
+        tools:context="hci.itba.edu.ar.tpe2.FlightsActivity">
 
         <android.support.v4.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
@@ -23,13 +23,10 @@
 
             <FrameLayout
                 android:id="@+id/fragment_container"
-                android:layout_centerHorizontal="true"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"></FrameLayout>
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"></FrameLayout>
 
-            <!--android:layout_alignParentStart="true"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"-->
         </android.support.v4.widget.SwipeRefreshLayout>
     </RelativeLayout>
 

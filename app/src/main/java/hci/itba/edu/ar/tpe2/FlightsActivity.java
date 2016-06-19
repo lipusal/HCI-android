@@ -21,6 +21,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
+import android.widget.ListView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
@@ -117,13 +119,29 @@ public class FlightsActivity extends AppCompatActivity
 //            getSupportFragmentManager().executePendingTransactions();
 //            textFragment.getTextView().setCompoundDrawablesWithIntrinsicBounds(null, null, null, getDrawable(R.drawable.ic_flight));
         } else {
-            swipeRefreshLayout.setEnabled(true);
+//            swipeRefreshLayout.setEnabled(true);
             flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
             } else {
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
             }
+
+            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
+            getSupportFragmentManager().executePendingTransactions();   //Otherwise the view in the next line might not yet exist
+            final ListView flightsFragmentListView = flightsFragment.getListView();
+            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if (flightsFragmentListView.getChildAt(0) != null) {
+                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
+                    }
+                }
+            });
         }
 
         //(Re-)register refresh broadcast receiver

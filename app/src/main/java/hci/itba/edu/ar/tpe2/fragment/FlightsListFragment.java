@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
-import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
