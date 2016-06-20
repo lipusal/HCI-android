@@ -1,29 +1,23 @@
 package hci.itba.edu.ar.tpe2;
 
-import android.*;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
-import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -41,13 +35,9 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.FailReason;
-import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
@@ -67,11 +57,14 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     private Airport closestAirport;
     private static final int PERM_LOCATION = 42;
     private boolean locationPermissionGranted = false;
+    private PersistentData persistentData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
+
+        persistentData = new PersistentData(this);
 
         //Set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -148,14 +141,14 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public View getInfoContents(final Marker marker) {
                 View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
+                City city = persistentData.getCities().get(marker.getTitle());
 
                 TextView title = (TextView) view.findViewById(R.id.title);
-                title.setText(marker.getTitle());
+                title.setText(city == null ? marker.getTitle() : city.getName());   //Marker for closest airport will cause NPE, take its title directly
 
                 TextView price = (TextView) view.findViewById(R.id.price);
                 price.setText(marker.getSnippet());
 
-                final City city = PersistentData.getInstance().getCities().get(marker.getSnippet());
                 ImageView image = (ImageView) view.findViewById(R.id.image_marker);
                 if (!marker.getTitle().equals(closestAirport.toString())) {
                     image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
@@ -224,16 +217,16 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener(){
-
             @Override
             public void onInfoWindowClick(Marker marker) {
-                Intent searchIntent = new Intent(DealsMapActivity.this, SearchResultsActivity.class);
-                searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, closestAirport.getCity().getName());
-                String test = marker.getTitle();
-                searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, marker.getTitle());
-                searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, "2016-06-19");
-                startActivity(searchIntent);
-                return;
+                if (marker.getPosition().equals(new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude())) == false) {
+                    Intent searchIntent = new Intent(DealsMapActivity.this, SearchResultsActivity.class);
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, closestAirport.getID());
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_TO, marker.getTitle());
+                    searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, "2016-10-19");    //TODO use today + 2 days or price
+                    startActivity(searchIntent);
+                    return;
+                }
             }
         });
         mMap = googleMap;
@@ -301,10 +294,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                                 for (Deal d : deals) {
                                     aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
                                     colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
-//                                    mMap.addMarker(new MarkerOptions().position(aux).title(d.toString()).icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                                     mMap.addMarker(new MarkerOptions()
                                             .position(aux)
-                                            .title(d.getCity().getName())
+                                            .title(d.getCity().getID())
                                             .snippet("$" + Double.toString(d.getPrice()))
                                             .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                                 }
