@@ -128,11 +128,11 @@ public class API {
 
                             @Override
                             protected void errorCallback(String result) {
-                                errorCallback.execute(context, result);
-//                                successCallback.execute(context, Collections.EMPTY_LIST);
-                        /*Log.w("VOLANDO", "Error searching flights:");
-                        Log.w("VOLANDO", result);
-                        successCallback.execute(context, Collections.EMPTY_LIST);*/
+                                if (errorCallback == null) {
+                                    super.errorCallback(result);
+                                } else {
+                                    errorCallback.execute(context, result);
+                                }
                             }
                         }.execute();
                     }
@@ -168,18 +168,6 @@ public class API {
                 successCallback.execute(context, Collections.EMPTY_LIST);
             }
         });
-    }
-
-    /**
-     * Queries the status of the flight with the specified information.
-     *
-     * @param airlineId The flight's airline ID.
-     * @param flightNum The flight number.
-     * @param context   Context under which to run the specified callback.
-     * @param callback  Function to execute when network request is complete.
-     */
-    public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
-        getFlightStatus(airlineId, flightNum, context, callback, null);
     }
 
     /**
@@ -221,6 +209,18 @@ public class API {
     /**
      * Queries the status of the flight with the specified information.
      *
+     * @param airlineId The flight's airline ID.
+     * @param flightNum The flight number.
+     * @param context   Context under which to run the specified callback.
+     * @param callback  Function to execute when network request is complete.
+     */
+    public void getFlightStatus(String airlineId, int flightNum, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
+        getFlightStatus(airlineId, flightNum, context, callback, null);
+    }
+
+    /**
+     * Queries the status of the flight with the specified information.
+     *
      * @see #getFlightStatus(String, int, Context, NetworkRequestCallback)
      */
     public void getFlightStatus(Flight flight, final Context context, final NetworkRequestCallback<FlightStatus> callback) {
@@ -234,34 +234,6 @@ public class API {
      */
     public void getFlightStatus(Flight flight, final Context context, final NetworkRequestCallback<FlightStatus> successCallback, final NetworkRequestCallback<String> errorCallback) {
         getFlightStatus(flight.getAirline().getID(), flight.getNumber(), context, successCallback, errorCallback);
-    }
-
-    /**
-     * Fetches all airlines provided by the API. Airlines are passed to the specified callback.
-     *
-     * @param context  Context under which to run the specified callback.
-     * @param callback Function to execute when network request completes.
-     */
-    public void getAllAirlines(final Context context, final NetworkRequestCallback<Airline[]> callback) {
-        final Service service = Service.misc;
-        final Bundle params = new Bundle();
-        params.putString("method", Method.getairlines.name());
-        count(service, params, context, new NetworkRequestCallback<Integer>() {
-            @Override
-            public void execute(Context c, Integer airlineCount) {
-                params.putString("page_size", Integer.toString(airlineCount));
-                new APIRequest(service, params) {
-                    @Override
-                    protected void successCallback(String result) {
-                        JsonObject data = gson.fromJson(result, JsonObject.class);
-                        Airline[] airlines = gson.fromJson(data.get("airlines"), Airline[].class);
-                        if (callback != null) {
-                            callback.execute(context, airlines);
-                        }
-                    }
-                }.execute();
-            }
-        });
     }
 
     /**
@@ -311,66 +283,176 @@ public class API {
     }
 
     /**
+     * Fetches all airlines provided by the API. Airlines are passed to the specified callback.
+     *
+     * @param context  Context under which to run the specified callback.
+     * @param callback Function to execute when network request completes.
+     */
+    public void getAllAirlines(final Context context, final NetworkRequestCallback<Airline[]> callback) {
+        getAllAirlines(context, callback, null);
+    }
+
+    /**
      * Fetches all cities provided by the API. Cities are passed to the specified callback.
      *
      * @param context  Context under which to run the specified callback.
-     * @param callback Function to execute when network request is complete.
+     * @param successCallback Function to execute when network request is complete.
+     * @param errorCallback   Function to execute on network error.
      */
-    public void getAllCities(final Context context, final NetworkRequestCallback<City[]> callback) {
+    public void getAllCities(final Context context, final NetworkRequestCallback<City[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
         params.putString("method", Method.getcities.name());
         count(service, params, context, new NetworkRequestCallback<Integer>() {
-            @Override
-            public void execute(Context c, Integer cityCount) {
-                //TODO handle null
-                //Now that we have the total, fetch again with a page of size <cityCount>
-                params.putString("page_size", Integer.toString(cityCount));
-                new APIRequest(service, params) {
                     @Override
-                    protected void successCallback(String result) {
-                        int startIndex = result.indexOf("cities") + 8,   //Start at cities' [
-                                endIndex = result.lastIndexOf(']') + 1;         //End at cities' ]
-                        String data = result.substring(startIndex, endIndex);
-                        City[] cities = gson.fromJson(data, City[].class);
-                        //TODO stop saving them here, save them in the callback if anything
-                        if (callback != null) {
-                            callback.execute(context, cities);
+                    public void execute(Context c, Integer cityCount) {
+                        //Now that we have the total, fetch again with a page of size <cityCount>
+                        params.putString("page_size", Integer.toString(cityCount));
+                        new APIRequest(service, params) {
+                            @Override
+                            protected void successCallback(String result) {
+                                JsonObject data = gson.fromJson(result, JsonObject.class);
+                                City[] cities = gson.fromJson(data.get("cities"), City[].class);
+                                if (successCallback != null) {
+                                    successCallback.execute(context, cities);
+                                }
+                            }
+
+                            @Override
+                            protected void errorCallback(String result) {
+                                if (errorCallback != null) {
+                                    errorCallback.execute(context, result);
+                                } else {
+                                    super.errorCallback(result);
+                                }
+                            }
+                        }.execute();
+                    }
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        if (errorCallback != null) {
+                            errorCallback.execute(c, param);
                         }
                     }
-                }.execute();
-            }
-        });
+                });
+    }
+
+    /**
+     * Fetches all cities provided by the API. Cities are passed to the specified callback.
+     *
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Function to execute when network request is complete.
+     */
+    public void getAllCities(final Context context, final NetworkRequestCallback<City[]> successCallback) {
+        getAllCities(context, successCallback, null);
     }
 
     /**
      * Gets all currencies as returned by the API.
      *
      * @param context  Context under which to run the specified callback.
-     * @param callback Function to run when the network request completes. It will be passed the
+     * @param successCallback Function to run when the network request completes. It will be passed the
      *                 returned currencies.
+     * @param errorCallback Function to run on network error.
      */
-    public void getAllCurrencies(final Context context, final NetworkRequestCallback<Currency[]> callback) {
+    public void getAllCurrencies(final Context context, final NetworkRequestCallback<Currency[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.misc;
         final Bundle params = new Bundle();
         params.putString("method", Method.getcurrencies.name());
         count(service, params, context, new NetworkRequestCallback<Integer>() {
-            @Override
-            public void execute(Context c, Integer currencyCount) {
-                params.putString("page_size", Integer.toString(currencyCount));
-                new APIRequest(service, params) {
                     @Override
-                    protected void successCallback(String result) {
-                        if (callback != null) {
-                            //TODO make all success callbacks work like this (don't process data if there's no callback)
-                            JsonObject json = gson.fromJson(result, JsonObject.class);
-                            Currency[] currencies = gson.fromJson(json.get("currencies"), Currency[].class);
-                            callback.execute(context, currencies);
+                    public void execute(Context c, Integer currencyCount) {
+                        params.putString("page_size", Integer.toString(currencyCount));
+                        new APIRequest(service, params) {
+                            @Override
+                            protected void successCallback(String result) {
+                                if (successCallback != null) {
+                                    //TODO make all success callbacks work like this (don't process data if there's no callback)
+                                    JsonObject json = gson.fromJson(result, JsonObject.class);
+                                    Currency[] currencies = gson.fromJson(json.get("currencies"), Currency[].class);
+                                    successCallback.execute(context, currencies);
+                                }
+                            }
+
+                            @Override
+                            protected void errorCallback(String result) {
+                                if (errorCallback != null) {
+                                    errorCallback.execute(context, result);
+                                } else {
+                                    super.errorCallback(result);
+                                }
+                            }
+                        }.execute();
+                    }
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        if (errorCallback != null) {
+                            errorCallback.execute(context, param);
                         }
                     }
-                }.execute();
-            }
-        });
+                });
+    }
+
+    /**
+     * Gets all currencies as returned by the API.
+     *
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Function to run when the network request completes. It will be passed the
+     *                        returned currencies.
+     */
+    public void getAllCurrencies(final Context context, final NetworkRequestCallback<Currency[]> successCallback) {
+        getAllCurrencies(context, successCallback, null);
+    }
+
+    /**
+     * Fetches all countries provided by the API, running specified callbacks on success and error.
+     * Countries are passed to the specified callback.
+     *
+     * @param context  Context under which to run the specified callback.
+     * @param callback Function to execute when network request is complete.
+     * @param errorCallback Function to run if there's a network error.
+     */
+    public void getAllCountries(final Context context, final NetworkRequestCallback<Country[]> callback, final NetworkRequestCallback<String> errorCallback) {
+        final Service service = Service.geo;
+        final Bundle params = new Bundle();
+        params.putString("method", Method.getcountries.name());
+        count(service, params, context, new NetworkRequestCallback<Integer>() {
+                    @Override
+                    public void execute(Context c, Integer count) {
+                        params.putString("page_size", Integer.toString(count));
+                        new APIRequest(service, params) {
+                            @Override
+                            protected void successCallback(String data) {
+                                JsonObject json = gson.fromJson(data, JsonObject.class);
+                                Country[] result = gson.fromJson(json.get("countries"), Country[].class);
+                                if (callback != null) {
+                                    callback.execute(context, result);
+                                }
+                            }
+
+                            @Override
+                            protected void errorCallback(String result) {
+                                if (errorCallback != null) {
+                                    errorCallback.execute(context, result);
+                                } else {
+                                    super.errorCallback(result);
+                                }
+                            }
+                        }.execute();
+                    }
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        if (errorCallback != null) {
+                            errorCallback.execute(context, param);
+                        }
+                    }
+                });
     }
 
     /**
@@ -380,34 +462,17 @@ public class API {
      * @param callback Function to execute when network request is complete.
      */
     public void getAllCountries(final Context context, final NetworkRequestCallback<Country[]> callback) {
-        final Service service = Service.geo;
-        final Bundle params = new Bundle();
-        params.putString("method", Method.getcountries.name());
-        count(service, params, context, new NetworkRequestCallback<Integer>() {
-            @Override
-            public void execute(Context c, Integer count) {
-                params.putString("page_size", Integer.toString(count));
-                new APIRequest(service, params) {
-                    @Override
-                    protected void successCallback(String data) {
-                        JsonObject json = gson.fromJson(data, JsonObject.class);
-                        Country[] result = gson.fromJson(json.get("countries"), Country[].class);
-                        if (callback != null) {
-                            callback.execute(context, result);
-                        }
-                    }
-                }.execute();
-            }
-        });
+        getAllCountries(context, callback, null);
     }
 
     /**
      * Fetches all airports provided by the API. Airports are passed to the specified callback.
      *
      * @param context  Context under which to run the specified callback.
-     * @param callback Function to execute when network request is complete.
+     * @param successCallback Function to execute when network request is complete.
+     * @param errorCallback Function to run on network error.
      */
-    public void getAllAirports(final Context context, final NetworkRequestCallback<Airport[]> callback) {
+    public void getAllAirports(final Context context, final NetworkRequestCallback<Airport[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.geo;
         final Bundle params = new Bundle();
         params.putString("method", Method.getairports.name());
@@ -420,57 +485,81 @@ public class API {
                     protected void successCallback(String data) {
                         JsonObject json = gson.fromJson(data, JsonObject.class);
                         Airport[] result = gson.fromJson(json.get("airports"), Airport[].class);
-                        if (callback != null) {
-                            callback.execute(context, result);
+                        if (successCallback != null) {
+                            successCallback.execute(context, result);
+                        }
+                    }
+
+                    @Override
+                    protected void errorCallback(String result) {
+                        if (errorCallback != null) {
+                            errorCallback.execute(context, result);
+                        } else {
+                            super.errorCallback(result);
                         }
                     }
                 }.execute();
             }
-        });
+                },
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        if (errorCallback != null) {
+                            errorCallback.execute(context, param);
+                        }
+                    }
+                });
+    }
+
+    /**
+     * Fetches all airports provided by the API. Airports are passed to the specified callback.
+     *
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Function to execute when network request is complete.
+     */
+    public void getAllAirports(final Context context, final NetworkRequestCallback<Airport[]> successCallback) {
+        getAllAirports(context, successCallback, null);
     }
 
     /**
      * Fetches all languages provided by the API. Languages are passed to the specified callback.
      *
      * @param context  Context under which to run the specified callback.
-     * @param callback Function to execute when network request is complete.
+     * @param successCallback Function to execute when network request is complete.
+     * @param errorCallback Function to run on network error.
      */
-    public void getLanguages(final Context context, final NetworkRequestCallback<Language[]> callback) {
+    public void getLanguages(final Context context, final NetworkRequestCallback<Language[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getlanguages.name());
         new APIRequest(Service.misc, params) {
             @Override
             protected void successCallback(String result) {
-                int startIndex = result.indexOf("languages") + 11,
-                        endIndex = result.lastIndexOf(']') + 1;
-                String data = result.substring(startIndex, endIndex);
-                Language[] langs = gson.fromJson(data, Language[].class);
-                //TODO stop saving them here, save them in the callback if anything
-                if (new FileManager(context).saveLanguages(langs)) {
-                    if (callback != null) {
-                        callback.execute(context, langs);
-                    }
+                JsonObject data = gson.fromJson(result, JsonObject.class);
+                Language[] langs = gson.fromJson(data.get("languages"), Language[].class);
+                if (successCallback != null) {
+                    successCallback.execute(context, langs);
+                }
+            }
+
+            @Override
+            protected void errorCallback(String result) {
+                if (errorCallback != null) {
+                    errorCallback.execute(context, result);
                 } else {
-                    Log.w(LOG_TAG, "Couldn't save languages.");
+                    super.errorCallback(result);
                 }
             }
         }.execute();
     }
 
     /**
-     * Gets all airports near the specified location within the specified radius. <b>NOTE:</b> API
-     * returns incomplete airports, this function maps the returned airports to the complete airport
-     * objects stored in local storage.
+     * Fetches all languages provided by the API. Languages are passed to the specified callback.
      *
-     * @param latitude
-     * @param longitude
-     * @param radius    In km
-     * @param context   Context under which to run the specified callback.
-     * @param callback  Function to run when the network request completes. Will get passed the
-     *                  returned (complete) Airport objects.
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Function to execute when network request is complete.
      */
-    public void getAirportsByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<Airport[]> callback) {
-        getAirportsByLocation(latitude, longitude, radius, context, callback, null);
+    public void getLanguages(final Context context, final NetworkRequestCallback<Language[]> successCallback) {
+        getLanguages(context, successCallback, null);
     }
 
     /**
@@ -524,6 +613,22 @@ public class API {
     }
 
     /**
+     * Gets all airports near the specified location within the specified radius. <b>NOTE:</b> API
+     * returns incomplete airports, this function maps the returned airports to the complete airport
+     * objects stored in local storage.
+     *
+     * @param latitude
+     * @param longitude
+     * @param radius    In km
+     * @param context   Context under which to run the specified callback.
+     * @param callback  Function to run when the network request completes. Will get passed the
+     *                  returned (complete) Airport objects.
+     */
+    public void getAirportsByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<Airport[]> callback) {
+        getAirportsByLocation(latitude, longitude, radius, context, callback, null);
+    }
+
+    /**
      * Gets all airports within a {@code DEFAULT_RADIUS}-km radius.
      *
      * @see #getAirportsByLocation(double, double, int, Context, NetworkRequestCallback)
@@ -550,10 +655,11 @@ public class API {
      * @param longitude
      * @param radius    In km
      * @param context   Context under which to run the specified callback.
-     * @param callback  Function to run when the network request completes. Will get passed the
+     * @param successCallback  Function to run when the network request completes. Will get passed the
      *                  returned (complete) City objects.
+     * @param errorCallback Function to run on network error.
      */
-    public void getCitiesByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<City[]> callback) {
+    public void getCitiesByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<City[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getcitiesbyposition.name());
         params.putString("latitude", Double.toString(latitude));
@@ -562,7 +668,7 @@ public class API {
         new APIRequest(Service.geo, params) {
             @Override
             protected void successCallback(String data) {
-                if (callback != null) {
+                if (successCallback != null) {
                     JsonObject json = gson.fromJson(data, JsonObject.class),
                             cities = json.getAsJsonObject("cities");
                     List<City> result = new ArrayList<>();
@@ -573,43 +679,55 @@ public class API {
                     for (JsonElement city : json.getAsJsonArray("cities")) {
                         result.add(completeCities.get(city.getAsJsonObject().get("id").getAsString()));
                     }
-                    if (callback != null) {
-                        callback.execute(context, result.toArray(new City[0]));
+                    if (successCallback != null) {
+                        successCallback.execute(context, result.toArray(new City[0]));
                     }
+                }
+            }
+
+            @Override
+            protected void errorCallback(String result) {
+                if (errorCallback != null) {
+                    errorCallback.execute(context, result);
+                } else {
+                    super.errorCallback(result);
                 }
             }
         }.execute();
     }
 
     /**
-     * Gets all cities within a {@code DEFAULT_RADIUS}-km radius.
+     * Gets all cities near the specified location within the specified radius. <b>NOTE:</b> API
+     * returns incomplete cities, this function maps the returned cities to the complete city
+     * objects stored in local storage.
+     *
+     * @param latitude
+     * @param longitude
+     * @param radius          In km
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Function to run when the network request completes. Will get passed the
+     *                        returned (complete) City objects.
+     */
+    public void getCitiesByLocation(double latitude, double longitude, int radius, final Context context, final NetworkRequestCallback<City[]> successCallback) {
+        getCitiesByLocation(latitude, longitude, radius, context, successCallback, null);
+    }
+
+    /**
+     * Gets all cities within a {@link #DEFAULT_RADIUS}-km radius.
+     *
+     * @see #getCitiesByLocation(double, double, int, Context, NetworkRequestCallback, NetworkRequestCallback)
+     */
+    public void getCitiesByLocation(double latitude, double longitude, final Context context, final NetworkRequestCallback<City[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
+        getCitiesByLocation(latitude, longitude, DEFAULT_RADIUS, context, successCallback, errorCallback);
+    }
+
+    /**
+     * Gets all cities within a {@link #DEFAULT_RADIUS}-km radius.
      *
      * @see #getCitiesByLocation(double, double, int, Context, NetworkRequestCallback)
      */
-    public void getCitiesByLocation(double latitude, double longitude, final Context context, final NetworkRequestCallback<City[]> callback) {
-        getCitiesByLocation(latitude, longitude, DEFAULT_RADIUS, context, callback);
-    }
-
-    /**
-     * Gets last-minute flight deals from the specified place.
-     *
-     * @param from     The place from which to search for deals, airport or city.
-     * @param context  The context under which to run the specified callback.
-     * @param callback Function to run once network request is complete.
-     */
-    public void getDeals(Place from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
-        getDeals(from.getID(), context, callback);
-    }
-
-    /**
-     * Gets last-minute flight deals from the specified origin.
-     *
-     * @param fromID   Valid ID of origin (city or airport)
-     * @param context  The context under which to run the specified callback.
-     * @param callback Function to run once network request is complete.
-     */
-    public void getDeals(String fromID, final Context context, final NetworkRequestCallback<Deal[]> callback) {
-        getDeals(fromID, context, callback, null);
+    public void getCitiesByLocation(double latitude, double longitude, final Context context, final NetworkRequestCallback<City[]> successCallback) {
+        getCitiesByLocation(latitude, longitude, DEFAULT_RADIUS, context, successCallback, null);
     }
 
     /**
@@ -647,16 +765,51 @@ public class API {
     }
 
     /**
+     * Gets last-minute flight deals from the specified origin.
+     *
+     * @param fromID   Valid ID of origin (city or airport)
+     * @param context  The context under which to run the specified callback.
+     * @param callback Function to run once network request is complete.
+     */
+    public void getDeals(String fromID, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        getDeals(fromID, context, callback, null);
+    }
+
+    /**
+     * Gets last-minute flight deals from the specified place.
+     *
+     * @param from            The place from which to search for deals, airport or city.
+     * @param context         The context under which to run the specified callback.
+     * @param successCallback Function to run once network request is complete.
+     * @param errorCallback   Function to run on network error.
+     */
+    public void getDeals(Place from, final Context context, final NetworkRequestCallback<Deal[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
+        getDeals(from.getID(), context, successCallback, errorCallback);
+    }
+
+    /**
+     * Gets last-minute flight deals from the specified place.
+     *
+     * @param from     The place from which to search for deals, airport or city.
+     * @param context  The context under which to run the specified callback.
+     * @param callback Function to run once network request is complete.
+     */
+    public void getDeals(Place from, final Context context, final NetworkRequestCallback<Deal[]> callback) {
+        getDeals(from, context, callback, null);
+    }
+
+    /**
      * Gets a subset of all reviews for the specified flight.
      *
      * @param flight     The flight for which to search reviews.
      * @param pageNumber The page number of reviews to fetch.
      * @param pageSize   The number of reviews per page.
      * @param context    The context under which to run the specified callback.
-     * @param callback   Function to run once the network request completes. Will get passed the found
+     * @param successCallback   Function to run once the network request completes. Will get passed the found
      *                   reviews.
+     * @param errorCallback Function to run on network error.
      */
-    public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> callback) {
+    public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         Bundle params = new Bundle();
         params.putString("method", Method.getairlinereviews.name());
         params.putString("airline_id", flight.getAirline().getID());
@@ -672,23 +825,34 @@ public class API {
                 for (int i = 0; i < reviewsJson.size(); i++) {
                     reviews[i] = Review.fromJson(reviewsJson.get(i).getAsJsonObject());
                 }
-                if (callback != null) {
-                    callback.execute(context, reviews);
+                if (successCallback != null) {
+                    successCallback.execute(context, reviews);
+                }
+            }
+
+            @Override
+            protected void errorCallback(String result) {
+                if (errorCallback != null) {
+                    errorCallback.execute(context, result);
+                } else {
+                    super.errorCallback(result);
                 }
             }
         }.execute();
     }
 
     /**
-     * Gets <b>all</b> the reviews for the specified flight.
+     * Gets a subset of all reviews for the specified flight.
      *
-     * @param flight   The flight for which to search for reviews.
-     * @param context  Context under which to run the specified callback.
-     * @param callback Function to run once the network request completes. Will get passed the
-     *                 found reviews.
+     * @param flight     The flight for which to search reviews.
+     * @param pageNumber The page number of reviews to fetch.
+     * @param pageSize   The number of reviews per page.
+     * @param context    The context under which to run the specified callback.
+     * @param successCallback   Function to run once the network request completes. Will get passed the found
+     *                   reviews.
      */
-    public void getAllReviews(Flight flight, final Context context, final NetworkRequestCallback<Review[]> callback) {
-        getAllReviews(flight, context, callback, null);
+    public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> successCallback) {
+        getPageOfReviews(flight, pageNumber, pageSize, context, successCallback, null);
     }
 
     /**
@@ -746,24 +910,15 @@ public class API {
     }
 
     /**
-     * Submits the specified review to the server.
+     * Gets <b>all</b> the reviews for the specified flight.
      *
-     * @param review   The review to publish.
-     * @param context  Context under which to run the specified callback, if any.
-     * @param callback Function to run once the network request completes.
+     * @param flight   The flight for which to search for reviews.
+     * @param context  Context under which to run the specified callback.
+     * @param callback Function to run once the network request completes. Will get passed the
+     *                 found reviews.
      */
-    public void submitReview(Review review, final Context context, final NetworkRequestCallback<Void> callback) {
-        Bundle params = new Bundle();
-        params.putString("method", Method.reviewairline2.name());
-        params.putString("review", review.toJson());
-        new APIRequest(Service.review, params) {
-            @Override
-            protected void successCallback(String result) {
-                if (callback != null) {
-                    callback.execute(context, null);
-                }
-            }
-        }.execute();
+    public void getAllReviews(Flight flight, final Context context, final NetworkRequestCallback<Review[]> callback) {
+        getAllReviews(flight, context, callback, null);
     }
 
     /**
@@ -798,17 +953,24 @@ public class API {
     }
 
     /**
-     * Gets the count of results returned by the specified query, or {@code null} if the query
-     * doesn't specify a total, and passes it to the specified callback function.
+     * Submits the specified review to the server.
      *
-     * @param service       The service the request is for.
-     * @param requestParams Request parameters.
-     * @param context       Context to run the callback with.
-     * @param callback      Callback which will receive the total, or {@code null} if not specified in
-     *                      the request's response.
+     * @param review   The review to publish.
+     * @param context  Context under which to run the specified callback, if any.
+     * @param callback Function to run once the network request completes.
      */
-    public void count(Service service, Bundle requestParams, final Context context, final NetworkRequestCallback<Integer> callback) {
-        count(service, requestParams, context, callback, null);
+    public void submitReview(Review review, final Context context, final NetworkRequestCallback<Void> callback) {
+        Bundle params = new Bundle();
+        params.putString("method", Method.reviewairline2.name());
+        params.putString("review", review.toJson());
+        new APIRequest(Service.review, params) {
+            @Override
+            protected void successCallback(String result) {
+                if (callback != null) {
+                    callback.execute(context, null);
+                }
+            }
+        }.execute();
     }
 
     /**
@@ -849,18 +1011,17 @@ public class API {
     }
 
     /**
-     * Queries Flickr for landscape images matching the specified query (usually a city or airport).
-     * The specified callback gets returned the URL of the first matching image, or {@code null} if
-     * none were found.
+     * Gets the count of results returned by the specified query, or {@code null} if the query
+     * doesn't specify a total, and passes it to the specified callback function.
      *
-     * @param query           Query for images to match.
-     * @param context         Context under which to run the specified callback.
-     * @param successCallback Callback to run when the network request completes. Will get passed
-     *                        the URL of the first matching image, or {@code null} if no images were
-     *                        found.
+     * @param service       The service the request is for.
+     * @param requestParams Request parameters.
+     * @param context       Context to run the callback with.
+     * @param callback      Callback which will receive the total, or {@code null} if not specified in
+     *                      the request's response.
      */
-    public void getFlickrImg(String query, final Context context, final NetworkRequestCallback<String> successCallback) {
-        getFlickrImg(query, context, successCallback, null);
+    public void count(Service service, Bundle requestParams, final Context context, final NetworkRequestCallback<Integer> callback) {
+        count(service, requestParams, context, callback, null);
     }
 
     /**
@@ -897,6 +1058,21 @@ public class API {
                 }
             }
         }.execute();
+    }
+
+    /**
+     * Queries Flickr for landscape images matching the specified query (usually a city or airport).
+     * The specified callback gets returned the URL of the first matching image, or {@code null} if
+     * none were found.
+     *
+     * @param query           Query for images to match.
+     * @param context         Context under which to run the specified callback.
+     * @param successCallback Callback to run when the network request completes. Will get passed
+     *                        the URL of the first matching image, or {@code null} if no images were
+     *                        found.
+     */
+    public void getFlickrImg(String query, final Context context, final NetworkRequestCallback<String> successCallback) {
+        getFlickrImg(query, context, successCallback, null);
     }
 
     private String getFlickImageURL(JsonObject imgObj) {
