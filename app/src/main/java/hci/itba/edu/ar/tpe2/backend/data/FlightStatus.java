@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import hci.itba.edu.ar.tpe2.R;
+
 /**
  * Ugly POJO used to hold flight status data.
  */
@@ -28,10 +30,11 @@ public class FlightStatus implements Serializable {
         validStatus.put("C", "canceled");
     }
 
-    private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, airlineName;
+    private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, baggageClaim;
     private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     private Integer flightId, flightNumber;
+    private Airline airline;
     private Airport destinationAirport;     //Can change from original if diverted
     //TODO incorporate delays
 
@@ -42,11 +45,13 @@ public class FlightStatus implements Serializable {
         FlightStatus result = new FlightStatus();
         JsonObject departure = statusObject.getAsJsonObject("departure"),
                 arrival = statusObject.getAsJsonObject("arrival");
+        PersistentData persistentData = PersistentData.getContextLessInstance();
         result.status = statusObject.get("status").getAsString();
         result.flightId = statusObject.get("id").getAsInt();
         result.flightNumber = statusObject.get("number").getAsInt();
-        result.airlineName = statusObject.getAsJsonObject("airline").get("name").getAsString();
-        result.destinationAirport = PersistentData.getInstance().getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.airline = persistentData.getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
+        result.destinationAirport = persistentData.getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.parseDeparture(departure);
         result.parseArrival(arrival);
         return result;
@@ -215,8 +220,8 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualArrivalRunwayTime);
     }
 
-    public String getAirlineName() {
-        return airlineName;
+    public Airline getAirline() {
+        return airline;
     }
 
     public Integer getFlightId() {
@@ -229,6 +234,27 @@ public class FlightStatus implements Serializable {
 
     public Airport getDestinationAirport() {
         return destinationAirport;
+    }
+
+    public String getBaggageClaim() {
+        return baggageClaim;
+    }
+
+    public int getIconID() {
+        switch (status) {
+            case "S":
+                return R.drawable.ic_scheduled;
+            case "A":
+                return R.drawable.ic_flight_takeoff_black;
+            case "D":
+                return R.drawable.ic_diverted;
+            case "L":
+                return R.drawable.ic_flight_land_black;
+            case "C":
+                return R.drawable.ic_cancelled;
+            default:
+                return -1;
+        }
     }
 
     @Override

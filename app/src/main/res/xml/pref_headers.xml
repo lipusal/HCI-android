@@ -13,7 +13,7 @@
         android:title="@string/pref_header_notifications" />
 
     <header
-        android:fragment="hci.itba.edu.ar.tpe2.SettingsActivity$DataSyncPreferenceFragment"
+        android:fragment="hci.itba.edu.ar.tpe2.SettingsActivity$UpdatesPreferenceFragment"
         android:icon="@drawable/ic_sync_black_24dp"
         android:title="@string/pref_header_data_sync" />
 

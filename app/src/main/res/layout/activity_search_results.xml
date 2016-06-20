@@ -10,10 +10,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Search Results"
+        android:text="@string/searching"
         android:id="@+id/search_results_title"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:freezesText="true" /> <!-- Preserve text when changing rotation -->
 
     <FrameLayout
         android:id="@+id/fragment_container"

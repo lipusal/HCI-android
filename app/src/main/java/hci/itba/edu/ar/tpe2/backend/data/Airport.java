@@ -48,4 +48,18 @@ public class Airport extends Place implements Serializable {
     public String toString() {
         return description + " (" + id + ")";
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Airport airport = (Airport) o;
+        return id.equals(airport.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }

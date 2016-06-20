@@ -3,12 +3,14 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -17,32 +19,68 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 /**
  * Adapter for displaying list of flights.
  */
 public class FlightAdapter extends ArrayAdapter<Flight> {
     private CoordinatorLayout mCoordinatorLayout;
+    private boolean[] statusFetched;
 
     FlightAdapter(Context context, List<Flight> objects, CoordinatorLayout layoutWithFAB) {
         super(context, 0, objects);
         mCoordinatorLayout = layoutWithFAB;
+        statusFetched = new boolean[objects.size()];
     }
 
     @Override
-    public View getView(int position, View destination, ViewGroup parent) {
-        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-        final Flight flight = getItem(position);
+    public View getView(final int position, View destination, final ViewGroup parent) {
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.activity_flights_list_item, parent, false);
         }
+        final PersistentData persistentData = new PersistentData(destination.getContext());
+        final List<Flight> followedFlights = persistentData.getFollowedFlights();
+        final Flight flight = getItem(position);
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
         ImageLoader.getInstance().displayImage(flight.getAirline().getLogoURL(), icon);
         //Text
-        TextView title = (TextView) destination.findViewById(R.id.text1);
+        TextView title = (TextView) destination.findViewById(R.id.flight_text);
         title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
+
+        //Status
+        if (flight.getStatus() == null) {
+            if (statusFetched[position] == false) {
+                statusFetched[position] = true;
+                API.getInstance().getFlightStatus(flight.getAirline().getID(), flight.getNumber(), destination.getContext(),
+                        new NetworkRequestCallback<FlightStatus>() {
+                            @Override
+                            public void execute(Context context, FlightStatus fetchedStatus) {
+                                flight.setStatus(fetchedStatus);
+                                //Can't use #destination here, adapter recycles views. Manually find view
+                                View safeDestination = parent.getChildAt(getPosition(flight) - ((ListView) parent).getFirstVisiblePosition());   //http://stackoverflow.com/questions/6766625/listview-getchildat-returning-null-for-visible-children
+                                ImageView statusIcon = (ImageView) safeDestination.findViewById(R.id.status_icon);
+                                statusIcon.setImageDrawable(context.getDrawable(fetchedStatus.getIconID()));
+                            }
+                        },
+                        new NetworkRequestCallback<String>() {
+                            @Override
+                            public void execute(Context c, String param) {
+                                //TODO snackbar/toast or error icon
+                                Log.d("VOLANDO", "Couldn't get status for " + flight.toString() + ": " + param);
+                                statusFetched[position] = false;    //TODO should leave this here? Will send network request again
+                            }
+                        });
+            }
+        } else {
+            ImageView statusIcon = (ImageView) destination.findViewById(R.id.status_icon);
+            statusIcon.setImageDrawable(destination.getContext().getDrawable(flight.getStatus().getIconID()));
+        }
+
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
         star.setImageResource(followedFlights.contains(flight) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
@@ -51,22 +89,22 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
             @Override
             public void onClick(View v) {
                 if (followedFlights.contains(flight)) {
-                    PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
+                    persistentData.removeFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_off_24dp);
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
+                            persistentData.addFollowedFlight(flight, finalDestination.getContext());
                             star.setImageResource(R.drawable.ic_star_on_24dp);
                         }
                     }).show();
                 } else {
-                    PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
+                    persistentData.addFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_on_24dp);
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
+                            persistentData.removeFollowedFlight(flight, finalDestination.getContext());
                             star.setImageResource(R.drawable.ic_star_off_24dp);
                         }
                     }).show();

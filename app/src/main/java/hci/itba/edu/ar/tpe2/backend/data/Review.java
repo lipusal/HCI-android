@@ -1,15 +1,28 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import android.text.Html;
+
 import com.google.gson.JsonObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 
 public class Review {
     private int overall, friendliness, food, punctuality, mileage_program, comfort, quality_price, flightNumber;
     private String airlineID, comment;
     private boolean isRecommended;
 
-    private Review() {}
+    private Review() {
+    }
 
     public Review(Flight flight, int overallScore, String comment) {
+        //TODO is recommended?
+        if (overallScore > 5) {
+            isRecommended = true;
+        } else {
+            isRecommended = false;
+        }
         flightNumber = flight.getNumber();
         airlineID = flight.getAirline().getID();
         this.comment = comment;
@@ -25,7 +38,7 @@ public class Review {
         Review result = new Review();
         JsonObject numbers = json.getAsJsonObject("rating");
         result.airlineID = json.getAsJsonObject("flight").getAsJsonObject("airline").get("id").getAsString();
-        result.flightNumber = json.getAsJsonObject("flight").getAsJsonObject("airline").get("id").getAsInt();
+        result.flightNumber = json.getAsJsonObject("flight").get("number").getAsInt();
         result.overall = numbers.get("overall").getAsInt();
         result.friendliness = numbers.get("friendliness").getAsInt();
         result.food = numbers.get("food").getAsInt();
@@ -34,7 +47,7 @@ public class Review {
         result.comfort = numbers.get("comfort").getAsInt();
         result.quality_price = numbers.get("quality_price").getAsInt();
         result.isRecommended = json.get("yes_recommend").getAsBoolean();
-        result.comment = json.get("comments").getAsString();   //TODO trim?
+        result.comment = Html.fromHtml(json.get("comments").getAsString()).toString();   //TODO trim?
         return result;
     }
 
@@ -42,7 +55,7 @@ public class Review {
      * @return This review's overall score, mapped to a scale of 5. Decimals are rounded down.
      */
     public int getOverall() {
-        return (int)Math.floor(overall/2);
+        return (int) Math.floor(overall / 2);
     }
 
     /**
@@ -93,6 +106,11 @@ public class Review {
     }
 
     public String toJson() {
-        return "{\"flight\":{\"airline\":{\"id\":\""+airlineID+"\"},\"number\":"+flightNumber+"},\"rating\":{\"friendliness\":"+friendliness+",\"food\":"+food+",\"punctuality\":"+punctuality+",\"mileage_program\":"+mileage_program+",\"comfort\":"+comfort+",\"quality_price\":"+quality_price+"},\"yes_recommend\":"+isRecommended+",\"comments\":\""+comment+"\"}";
+        try {
+            return "{\"flight\":{\"airline\":{\"id\":\"" + airlineID + "\"},\"number\":" + flightNumber + "},\"rating\":{\"friendliness\":" + friendliness + ",\"food\":" + food + ",\"punctuality\":" + punctuality + ",\"mileage_program\":" + mileage_program + ",\"comfort\":" + comfort + ",\"quality_price\":" + quality_price + "},\"yes_recommend\":" + isRecommended + ",\"comments\":\"" + URLEncoder.encode(comment, "UTF-8") + "\"}";
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return "";
+        }
     }
 }

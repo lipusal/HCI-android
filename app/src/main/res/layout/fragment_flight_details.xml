@@ -1,0 +1,94 @@
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
+    android:layout_width="match_parent">
+
+    <RelativeLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        tools:context="hci.itba.edu.ar.tpe2.FlightDetailMainActivity">
+
+        <TextView
+            android:id="@+id/firstPartDetail"
+            android:layout_alignParentTop="true"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content" />
+
+        <TextView
+            android:id="@+id/originTitle"
+            android:layout_alignStart="@id/firstPartDetail"
+            android:layout_below="@id/firstPartDetail"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginTop="10dp" />
+
+        <LinearLayout
+            android:id="@+id/originDetail"
+            android:layout_alignStart="@id/originTitle"
+            android:layout_below="@id/originTitle"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:id="@+id/originDetail1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+
+            <TextView
+                android:id="@+id/originDetail2"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+
+            <TextView
+                android:id="@+id/originDetail3"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/arrivalTitle"
+            android:layout_alignStart="@id/originDetail"
+            android:layout_below="@id/originDetail"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content" />
+
+        <LinearLayout
+            android:id="@+id/arrivalDetail"
+            android:layout_alignStart="@id/arrivalTitle"
+            android:layout_below="@id/arrivalTitle"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+
+            <TextView
+                android:id="@+id/arrivalDetail1"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+
+            <TextView
+                android:id="@+id/arrivalDetail2"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+
+            <TextView
+                android:id="@+id/arrivalDetail3"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/extraDetail"
+            android:layout_alignStart="@id/arrivalDetail"
+            android:layout_below="@id/arrivalDetail"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content" />
+
+    </RelativeLayout>
+</ScrollView>
