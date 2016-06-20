@@ -49,41 +49,36 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
         ImageLoader.getInstance().displayImage(flight.getAirline().getLogoURL(), icon);
         //Text
-        TextView title = (TextView) destination.findViewById(R.id.text1);
+        TextView title = (TextView) destination.findViewById(R.id.flight_text);
         title.setText(flight.getAirline().getName() + " #" + flight.getNumber());
 
         //Status
-        final TextView status = (TextView) destination.findViewById(R.id.status);
         if (flight.getStatus() == null) {
-            status.setText("Updating...");  //TODO could cause race condition when recreating view - network request completes and then this runs
             if (statusFetched[position] == false) {
                 statusFetched[position] = true;
                 API.getInstance().getFlightStatus(flight.getAirline().getID(), flight.getNumber(), destination.getContext(),
                         new NetworkRequestCallback<FlightStatus>() {
                             @Override
-                            public void execute(Context c, FlightStatus param) {
-                                flight.setStatus(param);
-                                String prettyStatus = param.toString();
-                                prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
+                            public void execute(Context context, FlightStatus fetchedStatus) {
+                                flight.setStatus(fetchedStatus);
                                 //Can't use #destination here, adapter recycles views. Manually find view
-                                View myCoolView = parent.getChildAt(getPosition(flight) - ((ListView) parent).getFirstVisiblePosition());   //http://stackoverflow.com/questions/6766625/listview-getchildat-returning-null-for-visible-children
-                                TextView myCoolText = (TextView) myCoolView.findViewById(R.id.status);
-                                myCoolText.setText(prettyStatus);
+                                View safeDestination = parent.getChildAt(getPosition(flight) - ((ListView) parent).getFirstVisiblePosition());   //http://stackoverflow.com/questions/6766625/listview-getchildat-returning-null-for-visible-children
+                                ImageView statusIcon = (ImageView) safeDestination.findViewById(R.id.status_icon);
+                                statusIcon.setImageDrawable(context.getDrawable(fetchedStatus.getIconID()));
                             }
                         },
                         new NetworkRequestCallback<String>() {
                             @Override
                             public void execute(Context c, String param) {
-                                status.setText("Error");
+                                //TODO snackbar/toast or error icon
                                 Log.d("VOLANDO", "Couldn't get status for " + flight.toString() + ": " + param);
                                 statusFetched[position] = false;    //TODO should leave this here? Will send network request again
                             }
                         });
             }
         } else {
-            String prettyStatus = flight.getStatus().toString();
-            prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
-            status.setText(prettyStatus);
+            ImageView statusIcon = (ImageView) destination.findViewById(R.id.status_icon);
+            statusIcon.setImageDrawable(destination.getContext().getDrawable(flight.getStatus().getIconID()));
         }
 
         //Star

@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import hci.itba.edu.ar.tpe2.R;
+
 /**
  * Ugly POJO used to hold flight status data.
  */
@@ -236,6 +238,23 @@ public class FlightStatus implements Serializable {
 
     public String getBaggageClaim() {
         return baggageClaim;
+    }
+
+    public int getIconID() {
+        switch (status) {
+            case "S":
+                return R.drawable.ic_scheduled;
+            case "A":
+                return R.drawable.ic_flight_takeoff_black;
+            case "D":
+                return R.drawable.ic_diverted;
+            case "L":
+                return R.drawable.ic_flight_land_black;
+            case "C":
+                return R.drawable.ic_cancelled;
+            default:
+                return -1;
+        }
     }
 
     @Override
