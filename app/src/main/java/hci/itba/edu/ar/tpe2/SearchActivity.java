@@ -32,13 +32,13 @@ public class SearchActivity extends AppCompatActivity
     private Button searchButton;
     private Toolbar toolbar;
 
-        @Override
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
 
         //Creating for the first time
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             //wat do
         }
         searchButton = (Button) findViewById(R.id.search_button);
@@ -51,17 +51,20 @@ public class SearchActivity extends AppCompatActivity
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(validateFields()) {
+                if (validateFields()) {
                     //Go toField flights search activity
-
-
-                    API.getInstance().getFlightStatus(airlineField.getText().toString(), Integer.getInteger(flightField.getText().toString()), SearchActivity.this,
+                    String airlineID = airlineField.getText().toString();
+                    int flightNumber = Integer.parseInt(flightField.getText().toString());
+                    API.getInstance().getFlightStatus(
+                            airlineID,
+                            flightNumber,
+                            SearchActivity.this,
                             new NetworkRequestCallback<FlightStatus>() {
                                 @Override
                                 public void execute(Context context, FlightStatus fetchedStatus) {
-                                    FlightStatus flightStatus=fetchedStatus;
+                                    FlightStatus flightStatus = fetchedStatus;
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
-                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus.toString());
+                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus);
                                     startActivity(searchIntent);
 
                                 }
@@ -76,17 +79,13 @@ public class SearchActivity extends AppCompatActivity
                             });
 
 
-
-
-
-
                 } else {
                     //wat do
                 }
             }
         });
 
-            //Set up the drawer
+        //Set up the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
@@ -156,7 +155,7 @@ public class SearchActivity extends AppCompatActivity
 
         }
 
-        if(i != null) {
+        if (i != null) {
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }
@@ -170,18 +169,16 @@ public class SearchActivity extends AppCompatActivity
         boolean valid = true;
         String airline = airlineField.getText().toString(),
                 flight = flightField.getText().toString();
-        if(airline.isEmpty()) {
+        if (airline.isEmpty()) {
             airlineField.setError("Enter the airline id");
             valid = false;
-        }
-        else if(false) {    //TODO handle invalid input
+        } else if (false) {    //TODO handle invalid input
 
         }
-        if(flight.isEmpty()) {
+        if (flight.isEmpty()) {
             flightField.setError("Enter the flight number");
             valid = false;
-        }
-        else if(false) {    //TODO handle invalid input
+        } else if (false) {    //TODO handle invalid input
 
         }
 
