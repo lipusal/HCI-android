@@ -468,9 +468,9 @@ public class API {
     /**
      * Fetches all airports provided by the API. Airports are passed to the specified callback.
      *
-     * @param context  Context under which to run the specified callback.
+     * @param context         Context under which to run the specified callback.
      * @param successCallback Function to execute when network request is complete.
-     * @param errorCallback Function to run on network error.
+     * @param errorCallback   Function to run on network error.
      */
     public void getAllAirports(final Context context, final NetworkRequestCallback<Airport[]> successCallback, final NetworkRequestCallback<String> errorCallback) {
         final Service service = Service.geo;
@@ -844,12 +844,12 @@ public class API {
     /**
      * Gets a subset of all reviews for the specified flight.
      *
-     * @param flight     The flight for which to search reviews.
-     * @param pageNumber The page number of reviews to fetch.
-     * @param pageSize   The number of reviews per page.
-     * @param context    The context under which to run the specified callback.
-     * @param successCallback   Function to run once the network request completes. Will get passed the found
-     *                   reviews.
+     * @param flight          The flight for which to search reviews.
+     * @param pageNumber      The page number of reviews to fetch.
+     * @param pageSize        The number of reviews per page.
+     * @param context         The context under which to run the specified callback.
+     * @param successCallback Function to run once the network request completes. Will get passed the found
+     *                        reviews.
      */
     public void getPageOfReviews(Flight flight, int pageNumber, int pageSize, final Context context, final NetworkRequestCallback<Review[]> successCallback) {
         getPageOfReviews(flight, pageNumber, pageSize, context, successCallback, null);

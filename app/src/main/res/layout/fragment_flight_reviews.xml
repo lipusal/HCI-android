@@ -9,8 +9,8 @@
         android:layout_height="match_parent"
         android:padding="15dp"
         tools:context="hci.itba.edu.ar.tpe2.FlightCommentsFrangment">
-    <!-- android:layout_alignParentTop="true"-->
-    <!-- android:layout_centerHorizontal="true"-->
+        <!-- android:layout_alignParentTop="true"-->
+        <!-- android:layout_centerHorizontal="true"-->
 
 
         <TextView

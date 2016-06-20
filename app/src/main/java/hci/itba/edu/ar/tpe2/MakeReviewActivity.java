@@ -45,7 +45,7 @@ public class MakeReviewActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //Creating for the first time
-        if(savedInstanceState == null) {
+        if (savedInstanceState == null) {
             //wat do
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -57,9 +57,9 @@ public class MakeReviewActivity extends AppCompatActivity
         reviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(validateFields()) {
-                    Review review = new Review(flight, score*2, reviewText.getText().toString());
-                    API.getInstance().submitReview(review,MakeReviewActivity.this, new NetworkRequestCallback<Void>(){
+                if (validateFields()) {
+                    Review review = new Review(flight, score * 2, reviewText.getText().toString());
+                    API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
                             MakeReviewActivity.this.finish();
@@ -73,14 +73,14 @@ public class MakeReviewActivity extends AppCompatActivity
         });
 
         /**
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
          this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+         drawer.setDrawerListener(toggle);
+         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+         navigationView.setNavigationItemSelectedListener(this);
          */
 
 
@@ -134,17 +134,16 @@ public class MakeReviewActivity extends AppCompatActivity
     }
 
 
-
     private boolean validateFields() {
         boolean valid = true;
         String text = reviewText.getText().toString();
 
-        if(score==0){
+        if (score == 0) {
             valid = false;
             reviewText.setError("Ingrese el puntaje. Mover de lugar el error");
         }
 
-        if(text.isEmpty()) {
+        if (text.isEmpty()) {
             reviewText.setError("Ingrese un comentario");
             valid = false;
         }
@@ -153,11 +152,11 @@ public class MakeReviewActivity extends AppCompatActivity
     }
 
     private void updateStars() {
-        firstStar.setImageResource(score>0?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-        secondStar.setImageResource(score>1?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-        thirdStar.setImageResource(score>2?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-        fourthStar.setImageResource(score>3?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-        fifthStar.setImageResource(score>4?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+        firstStar.setImageResource(score > 0 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+        secondStar.setImageResource(score > 1 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+        thirdStar.setImageResource(score > 2 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+        fourthStar.setImageResource(score > 3 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+        fifthStar.setImageResource(score > 4 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
     }
 
     @Override

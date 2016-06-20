@@ -59,7 +59,7 @@ public class SearchActivity extends AppCompatActivity
             }
         });
 
-        //Set up the drawer
+            //Set up the drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);

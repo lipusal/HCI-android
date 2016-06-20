@@ -7,6 +7,7 @@ public class City extends Place implements Serializable {
     private Country country;
     private double longitude, latitude;
     private boolean has_airport;
+    private String flickrUrl;
 
     public City(String id, String name, String countryID, double longitude, double latitude, boolean has_airport) {
         this.id = id;
@@ -24,6 +25,14 @@ public class City extends Place implements Serializable {
 
     public String getName() {
         return name;
+    }
+
+    public String getFlickrUrl() {
+        return flickrUrl;
+    }
+
+    public void setFlickrUrl(String url) {
+        flickrUrl = url;
     }
 
     public Country getCountry() {

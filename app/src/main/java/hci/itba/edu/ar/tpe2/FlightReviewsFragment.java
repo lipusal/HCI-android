@@ -60,42 +60,42 @@ public class FlightReviewsFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     *
      * @return A new instance of fragment FlightReviewsFragment.
      */
     // TODO: Rename and change types and number of parameters
     public static FlightReviewsFragment newInstance() {
         FlightReviewsFragment fragment = new FlightReviewsFragment();
-      //  Bundle args = new Bundle();
+        //  Bundle args = new Bundle();
 
-       // fragment.setArguments(args);
+        // fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        firstTime=true;
+        firstTime = true;
 
 //        if (getArguments() != null) {
-  //          mParam1 = getArguments().getString(ARG_PARAM1);
-    //        mParam2 = getArguments().getString(ARG_PARAM2);
-      //  }
+        //          mParam1 = getArguments().getString(ARG_PARAM1);
+        //        mParam2 = getArguments().getString(ARG_PARAM2);
+        //  }
 
 
     }
+
     @Override
-    public void onResume(){
+    public void onResume() {
         super.onResume();
         setView();
 
     }
 
     private void setView() {
-        if(firstTime){
+        if (firstTime) {
             title.setText("Searching...");
-            firstTime=false;
-        }else{
+            firstTime = false;
+        } else {
             title.setText("Updating...");
         }
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
@@ -103,7 +103,7 @@ public class FlightReviewsFragment extends Fragment {
 
         API.getInstance().getAllReviews(flight, activity, new NetworkRequestCallback<Review[]>() {
             @Override
-            public void execute(Context c,Review[] result) {
+            public void execute(Context c, Review[] result) {
                 reviews = new ArrayList<Review>(Arrays.asList(result));
                 if (reviewsAdapter == null) {
                     reviewsAdapter = new ReviewAdapter(activity, reviews);
@@ -123,7 +123,7 @@ public class FlightReviewsFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view;
         // Inflate the layout for this fragment
-        view =  inflater.inflate(R.layout.fragment_flight_reviews, container, false);
+        view = inflater.inflate(R.layout.fragment_flight_reviews, container, false);
         if (savedInstanceState == null) {
             title = (TextView) view.findViewById(R.id.reviews_results_title);
             reviewsList = (ListView) view.findViewById(R.id.reviews_list);
@@ -132,7 +132,6 @@ public class FlightReviewsFragment extends Fragment {
 
         return view;
     }
-
 
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -164,7 +163,7 @@ public class FlightReviewsFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
@@ -190,7 +189,7 @@ public class FlightReviewsFragment extends Fragment {
             //Fill in the list item with data
             TextView text = (TextView) destination.findViewById(R.id.textReview);//,
 
-            text.setText(review.getComment() + " \n" + review.getOverall() +"/5");
+            text.setText(review.getComment() + " \n" + review.getOverall() + "/5");
             /*
 
 
@@ -203,11 +202,11 @@ public class FlightReviewsFragment extends Fragment {
             ImageView fourthStar = (ImageView) destination.findViewById(R.id.fourthStar);
             ImageView fifthStar = (ImageView) destination.findViewById(R.id.fifthStar);
 
-            firstStar.setImageResource(overall>0?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-            secondStar.setImageResource(overall>1?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-            thirdStar.setImageResource(overall>2?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-            fourthStar.setImageResource(overall>3?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
-            fifthStar.setImageResource(overall>4?R.drawable.ic_star_on_24dp:R.drawable.ic_star_off_24dp);
+            firstStar.setImageResource(overall > 0 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+            secondStar.setImageResource(overall > 1 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+            thirdStar.setImageResource(overall > 2 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+            fourthStar.setImageResource(overall > 3 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
+            fifthStar.setImageResource(overall > 4 ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
 
             return destination;
         }
