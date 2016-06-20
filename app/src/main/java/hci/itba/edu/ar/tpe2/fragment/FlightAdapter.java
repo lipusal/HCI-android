@@ -50,13 +50,14 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
 
         //Status
         final TextView status = (TextView) destination.findViewById(R.id.status);
-        status.setText("loading");
-
-        API.getInstance().getFlightStatus(flight.getAirline().getID(),flight.getNumber(),destination.getContext(), new NetworkRequestCallback<FlightStatus>() {
+        status.setText("Updating...");
+        API.getInstance().getFlightStatus(flight.getAirline().getID(), flight.getNumber(), destination.getContext(), new NetworkRequestCallback<FlightStatus>() {
             @Override
             public void execute(Context c, FlightStatus param) {
                 flight.setStatus(param);
-                status.setText(param.getStatus());
+                String prettyStatus = param.toString();
+                prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
+                status.setText(prettyStatus);
             }
         });
 
