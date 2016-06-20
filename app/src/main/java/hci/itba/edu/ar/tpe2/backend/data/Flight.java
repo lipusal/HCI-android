@@ -29,6 +29,7 @@ public class Flight implements Serializable {
     public static Flight fromJson(JsonObject flightObj) {
         Flight result = new Flight();
         Gson g = new Gson();
+        PersistentData persistentData = PersistentData.getContextLessInstance();
         JsonObject outboundRoute = result.getOutboundRoute(flightObj),
                 outboundSegment = result.getOutboundSegment(outboundRoute);
         //Parse basic info
@@ -36,11 +37,11 @@ public class Flight implements Serializable {
         result.total = flightObj.getAsJsonObject("price").getAsJsonObject("total").get("total").getAsDouble();
         result.id = outboundSegment.get("id").getAsInt();
         result.number = outboundSegment.get("number").getAsInt();
-        result.airline = PersistentData.getContextLessInstance().getAirlines().get(outboundSegment.getAsJsonObject("airline").get("id").getAsString());
+        result.airline = persistentData.getAirlines().get(outboundSegment.getAsJsonObject("airline").get("id").getAsString());
         result.durationStr = outboundRoute.get("duration").getAsString();
         //Parse departureDate/arrivalDate Airport objects
-        result.departureAirport = g.fromJson(outboundSegment.getAsJsonObject("departure").get("airport"), Airport.class);
-        result.arrivalAirport = g.fromJson(outboundSegment.getAsJsonObject("arrival").get("airport"), Airport.class);
+        result.departureAirport = persistentData.getAirports().get(outboundSegment.getAsJsonObject("departure").getAsJsonObject("airport").get("id").getAsString());
+        result.arrivalAirport = persistentData.getAirports().get(outboundSegment.getAsJsonObject("arrival").getAsJsonObject("airport").get("id").getAsString());
         //Parse departureDate/arrivalDate dates
         result.departureDate = result.parseDate(outboundSegment.getAsJsonObject("departure").get("date"), result.departureAirport.getTimezoneStr());
         result.arrivalDate = result.parseDate(outboundSegment.getAsJsonObject("arrival").get("date"), result.arrivalAirport.getTimezoneStr());
