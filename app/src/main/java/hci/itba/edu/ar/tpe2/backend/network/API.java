@@ -484,7 +484,11 @@ public class API {
                     @Override
                     protected void successCallback(String data) {
                         JsonObject json = gson.fromJson(data, JsonObject.class);
-                        Airport[] result = gson.fromJson(json.get("airports"), Airport[].class);
+                        JsonArray airports = json.getAsJsonArray("airports");
+                        Airport[] result = new Airport[airports.size()];
+                        for (int i = 0; i < result.length; i++) {
+                            result[i] = Airport.fromJson(airports.get(i).getAsJsonObject());
+                        }
                         if (successCallback != null) {
                             successCallback.execute(context, result);
                         }

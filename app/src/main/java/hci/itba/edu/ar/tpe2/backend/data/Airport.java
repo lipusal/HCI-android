@@ -1,16 +1,27 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import com.google.gson.JsonObject;
+
 import java.io.Serializable;
 
 public class Airport extends Place implements Serializable {
     private String id, description, time_zone;
     private City city;
 
-    public Airport(String id, String description, String timezoneStr, City city) {
+    private Airport(String id, String description, String timezoneStr, City city) {
         this.id = id;
         this.description = description;
         this.time_zone = (timezoneStr.charAt(0) == '-' ? "" : "+") + timezoneStr;
         this.city = city;
+    }
+
+    public static Airport fromJson(JsonObject json) {
+        return new Airport(
+                json.get("id").getAsString(),
+                json.get("description").getAsString(),
+                json.get("time_zone").getAsString(),
+                PersistentData.getContextLessInstance().getCities().get(json.getAsJsonObject("city").get("id").getAsString())
+        );
     }
 
     @Override
