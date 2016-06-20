@@ -68,6 +68,7 @@ public class FlightStatus implements Serializable {
     private void parseDates(JsonObject obj, String departureOrArrival) {
         JsonObject airport = obj.getAsJsonObject("airport");
         String timezone = airport.get("time_zone").getAsString();
+        timezone = (timezone.charAt(0) == '-' ? "" : "+") + timezone;
         if (departureOrArrival.equals("departure")) {
             scheduledDepartureTime = parseDate(obj, "scheduled_time", timezone);
             actualDepartureTime = parseDate(obj, "actual_time", timezone);

@@ -9,7 +9,7 @@ public class Airport extends Place implements Serializable {
     public Airport(String id, String description, String timezoneStr, City city) {
         this.id = id;
         this.description = description;
-        this.time_zone = timezoneStr;
+        this.time_zone = (timezoneStr.charAt(0) == '-' ? "" : "+") + timezoneStr;
         this.city = city;
     }
 
