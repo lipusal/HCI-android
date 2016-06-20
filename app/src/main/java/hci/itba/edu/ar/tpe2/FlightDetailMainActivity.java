@@ -42,7 +42,7 @@ import info.androidhive.materialtabs.fragments.ThreeFragment;
 import info.androidhive.materialtabs.fragments.TwoFragment;
 */
 public class FlightDetailMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightReviewsFragment.OnFragmentInteractionListener  {
+        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightReviewsFragment.OnFragmentInteractionListener {
 
     public static final String PARAM_FLIGHT = "FLIGHT";
     private Toolbar toolbar;
@@ -71,16 +71,16 @@ public class FlightDetailMainActivity extends AppCompatActivity
             throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");
         }
         flight = (Flight) callerIntent.getSerializableExtra(PARAM_FLIGHT);
-        setTitle(flight.getAirline().getID()+"#"+flight.getNumber());
+        setTitle(flight.getAirline().getID() + "#" + flight.getNumber());
 
 
         /**
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+         this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+         navigationView.setNavigationItemSelectedListener(this);
          */
 
     }
@@ -161,7 +161,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         int id = item.getItemId();
 
 
-        if(id == R.id.action_follow){
+        if (id == R.id.action_follow) {
             PersistentData persistentData = new PersistentData(this);
             final List<Flight> followedFlights = persistentData.getFollowedFlights();
             if (followedFlights.contains(flight)) {
@@ -173,7 +173,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
             }
             return true;
         }
-        if(id == R.id.action_review){
+        if (id == R.id.action_review) {
             Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
             reviewIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flight);
             reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
@@ -185,13 +185,6 @@ public class FlightDetailMainActivity extends AppCompatActivity
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             this.invalidateOptionsMenu();
         }
-
-
-
-
-
-
-
 
 
         return super.onOptionsItemSelected(item);
@@ -226,7 +219,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         return true;
     }
 
-    public Flight getFlight(){
+    public Flight getFlight() {
         return flight;
     }
 }

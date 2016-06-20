@@ -65,8 +65,8 @@ public class FlightDetailsFragment extends Fragment {
     public static FlightDetailsFragment newInstance(String param1, String param2) {
         FlightDetailsFragment fragment = new FlightDetailsFragment();
         Bundle args = new Bundle();
-     //   args.putString(ARG_PARAM1, param1);
-     //   args.putString(ARG_PARAM2, param2);
+        //   args.putString(ARG_PARAM1, param1);
+        //   args.putString(ARG_PARAM2, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -75,8 +75,8 @@ public class FlightDetailsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-    //        mParam1 = getArguments().getString(ARG_PARAM1);
-    //        mParam2 = getArguments().getString(ARG_PARAM2);
+            //        mParam1 = getArguments().getString(ARG_PARAM1);
+            //        mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
 
@@ -93,7 +93,7 @@ public class FlightDetailsFragment extends Fragment {
         Airport departureAirport = flight.getDepartureAirport();
         Airport arrivalAirport = flight.getArrivalAirport();
 
-        firstPartDetail = (TextView)view.findViewById(R.id.firstPartDetail);
+        firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
         originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
         originDetail2 = (TextView) view.findViewById(R.id.originDetail2);
         originDetail3 = (TextView) view.findViewById(R.id.originDetail3);
@@ -102,7 +102,7 @@ public class FlightDetailsFragment extends Fragment {
         arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
         arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
         arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
-        extraDetail = (TextView)view.findViewById(R.id.extraDetail);
+        extraDetail = (TextView) view.findViewById(R.id.extraDetail);
 
         FragmentActivity context = getActivity();
 
@@ -112,25 +112,25 @@ public class FlightDetailsFragment extends Fragment {
         originTitle.setText("Origen");
         originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
         originDetail1.setText(departureAirport.getDescription() + ", " + departureAirport.getCity().getName() + ", " +
-                departureAirport.getCity().getCountry().getName()+"" +
-                flight.getPrettyDepartureDate()+"\n" +
-                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n"+
+                departureAirport.getCity().getCountry().getName() + "" +
+                flight.getPrettyDepartureDate() + "\n" +
+                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n" +
                 flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
         originDetail2.setText("Ayy lmao");
         originDetail3.setText("Dank");
         arrivalTitle.setText("Destino");
         arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
         arrivalDetail1.setText(arrivalAirport.getDescription() + ", " + arrivalAirport.getCity().getName() + ", " +
-                arrivalAirport.getCity().getCountry().getName()+"" +
-                flight.getPrettyArrivalDate()+"\n" +
+                arrivalAirport.getCity().getCountry().getName() + "" +
+                flight.getPrettyArrivalDate() + "\n" +
                 arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
                 flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
         arrivalDetail2.setText("allo");
         arrivalDetail3.setText("bpnjouir");
-        extraDetail.setText(context.getString(R.string.extra_details)+"\n" +
-                context.getString(R.string.direct_flight)+"\n" + //Hardcodeado?
-                context.getString(R.string.duration)+ flight.getDurationStr() + "\n" +
-                context.getString(R.string.equipage)+ "Donde? \n" +
+        extraDetail.setText(context.getString(R.string.extra_details) + "\n" +
+                context.getString(R.string.direct_flight) + "\n" + //Hardcodeado?
+                context.getString(R.string.duration) + flight.getDurationStr() + "\n" +
+                context.getString(R.string.equipage) + "Donde? \n" +
                 context.getString(R.string.price) + flight.getTotal() + "\n" +
                 context.getString(R.string.score) + "puntaje?Aca?  ");
 
@@ -166,7 +166,7 @@ public class FlightDetailsFragment extends Fragment {
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
      * activity.
-     * <p/>
+     * <p>
      * See the Android Training lesson <a href=
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.

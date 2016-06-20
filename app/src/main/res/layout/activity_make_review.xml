@@ -42,6 +42,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/review_text"
             android:layout_centerVertical="true" />
+
         <ImageButton
             android:id="@+id/second_star_button"
             android:layout_width="24dp"
@@ -52,6 +53,7 @@
             android:layout_below="@+id/review_text"
             android:layout_marginStart="25dp"
             android:layout_centerVertical="true" />
+
         <ImageButton
             android:id="@+id/third_star_button"
             android:layout_marginStart="50dp"
@@ -62,6 +64,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/review_text"
             android:layout_centerVertical="true" />
+
         <ImageButton
             android:id="@+id/fourth_star_button"
             android:layout_marginStart="75dp"
@@ -72,6 +75,7 @@
             android:layout_alignParentStart="true"
             android:layout_below="@+id/review_text"
             android:layout_centerVertical="true" />
+
         <ImageButton
             android:layout_marginStart="100dp"
             android:id="@+id/fifth_star_button"

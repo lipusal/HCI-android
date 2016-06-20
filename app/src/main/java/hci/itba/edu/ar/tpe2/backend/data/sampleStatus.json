@@ -1,75 +1,75 @@
 {
   "meta":{
-    "uuid":"b81996c1-0020-476d-8d8f-8cb3d4c6f864",
-    "time":"80.456ms"
+    "uuid": "b81996c1-0020-476d-8d8f-8cb3d4c6f864",
+    "time": "80.456ms"
   },
   "status":{
-    "id":127541,
-    "number":2834,
+    "id": 127541,
+    "number": 2834,
     "airline":{
-      "id":"AF",
-      "name":"Air France",
-      "logo":"http://eiffel.itba.edu.ar/hci/service4/images/AF.png"
+      "id": "AF",
+      "name": "Air France",
+      "logo": "http://eiffel.itba.edu.ar/hci/service4/images/AF.png"
     },
     "status":"L",
     "departure":{
       "airport":{
-        "id":"ORY",
-        "description":"Aeropuerto Orly, Paris, Francia",
-        "time_zone":"01:00",
-        "latitude":48.7323,
-        "longitude":2.3661,
+        "id": "ORY",
+        "description": "Aeropuerto Orly, Paris, Francia",
+        "time_zone": "01:00",
+        "latitude": 48.7323,
+        "longitude": 2.3661,
         "city":{
-          "id":"PAR",
-          "name":"Paris, Francia",
-          "latitude":48.7323,
-          "longitude":2.3661,
+          "id": "PAR",
+          "name": "Paris, Francia",
+          "latitude": 48.7323,
+          "longitude": 2.3661,
           "country":{
-            "id":"FR",
-            "name":"Francia"
+            "id": "FR",
+            "name": "Francia"
           }
         },
-        "terminal":"C",
-        "gate":"13"
+        "terminal": "C",
+        "gate": "13"
       },
-      "scheduled_time":"2016-06-18 00:40:00",
-      "actual_time":"2016-06-18 00:52:00",
-      "scheduled_gate_time":"2016-06-17 23:10:00",
-      "actual_gate_time":"2016-06-17 23:10:00",
+      "scheduled_time": "2016-06-18 00:40:00",
+      "actual_time": "2016-06-18 00:52:00",
+      "scheduled_gate_time": "2016-06-17 23:10:00",
+      "actual_gate_time": "2016-06-17 23:10:00",
       "gate_delay":null,
-      "estimate_runway_time":"2016-06-18 00:00:00",
-      "actual_runway_time":"2016-06-18 00:12:00",
-      "runway_delay":12
+      "estimate_runway_time": "2016-06-18 00:00:00",
+      "actual_runway_time": "2016-06-18 00:12:00",
+      "runway_delay": 12
     },
     "arrival":{
       "airport":{
-        "id":"CRD",
-        "description":"Aeropuerto Comodoro Rivadavia, Comodoro Rivadavia , Argentina",
+        "id": "CRD",
+        "description": "Aeropuerto Comodoro Rivadavia, Comodoro Rivadavia , Argentina",
         "time_zone":"-03:00",
-        "latitude":-45.7902,
-        "longitude":-67.4684,
+        "latitude": -45.7902,
+        "longitude": -67.4684,
         "city":{
-          "id":"CRD",
-          "name":"Comodoro Rivadavia, Chubut",
-          "latitude":-45.8679,
-          "longitude":-67.5,
+          "id": "CRD",
+          "name": "Comodoro Rivadavia, Chubut",
+          "latitude": -45.8679,
+          "longitude": -67.5,
           "country":{
             "id":"AR",
             "name":"Argentina"
           }
         },
-        "terminal":"E",
-        "gate":"7",
-        "baggage":"5"
+        "terminal": "E",
+        "gate": "7",
+        "baggage": "5"
       },
-      "scheduled_time":"2016-06-18 12:21:00",
-      "actual_time":"2016-06-18 14:54:00",
-      "scheduled_gate_time":"2016-06-18 13:51:00",
-      "actual_gate_time":"2016-06-18 16:55:00",
-      "gate_delay":15,
-      "estimate_runway_time":"2016-06-18 13:01:00",
-      "actual_runway_time":"2016-06-18 15:50:00",
-      "runway_delay":16
+      "scheduled_time": "2016-06-18 12:21:00",
+      "actual_time": "2016-06-18 14:54:00",
+      "scheduled_gate_time": "2016-06-18 13:51:00",
+      "actual_gate_time": "2016-06-18 16:55:00",
+      "gate_delay": 15,
+      "estimate_runway_time": "2016-06-18 13:01:00",
+      "actual_runway_time": "2016-06-18 15:50:00",
+      "runway_delay": 16
     }
   }
 }
