@@ -26,6 +26,25 @@ public class Flight implements Serializable {
     private Flight() {
     }
 
+    /**
+     * Constructs a new Flight with the specified information.
+     *
+     * @param id
+     * @param number
+     * @param airline
+     */
+    public Flight(int id, int number, Airline airline) {
+        this.id = id;
+        this.number = number;
+        this.airline = airline;
+    }
+
+    /**
+     * Instantiates a Flight object with the provided JSON data.
+     *
+     * @param flightObj
+     * @return
+     */
     public static Flight fromJson(JsonObject flightObj) {
         Flight result = new Flight();
         Gson g = new Gson();
@@ -48,14 +67,17 @@ public class Flight implements Serializable {
         return result;
     }
 
+    @Deprecated
     private JsonObject getOutboundRoute(JsonObject flightObj) {
         return flightObj.getAsJsonArray("outbound_routes").get(0).getAsJsonObject();
     }
 
+    @Deprecated
     private JsonObject getOutboundSegment(JsonObject routeObj) {
         return routeObj.getAsJsonArray("segments").get(0).getAsJsonObject();
     }
 
+    @Deprecated
     private Date parseDate(JsonElement dateObj, String timezoneStr) {
         Date result;
         try {
@@ -74,6 +96,7 @@ public class Flight implements Serializable {
         return airline;
     }
 
+    @Deprecated
     public String getDurationStr() {
         return durationStr;
     }
@@ -86,42 +109,57 @@ public class Flight implements Serializable {
         return id;
     }
 
+    @Deprecated
     public Airport getDepartureAirport() {
         return departureAirport;
     }
 
+    @Deprecated
     public Airport getArrivalAirport() {
         return arrivalAirport;
     }
 
+    @Deprecated
     public Date getDepartureDate() {
         return departureDate;
     }
 
+    @Deprecated
     public String getPrettyDepartureDate() {
         return prettyFormat.format(departureDate);
     }
 
+    @Deprecated
     public Date getArrivalDate() {
         return arrivalDate;
     }
 
+    @Deprecated
     public String getPrettyArrivalDate() {
         return prettyFormat.format(arrivalDate);
     }
 
+    @Deprecated
     public FlightStatus getStatus() {
         return status;
     }
 
+    @Deprecated
     public void setStatus(FlightStatus status) {
         this.status = status;
     }
 
+    @Deprecated
     public double getTotal() {
         return total;
     }
 
+    /**
+     * Two Flights are considered equal if they have the same ID and departure date.
+     *
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -142,6 +180,6 @@ public class Flight implements Serializable {
 
     @Override
     public String toString() {
-        return airline.getID() + " #" + number /*+ ", " + departureAirport.getID() + "=>" + arrivalAirport.getID() + " @ " + prettyFormat.format(departureDate) + " (id=" + id + ")"*/;
+        return airline.getID() + " #" + number;
     }
 }

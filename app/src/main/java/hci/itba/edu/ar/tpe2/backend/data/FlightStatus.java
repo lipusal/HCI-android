@@ -30,12 +30,12 @@ public class FlightStatus implements Serializable {
         validStatus.put("C", "canceled");
     }
 
+    private Flight flight;
+    private Airline airline;
+    private Airport originAirport, destinationAirport;
     private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, baggageClaim;
     private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
-    private Integer flightId, flightNumber;
-    private Airline airline;
-    private Airport destinationAirport;     //Can change from original if diverted
     //TODO incorporate delays
 
     private FlightStatus() {
@@ -47,13 +47,17 @@ public class FlightStatus implements Serializable {
                 arrival = statusObject.getAsJsonObject("arrival");
         PersistentData persistentData = PersistentData.getContextLessInstance();
         result.status = statusObject.get("status").getAsString();
-        result.flightId = statusObject.get("id").getAsInt();
-        result.flightNumber = statusObject.get("number").getAsInt();
         result.airline = persistentData.getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
-        result.destinationAirport = persistentData.getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.originAirport = persistentData.getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.destinationAirport = persistentData.getAirports().get(arrival.getAsJsonObject("airport").get("id").getAsString());
         result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.parseDeparture(departure);
         result.parseArrival(arrival);
+        result.flight = new Flight(
+                statusObject.get("id").getAsInt(),
+                statusObject.get("number").getAsInt(),
+                result.airline
+        );
         return result;
     }
 
@@ -225,12 +229,12 @@ public class FlightStatus implements Serializable {
         return airline;
     }
 
-    public Integer getFlightId() {
-        return flightId;
+    public Flight getFlight() {
+        return flight;
     }
 
-    public Integer getFlightNumber() {
-        return flightNumber;
+    public Airport getOriginAirport() {
+        return originAirport;
     }
 
     public Airport getDestinationAirport() {
@@ -258,13 +262,20 @@ public class FlightStatus implements Serializable {
         }
     }
 
+    /**
+     * Two status objects are considered equal if their Flight objects are considered
+     * {@link Flight#equals(Object) equal}.
+     *
+     * @param o the other Object to compare against.
+     * @return Whether the two objects are equal.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         FlightStatus that = (FlightStatus) o;
-        return status.equals(that.status);
+        return this.flight.equals(that.flight);
 
     }
 
