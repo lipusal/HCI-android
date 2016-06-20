@@ -37,28 +37,29 @@ public class SearchResultsActivity extends AppCompatActivity {
             PARAM_AIRLINE_ID = "AIRLINE_ID";
 
     private List<Flight> flights;
+    private boolean firstTime;
 
     //View elements
     private TextView title;
     private FlightsListFragment flightsFragment;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search_results);
+    public void onResume(){
+        super.onResume();
+        setView();
+    }
 
-        if (savedInstanceState == null) {    //Creating for the first time
-            title = (TextView) findViewById(R.id.search_results_title);
-            if (flightsFragment == null) {
-                flightsFragment = FlightsListFragment.newInstance(null);
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-            }
-        } else {
-            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
+
+
+    private void setView(){
+        //Search with passed parameters
+        if(firstTime){
+            title.setText("Searching...");
+            firstTime=false;
+        }else{
+            title.setText("Updating...");
         }
 
-        //Search with passed parameters
-        title.setText("Searching...");
         final String from = getIntent().getStringExtra(PARAM_FROM),
                 to = getIntent().getStringExtra(PARAM_TO),
                 departure = getIntent().getStringExtra(PARAM_DEPARTURE_DATE),
@@ -83,6 +84,26 @@ public class SearchResultsActivity extends AppCompatActivity {
                         title.setText("Network error, couldn't find flights =(");
                     }
                 });
+
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        firstTime=true;
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_search_results);
+
+        if (savedInstanceState == null) {    //Creating for the first time
+            title = (TextView) findViewById(R.id.search_results_title);
+            if (flightsFragment == null) {
+                flightsFragment = FlightsListFragment.newInstance(null);
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+            }
+        } else {
+            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_text);
+        }
+
+
 
         //Comment previous API code block and uncomment this one to get hardcoded flights (i.e. Interwebz not working)  TODO borrar para entrega final
 //        Gson gson = new Gson();
