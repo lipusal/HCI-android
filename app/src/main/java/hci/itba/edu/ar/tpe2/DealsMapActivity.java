@@ -2,7 +2,6 @@ package hci.itba.edu.ar.tpe2;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -65,7 +65,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
-        openDialog(findViewById(R.id.imageView)); //Se esta mostrando aca para testeo
 
         persistentData = new PersistentData(this);
 
@@ -219,7 +218,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             }
         });
 
-        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener(){
+        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
 
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -259,52 +258,18 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         if (lastKnownLocation != null) {
             latitude = lastKnownLocation.getLatitude();
             longitude = lastKnownLocation.getLongitude();
-            API.getInstance().getAirportsByLocation(latitude, longitude, 10, this, new NetworkRequestCallback<Airport[]>() {
+            API.getInstance().getAirportsByLocation(latitude, longitude, 100, this, new NetworkRequestCallback<Airport[]>() {   //TODO use smaller radius, or let the user set it in settings
                 @Override
                 public void execute(Context c, Airport[] nearbyAirports) {
                     if (nearbyAirports.length == 0) {
                         Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
-                    } else {
+                    } else if (nearbyAirports.length == 1) {
                         Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
-                        closestAirport = nearbyAirports[0]; //TODO Discutir cómo devolvemos el mas cercano y demás
-                        LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
-                        //Add special marker in the found airport
-                        //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
-
-                        mMap.addMarker(new MarkerOptions()
-                                .position(airportPosition)
-                                .title(closestAirport.toString())
-                                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-                        //Move the camera to it
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
-
+                        closestAirport = nearbyAirports[0];
                         //Got closest airport, find deals for it
-                        API.getInstance().getDeals(closestAirport, DealsMapActivity.this, new NetworkRequestCallback<Deal[]>() {
-                            @Override
-                            public void execute(Context c, Deal[] param) {
-                                deals = param;
-                                List<Deal> orderedDeals = Arrays.asList(deals);
-                                Collections.sort(orderedDeals);
-                                LatLng aux;
-                                float average = 0;
-                                int i = 0;
-                                for (Deal d : deals) {
-                                    average += d.getPrice();
-                                    i++;
-                                }
-                                average = average / i;
-                                float colorValue;
-                                for (Deal d : deals) {
-                                    aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-                                    colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
-                                    mMap.addMarker(new MarkerOptions()
-                                            .position(aux)
-                                            .title(d.getCity().getID())
-                                            .snippet("$" + Double.toString(d.getPrice()))
-                                            .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
-                                }
-                            }
-                        });
+                        findDeals(closestAirport);
+                    } else {
+                        openDialog(nearbyAirports);
                     }
                 }
             });
@@ -377,14 +342,17 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         return true;
     }
 
-    public void openDialog(View view){ //Agregar lista de aeropuertos conseguida despues de llamar a la API
+    private void openDialog(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        CharSequence[] items = {"Hola", "Cosa", "Juen"}; //Hacer que esto sean de alguna manera aeropuertos
-        dialogBuilder.setTitle("Holi");
-        dialogBuilder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+        final String[] airportNames = new String[airports.length];
+        for (int i = 0; i < airportNames.length; i++) {
+            airportNames[i] = airports[i].getDescription();
+        }
+        dialogBuilder.setTitle("Choose an airport");    //TODO use string resource (res/values/string.xml)
+        dialogBuilder.setSingleChoiceItems(airportNames, -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
-
+                //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
             }
         });
 
@@ -392,7 +360,11 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         dialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
+                //TODO make API request of getDeals() and set markers and shtuff
+                Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
+                Toast.makeText(DealsMapActivity.this, "Getting deals from " + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
+                closestAirport = selectedAirport;
+                findDeals(closestAirport);
             }
         });
         //Deberia llevarte a la actividad anterior?
@@ -404,5 +376,51 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         });
         AlertDialog dialog = dialogBuilder.create();
         dialog.show();
+    }
+
+    /**
+     * Finds deals for the specified airport and places appropriate markers, clearing any other
+     * markers.
+     *
+     * @param origin The origin airport from which to find deals.
+     */
+    private void findDeals(Airport origin) {
+        mMap.clear();
+        //Add special marker in origin airport
+        //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
+        LatLng airportPosition = new LatLng(origin.getLatitude(), origin.getLongitude());
+        mMap.addMarker(new MarkerOptions()
+                .position(airportPosition)
+                .title(origin.toString())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        //Move the camera to it
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
+        //Now query deals
+        API.getInstance().getDeals(origin, this, new NetworkRequestCallback<Deal[]>() {
+            @Override
+            public void execute(Context c, Deal[] param) {
+                deals = param;
+                List<Deal> orderedDeals = Arrays.asList(deals);
+                Collections.sort(orderedDeals);
+                LatLng aux;
+//                float average = 0;
+//                int i = 0;
+//                for (Deal d : deals) {
+//                    average += d.getPrice();
+//                    i++;
+//                }
+//                average = average / i;
+                float colorValue;
+                for (Deal d : deals) {
+                    aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
+                    colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
+                    mMap.addMarker(new MarkerOptions()
+                            .position(aux)
+                            .title(d.getCity().getID())
+                            .snippet("$" + Double.toString(d.getPrice()))
+                            .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+                }
+            }
+        });
     }
 }
