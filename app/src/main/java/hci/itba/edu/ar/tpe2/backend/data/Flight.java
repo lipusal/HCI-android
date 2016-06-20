@@ -36,7 +36,7 @@ public class Flight implements Serializable {
         result.total = flightObj.getAsJsonObject("price").getAsJsonObject("total").get("total").getAsDouble();
         result.id = outboundSegment.get("id").getAsInt();
         result.number = outboundSegment.get("number").getAsInt();
-        result.airline = PersistentData.getInstance().getAirlines().get(outboundSegment.getAsJsonObject("airline").get("id").getAsString());
+        result.airline = PersistentData.getContextLessInstance().getAirlines().get(outboundSegment.getAsJsonObject("airline").get("id").getAsString());
         result.durationStr = outboundRoute.get("duration").getAsString();
         //Parse departureDate/arrivalDate Airport objects
         result.departureAirport = g.fromJson(outboundSegment.getAsJsonObject("departure").get("airport"), Airport.class);

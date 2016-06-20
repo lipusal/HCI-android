@@ -43,11 +43,12 @@ public class FlightStatus implements Serializable {
         FlightStatus result = new FlightStatus();
         JsonObject departure = statusObject.getAsJsonObject("departure"),
                 arrival = statusObject.getAsJsonObject("arrival");
+        PersistentData persistentData = PersistentData.getContextLessInstance();
         result.status = statusObject.get("status").getAsString();
         result.flightId = statusObject.get("id").getAsInt();
         result.flightNumber = statusObject.get("number").getAsInt();
-        result.airline = PersistentData.getInstance().getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
-        result.destinationAirport = PersistentData.getInstance().getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
+        result.airline = persistentData.getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
+        result.destinationAirport = persistentData.getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
         result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.parseDeparture(departure);
         result.parseArrival(arrival);

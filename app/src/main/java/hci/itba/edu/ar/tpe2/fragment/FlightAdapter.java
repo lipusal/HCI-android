@@ -32,11 +32,12 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
 
     @Override
     public View getView(int position, View destination, ViewGroup parent) {
-        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-        final Flight flight = getItem(position);
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.activity_flights_list_item, parent, false);
         }
+        final PersistentData persistentData = new PersistentData(destination.getContext());
+        final List<Flight> followedFlights = persistentData.getFollowedFlights();
+        final Flight flight = getItem(position);
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
         ImageLoader.getInstance().displayImage(flight.getAirline().getLogoURL(), icon);
@@ -51,22 +52,22 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
             @Override
             public void onClick(View v) {
                 if (followedFlights.contains(flight)) {
-                    PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
+                    persistentData.removeFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_off_24dp);
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
+                            persistentData.addFollowedFlight(flight, finalDestination.getContext());
                             star.setImageResource(R.drawable.ic_star_on_24dp);
                         }
                     }).show();
                 } else {
-                    PersistentData.getInstance().addFollowedFlight(flight, finalDestination.getContext());
+                    persistentData.addFollowedFlight(flight, finalDestination.getContext());
                     star.setImageResource(R.drawable.ic_star_on_24dp);
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            PersistentData.getInstance().removeFollowedFlight(flight, finalDestination.getContext());
+                            persistentData.removeFollowedFlight(flight, finalDestination.getContext());
                             star.setImageResource(R.drawable.ic_star_off_24dp);
                         }
                     }).show();

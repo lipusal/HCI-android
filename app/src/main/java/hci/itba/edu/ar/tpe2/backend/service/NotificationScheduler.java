@@ -10,8 +10,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import hci.itba.edu.ar.tpe2.R;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 /**
  * Class used to set up the repeating alarm for the notification service.
@@ -30,11 +33,40 @@ public class NotificationScheduler extends BroadcastReceiver {
     }
 
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, Intent intent) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
         switch (intent.getAction()) {
-            case "android.intent.action.BOOT_COMPLETED":
+            case "android.intent.action.BOOT_COMPLETED":    //Persistent data is probably not initialized, that should be ready first
+                PersistentData persistentData = new PersistentData(context);
+                if (!persistentData.isInited()) {
+                    if (areUpdatesEnabled()) {   //Getting updates would cause a crash, wait until data is inited before sending updates
+                        disableUpdates(context);
+                    }
+                    persistentData.init(
+                            new NetworkRequestCallback<Void>() {
+                                @Override
+                                public void execute(Context c, Void param) {
+                                    //All set, set updates (which will trigger an update right away,
+                                    //hence the need to init first)
+                                    setDefaultUpdateFrequency(context);
+//                                    Toast.makeText(context, "Inited and set updates", Toast.LENGTH_SHORT).show();
+                                }
+                            },
+                            new NetworkRequestCallback<String>() {
+                                @Override
+                                public void execute(Context c, String param) {
+                                    disableUpdates(context);        //Failed to init, getting updates would cause a crash
+                                    //TODO show toast or some sort of message?
+//                                    Toast.makeText(context, "Failed to init, disabled updates", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                    );
+                } else {  //Initialized, set updates right away
+                    setDefaultUpdateFrequency(context);
+//                    Toast.makeText(context, "Already inited, setting updates", Toast.LENGTH_SHORT).show();
+                }
+                break;
             case ACTION_UPDATE_FREQUENCY_SETTING_CHANGED:
                 setDefaultUpdateFrequency(context);
                 break;

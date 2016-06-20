@@ -144,8 +144,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.flight_detail_main, menu);
 
         int id = R.id.action_follow;
-        final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
-        if (followedFlights.contains(flight)) {
+        if (new PersistentData(this).getFollowedFlights().contains(flight)) {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
         } else {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
@@ -163,12 +162,13 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
 
         if(id == R.id.action_follow){
-            final List<Flight> followedFlights = PersistentData.getInstance().getFollowedFlights();
+            PersistentData persistentData = new PersistentData(this);
+            final List<Flight> followedFlights = persistentData.getFollowedFlights();
             if (followedFlights.contains(flight)) {
-                PersistentData.getInstance().removeFollowedFlight(flight, this);
+                persistentData.removeFollowedFlight(flight, this);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
             } else {
-                PersistentData.getInstance().addFollowedFlight(flight, this);
+                persistentData.addFollowedFlight(flight, this);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
             }
             return true;

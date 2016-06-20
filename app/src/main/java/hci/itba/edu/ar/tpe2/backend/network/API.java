@@ -588,7 +588,7 @@ public class API {
                     JsonObject json = gson.fromJson(data, JsonObject.class);
                     JsonArray airports = json.getAsJsonArray("airports");
                     List<Airport> result = new ArrayList<>();
-                    Map<String, Airport> completeAirports = PersistentData.getInstance().getAirports();
+                    Map<String, Airport> completeAirports = PersistentData.getContextLessInstance().getAirports();
                     if (completeAirports == null) {
                         throw new IllegalStateException("Airports not stored in local storage, can't search airports by location.");
                     }
@@ -672,7 +672,7 @@ public class API {
                     JsonObject json = gson.fromJson(data, JsonObject.class),
                             cities = json.getAsJsonObject("cities");
                     List<City> result = new ArrayList<>();
-                    Map<String, City> completeCities = PersistentData.getInstance().getCities();
+                    Map<String, City> completeCities = PersistentData.getContextLessInstance().getCities();
                     if (completeCities == null) {
                         throw new IllegalStateException("Cities not stored in local storage, can't search cities by location.");
                     }

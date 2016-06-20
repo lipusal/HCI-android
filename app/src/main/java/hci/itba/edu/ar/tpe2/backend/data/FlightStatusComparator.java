@@ -80,7 +80,7 @@ public class FlightStatusComparator {
         }
         //Airport (i.e. if diverted)
         if (originalStatus != null && newStatus.getDestinationAirport() != null && !originalStatus.getDestinationAirport().equals(newStatus.getDestinationAirport())) {
-            result.put(ComparableField.ARRIVAL_AIRPORT, PersistentData.getInstance().getAirports().get(newStatus.getDestinationAirport().getID()));
+            result.put(ComparableField.ARRIVAL_AIRPORT, PersistentData.getContextLessInstance().getAirports().get(newStatus.getDestinationAirport().getID()));
         }
         return result;
     }
