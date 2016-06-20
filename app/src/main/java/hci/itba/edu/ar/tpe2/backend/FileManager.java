@@ -22,6 +22,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Language;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 
@@ -30,7 +31,7 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
  * languages, currencies) in the device's internal storage.
  */
 public class FileManager {
-    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FLIGHTS, AIRLINES}
+    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FLIGHTS, AIRLINES, STATUSES}
 
     ;
     private Context context;
@@ -159,6 +160,26 @@ public class FileManager {
         return result.toArray(new Airline[]{});
     }
 
+    public boolean saveWatchedStatuses(List<FlightStatus> statuses) {
+        try {
+            return saveObjects(statuses.toArray(new FlightStatus[0]), StorageFile.STATUSES);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<FlightStatus> loadWatchedStatuses() {
+        List<FlightStatus> result = new ArrayList<>();
+        try {
+            loadObjects(context, StorageFile.STATUSES, result);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return Collections.EMPTY_LIST;
+        }
+        return result;
+    }
+
     private boolean saveObjects(Serializable[] objects, StorageFile destFile) throws IOException {
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
@@ -169,7 +190,7 @@ public class FileManager {
             for(Serializable o : objects) {
                 oos.writeObject(o);
             }
-            Log.i(API.LOG_TAG, "Saved " + objects.length + " objects to " + destFile);
+//            Log.i(API.LOG_TAG, "Saved " + objects.length + " objects to " + destFile);
         } catch (FileNotFoundException e) {
             Log.wtf(API.LOG_TAG, "Wut, " + destFile + " file not found, even though we're creating it...");
             return false;
@@ -199,12 +220,12 @@ public class FileManager {
             for(int i = 0; i < numObjects; i++) {
                 dest.add((T) ois.readObject());
             }
-            Log.i(API.LOG_TAG, "Read " + numObjects + " objects from " + srcFile);
+//            Log.i(API.LOG_TAG, "Read " + numObjects + " objects from " + srcFile);
         } catch (FileNotFoundException e) {
             Log.wtf(API.LOG_TAG, "Wut, " + srcFile + " file not found, even though we're creating it...");
             return false;
         } catch (EOFException e) {
-            Log.d("VOLANDO", "Empty " + srcFile.name() + " file.");
+//            Log.d("VOLANDO", "Empty " + srcFile.name() + " file.");
             return false;
         } catch (ClassNotFoundException e) {
             Log.e(API.LOG_TAG, "Error reading objects from " + srcFile + ": " + e.getMessage());

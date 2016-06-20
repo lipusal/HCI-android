@@ -21,7 +21,6 @@ public class FlightStatus implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
     private static final Map<String, String> validStatus = new HashMap<>();
-
     static {
         validStatus.put("S", "scheduled");
         validStatus.put("A", "active");
@@ -29,6 +28,7 @@ public class FlightStatus implements Serializable {
         validStatus.put("L", "landed");
         validStatus.put("C", "canceled");
     }
+
 
     private Flight flight;
     private Airline airline;

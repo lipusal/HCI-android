@@ -25,7 +25,9 @@ public class PersistentData {
     private static Map<String, City> cities;
     private static Map<String, Country> countries;
     private static Map<String, Currency> currencies;
+    @Deprecated
     private static List<Flight> followedFlights;
+    private static List<FlightStatus> watchedStatuses;
     private static Map<String, Language> languages;
 
 
@@ -44,10 +46,12 @@ public class PersistentData {
         return new PersistentData(null);
     }
 
+    @Deprecated
     public List<Flight> getFollowedFlights() {
         return followedFlights;
     }
 
+    @Deprecated
     private void setFollowedFlights(List<Flight> followedFlights) {
         PersistentData.followedFlights = followedFlights;
     }
@@ -100,6 +104,33 @@ public class PersistentData {
         PersistentData.airlines = airlines;
     }
 
+    public List<FlightStatus> getWatchedStatuses() {
+        return watchedStatuses;
+    }
+
+    private void setWatchedStatuses(List<FlightStatus> watchedStatuses) {
+        PersistentData.watchedStatuses = watchedStatuses;
+    }
+
+    public void watchStatus(FlightStatus status, Context context) {
+        if (watchedStatuses == null) {
+            throw new IllegalStateException("Watched statuses have not been set, can't watch status.");
+        }
+        if (watchedStatuses.contains(status)) {
+            throw new IllegalArgumentException("Status for " + status.getFlight().toString() + " already watched");
+        }
+        watchedStatuses.add(status);
+        fileManager.saveWatchedStatuses(watchedStatuses);
+    }
+
+    public void stopWatchingStatus(FlightStatus status, Context context) {
+        if (watchedStatuses == null) {
+            throw new IllegalStateException("Watched statuses have not been set, can't unwatch status.");
+        }
+        watchedStatuses.remove(status);
+        fileManager.saveWatchedStatuses(watchedStatuses);
+    }
+
     public void addFollowedFlight(Flight f, Context context) {
         if (followedFlights == null) {
             throw new IllegalStateException("Followed flights have not been set, can't add flight.");
@@ -120,13 +151,14 @@ public class PersistentData {
     }
 
     public boolean isInited() {
-        return followedFlights != null &&
-                cities != null &&
+        return cities != null &&
                 countries != null &&
+//                followedFlights != null &&
 //                currencies != null && TODO incorporate currencies?
                 languages != null &&
                 airports != null &&
-                airlines != null;
+                airlines != null &&
+                watchedStatuses != null;
     }
 
     /**
@@ -137,9 +169,14 @@ public class PersistentData {
      * @param errorCallback Callback to run if any errors occur.
      */
     public void init(final NetworkRequestCallback<Void> doneCallback, NetworkRequestCallback<String> errorCallback) {
+        //TODO stop saving flights
         //Followed flights (done before the other data because it needs to be complete for either path to "finish")
         setFollowedFlights(fileManager.loadFollowedFlights());
         Log.d("VOLANDO", "Loaded " + getFollowedFlights().size() + " followed flights.");
+        //TODO delete up to here
+        //Watched statuses (done before the other data because it needs to be complete for either path to "finish")
+        setWatchedStatuses(fileManager.loadWatchedStatuses());
+        Log.d("VOLANDO", "Loaded " + watchedStatuses.size() + " watched statuses.");
 
 
         //Basic data (countries, cities, airports, airlines)
