@@ -2,7 +2,9 @@ package hci.itba.edu.ar.tpe2;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -63,6 +65,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
+        openDialog(findViewById(R.id.imageView)); //Se esta mostrando aca para testeo
 
         persistentData = new PersistentData(this);
 
@@ -217,6 +220,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         });
 
         googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener(){
+
             @Override
             public void onInfoWindowClick(Marker marker) {
                 if (marker.getPosition().equals(new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude())) == false) {
@@ -261,7 +265,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     if (nearbyAirports.length == 0) {
                         Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
                     } else {
-                        //AlertDialog.Builder dialogBox = new AlertDialog.Builder(getActivity());
                         Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
                         closestAirport = nearbyAirports[0]; //TODO Discutir cómo devolvemos el mas cercano y demás
                         LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
@@ -372,5 +375,34 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public void openDialog(View view){ //Agregar lista de aeropuertos conseguida despues de llamar a la API
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        CharSequence[] items = {"Hola", "Cosa", "Juen"}; //Hacer que esto sean de alguna manera aeropuertos
+        dialogBuilder.setTitle("Holi");
+        dialogBuilder.setSingleChoiceItems(items, -1, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
+
+            }
+        });
+
+        //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
+        dialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
+            }
+        });
+        //Deberia llevarte a la actividad anterior?
+        dialogBuilder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
+            }
+        });
+        AlertDialog dialog = dialogBuilder.create();
+        dialog.show();
     }
 }
