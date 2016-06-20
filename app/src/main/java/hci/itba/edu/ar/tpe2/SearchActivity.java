@@ -1,5 +1,6 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -8,16 +9,26 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+
+
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
+
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 public class SearchActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private EditText fromField, toField, departureDateField, airlineField;
+    private EditText flightField, airlineField;
     private Button searchButton;
     private Toolbar toolbar;
 
@@ -30,29 +41,45 @@ public class SearchActivity extends AppCompatActivity
         if(savedInstanceState == null) {
             //wat do
         }
-            searchButton = (Button) findViewById(R.id.search_button);
-            fromField = (EditText) findViewById(R.id.from);
-            toField = (EditText) findViewById(R.id.to);
-            departureDateField = (EditText) findViewById(R.id.dep_date);
-            airlineField = (EditText) findViewById(R.id.airline);
-            toolbar = (Toolbar) findViewById(R.id.toolbar);
-            toolbar.setTitle(R.string.title_activity_search);
-            setSupportActionBar(toolbar);
+        searchButton = (Button) findViewById(R.id.search_button);
+        airlineField = (EditText) findViewById(R.id.airline_id);
+        flightField = (EditText) findViewById(R.id.flight_number);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.title_activity_search);
+        setSupportActionBar(toolbar);
 
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(validateFields()) {
                     //Go toField flights search activity
-                    Intent searchIntent = new Intent(SearchActivity.this, SearchResultsActivity.class);
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, fromField.getText().toString());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_TO, toField.getText().toString());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, departureDateField.getText().toString());
-                    String airline = airlineField.getText().toString();
-                    if(!airline.isEmpty()) {
-                        searchIntent.putExtra(SearchResultsActivity.PARAM_AIRLINE_ID, airline);
-                    }
-                    startActivity(searchIntent);
+
+
+                    API.getInstance().getFlightStatus(airlineField.getText().toString(), Integer.getInteger(flightField.getText().toString()), SearchActivity.this,
+                            new NetworkRequestCallback<FlightStatus>() {
+                                @Override
+                                public void execute(Context context, FlightStatus fetchedStatus) {
+                                    FlightStatus flightStatus=fetchedStatus;
+                                    Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
+                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus.toString());
+                                    startActivity(searchIntent);
+
+                                }
+                            },
+                            new NetworkRequestCallback<String>() {
+                                @Override
+                                public void execute(Context c, String param) {
+                                    //TODO snackbar/toast or error icon
+
+                                    Log.d("VOLANDO", "Couldn't get status for " + airlineField.getText().toString() + "# " + flightField.getText().toString());
+                                }
+                            });
+
+
+
+
+
+
                 } else {
                     //wat do
                 }
@@ -141,35 +168,24 @@ public class SearchActivity extends AppCompatActivity
 
     private boolean validateFields() {
         boolean valid = true;
-        String from = fromField.getText().toString(),
-                to = toField.getText().toString(),
-                depDate = departureDateField.getText().toString(),
-                airline = airlineField.getText().toString();
-        if(from.isEmpty()) {
-            fromField.setError("Enter an origin");
+        String airline = airlineField.getText().toString(),
+                flight = flightField.getText().toString();
+        if(airline.isEmpty()) {
+            airlineField.setError("Enter the airline id");
             valid = false;
         }
         else if(false) {    //TODO handle invalid input
 
         }
-        if(to.isEmpty()) {
-            fromField.setError("Enter a destination");
+        if(flight.isEmpty()) {
+            flightField.setError("Enter the flight number");
             valid = false;
         }
         else if(false) {    //TODO handle invalid input
 
         }
-        if(depDate.isEmpty()) {
-            fromField.setError("Enter a departure date");
-            valid = false;
-        }
-        else if(false) {    //TODO handle invalid input
 
-        }
-        if(!airline.isEmpty() && false) {   //TODO handle invalid input
-            airlineField.setError("Enter a valid airline");
-            valid = false;
-        }
+
         return valid;
     }
 }

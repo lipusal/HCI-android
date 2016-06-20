@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 import hci.itba.edu.ar.tpe2.backend.network.API;
@@ -29,7 +30,7 @@ public class MakeReviewActivity extends AppCompatActivity
 
     private EditText reviewText;
     private Button reviewButton;
-    private Flight flight;
+    private FlightStatus flightStatus;
     private int score;
     private ImageButton firstStar;
     private ImageButton secondStar;
@@ -52,13 +53,13 @@ public class MakeReviewActivity extends AppCompatActivity
         reviewButton = (Button) findViewById(R.id.review_button);
         reviewText = (EditText) findViewById(R.id.review_text);
         Intent callerIntent = getIntent();
-        flight = (Flight) callerIntent.getSerializableExtra(FlightDetailMainActivity.PARAM_FLIGHT);
+        flightStatus = (FlightStatus) callerIntent.getSerializableExtra(FlightDetailMainActivity.PARAM_FLIGHT);
 
         reviewButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
-                    Review review = new Review(flight, score * 2, reviewText.getText().toString());
+                    Review review = new Review(flightStatus.getFlight(), score * 2, reviewText.getText().toString());
                     API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {

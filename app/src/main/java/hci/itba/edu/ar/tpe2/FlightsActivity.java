@@ -284,6 +284,7 @@ public class FlightsActivity extends AppCompatActivity
         swipeRefreshLayout.setRefreshing(true);
     }
 
+
     @Override
     public void onStop() {
         super.onStop();
@@ -303,4 +304,6 @@ public class FlightsActivity extends AppCompatActivity
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
     }
+
+
 }

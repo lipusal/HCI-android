@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 
 
 /**
@@ -46,7 +47,7 @@ public class FlightDetailsFragment extends Fragment {
     TextView arrivalDetail3;
     TextView arrivalTitle;
     TextView extraDetail;
-    Flight flight;
+    FlightStatus flightStatus;
 
 
     public FlightDetailsFragment() {
@@ -88,10 +89,10 @@ public class FlightDetailsFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_flight_details, container, false);
 
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
-        final Flight flight = activity.getFlight();
+        flightStatus = activity.getFlightStatus();
 
-        Airport departureAirport = flight.getDepartureAirport();
-        Airport arrivalAirport = flight.getArrivalAirport();
+        Airport departureAirport = flightStatus.getOriginAirport();
+        Airport arrivalAirport = flightStatus.getDestinationAirport();
 
         firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
         originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
@@ -106,33 +107,37 @@ public class FlightDetailsFragment extends Fragment {
 
         FragmentActivity context = getActivity();
 
-        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
-                "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
-                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
-        originTitle.setText("Origen");
-        originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
-        originDetail1.setText(departureAirport.getDescription() + ", " + departureAirport.getCity().getName() + ", " +
-                departureAirport.getCity().getCountry().getName() + "" +
-                flight.getPrettyDepartureDate() + "\n" +
-                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n" +
-                flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
-        originDetail2.setText("Ayy lmao");
-        originDetail3.setText("Dank");
-        arrivalTitle.setText("Destino");
-        arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
-        arrivalDetail1.setText(arrivalAirport.getDescription() + ", " + arrivalAirport.getCity().getName() + ", " +
-                arrivalAirport.getCity().getCountry().getName() + "" +
-                flight.getPrettyArrivalDate() + "\n" +
-                arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
-                flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
-        arrivalDetail2.setText("allo");
-        arrivalDetail3.setText("bpnjouir");
-        extraDetail.setText(context.getString(R.string.extra_details) + "\n" +
-                context.getString(R.string.direct_flight) + "\n" + //Hardcodeado?
-                context.getString(R.string.duration) + flight.getDurationStr() + "\n" +
-                context.getString(R.string.equipage) + "Donde? \n" +
-                context.getString(R.string.price) + flight.getTotal() + "\n" +
-                context.getString(R.string.score) + "puntaje?Aca?  ");
+        firstPartDetail.setText("ALUHAKBAR ALEXIS!!");
+
+//        Flight flight = flightStatus.getFlight();
+//
+//        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
+//                "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
+//                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
+//        originTitle.setText("Origen");
+//        originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
+//        originDetail1.setText(departureAirport.getDescription() + ", " + departureAirport.getCity().getName() + ", " +
+//                departureAirport.getCity().getCountry().getName() + "" +
+//                flight.getPrettyDepartureDate() + "\n" +
+//                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n" +
+//                flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
+//        originDetail2.setText("Ayy lmao");
+//        originDetail3.setText("Dank");
+//        arrivalTitle.setText("Destino");
+//        arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
+//        arrivalDetail1.setText(arrivalAirport.getDescription() + ", " + arrivalAirport.getCity().getName() + ", " +
+//                arrivalAirport.getCity().getCountry().getName() + "" +
+//                flight.getPrettyArrivalDate() + "\n" +
+//                arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
+//                flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
+//        arrivalDetail2.setText("allo");
+//        arrivalDetail3.setText("bpnjouir");
+//        extraDetail.setText(context.getString(R.string.extra_details) + "\n" +
+//                context.getString(R.string.direct_flight) + "\n" + //Hardcodeado?
+//                context.getString(R.string.duration) + flight.getDurationStr() + "\n" +
+//                context.getString(R.string.equipage) + "Donde? \n" +
+//                context.getString(R.string.price) + flight.getTotal() + "\n" +
+//                context.getString(R.string.score) + "puntaje?Aca?  ");
 
         return view;
     }

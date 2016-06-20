@@ -24,51 +24,31 @@
         <EditText
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:id="@+id/from"
+            android:id="@+id/airline_id"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:layout_marginTop="50dp"
             android:inputType="text"
-            android:hint="From"
-            android:text="JFK" />
+            android:hint="Airline id"
+            android:text="CM" />
 
         <EditText
             android:layout_width="150dp"
             android:layout_height="wrap_content"
-            android:id="@+id/to"
-            android:layout_alignTop="@+id/from"
+            android:id="@+id/flight_number"
+            android:layout_alignTop="@+id/airline_id"
             android:layout_alignParentEnd="true"
-            android:inputType="text"
-            android:hint="To"
-            android:text="LAX" />
+            android:inputType="number"
+            android:hint="Flight number"
+            android:text="4704" />
 
-        <EditText
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:inputType="date"
-            android:ems="10"
-            android:id="@+id/dep_date"
-            android:layout_below="@+id/from"
-            android:layout_alignStart="@+id/from"
-            android:layout_marginTop="30dp"
-            android:hint="Departure date"
-            android:text="2016-10-03" />
-
-        <EditText
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/airline"
-            android:inputType="text"
-            android:hint="Airline (optional)"
-            android:layout_alignTop="@+id/dep_date"
-            android:layout_alignStart="@+id/to" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Search"
             android:id="@+id/search_button"
-            android:layout_below="@+id/dep_date"
+            android:layout_below="@+id/flight_number"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp" />
     </RelativeLayout>

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 
 /*
@@ -48,7 +49,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
-    Flight flight;
+    FlightStatus flightStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,8 +71,8 @@ public class FlightDetailMainActivity extends AppCompatActivity
         if (!callerIntent.hasExtra(PARAM_FLIGHT)) {
             throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");
         }
-        flight = (Flight) callerIntent.getSerializableExtra(PARAM_FLIGHT);
-        setTitle(flight.getAirline().getID() + "#" + flight.getNumber());
+        flightStatus = (FlightStatus) callerIntent.getSerializableExtra(PARAM_FLIGHT);
+        setTitle(flightStatus.getAirline().getID() + "#" + flightStatus.getFlight().getNumber());
 
 
         /**
@@ -143,8 +144,10 @@ public class FlightDetailMainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.flight_detail_main, menu);
 
+      //  Flight flight = flightStatus.getFlight();
+
         int id = R.id.action_follow;
-        if (new PersistentData(this).getFollowedFlights().contains(flight)) {
+        if (new PersistentData(this).getWatchedStatuses().contains(flightStatus)) {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
         } else {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
@@ -158,24 +161,26 @@ public class FlightDetailMainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
 
+       // Flight flight = flightStatus.getFlight();
+
         int id = item.getItemId();
 
 
         if (id == R.id.action_follow) {
             PersistentData persistentData = new PersistentData(this);
-            final List<Flight> followedFlights = persistentData.getFollowedFlights();
-            if (followedFlights.contains(flight)) {
-                persistentData.removeFollowedFlight(flight, this);
+
+            if (persistentData.getWatchedStatuses().contains(flightStatus)) {
+                persistentData.stopWatchingStatus(flightStatus,this);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
             } else {
-                persistentData.addFollowedFlight(flight, this);
+                persistentData.watchStatus(flightStatus, this);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
             }
             return true;
         }
         if (id == R.id.action_review) {
             Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
-            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flight);
+            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus);
             reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
             startActivity(reviewIntent);
@@ -219,7 +224,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         return true;
     }
 
-    public Flight getFlight() {
-        return flight;
+    public FlightStatus getFlightStatus() {
+        return flightStatus;
     }
 }

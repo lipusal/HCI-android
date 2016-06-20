@@ -99,9 +99,9 @@ public class FlightReviewsFragment extends Fragment {
             title.setText("Updating...");
         }
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
-        final Flight flight = activity.getFlight();
+       
 
-        API.getInstance().getAllReviews(flight, activity, new NetworkRequestCallback<Review[]>() {
+        API.getInstance().getAllReviews(activity.getFlightStatus().getFlight(), activity, new NetworkRequestCallback<Review[]>() {
             @Override
             public void execute(Context c, Review[] result) {
                 reviews = new ArrayList<Review>(Arrays.asList(result));
