@@ -9,6 +9,7 @@
 
     <string name="not_following_flights">No followed flights</string>
     <string name="no_flights_found">No flights found</string>
+    <string name="searching">Searching...</string>
 
     <string name="origin">Origen</string>
     <string name="terminal">  Terminal  </string>

@@ -3,12 +3,14 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -27,14 +29,16 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
  */
 public class FlightAdapter extends ArrayAdapter<Flight> {
     private CoordinatorLayout mCoordinatorLayout;
+    private boolean[] statusFetched;
 
     FlightAdapter(Context context, List<Flight> objects, CoordinatorLayout layoutWithFAB) {
         super(context, 0, objects);
         mCoordinatorLayout = layoutWithFAB;
+        statusFetched = new boolean[objects.size()];
     }
 
     @Override
-    public View getView(int position, View destination, ViewGroup parent) {
+    public View getView(final int position, View destination, final ViewGroup parent) {
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.activity_flights_list_item, parent, false);
         }
@@ -50,17 +54,37 @@ public class FlightAdapter extends ArrayAdapter<Flight> {
 
         //Status
         final TextView status = (TextView) destination.findViewById(R.id.status);
-        status.setText("Updating...");
-        API.getInstance().getFlightStatus(flight.getAirline().getID(), flight.getNumber(), destination.getContext(), new NetworkRequestCallback<FlightStatus>() {
-            @Override
-            public void execute(Context c, FlightStatus param) {
-                flight.setStatus(param);
-                String prettyStatus = param.toString();
-                prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
-                status.setText(prettyStatus);
+        if (flight.getStatus() == null) {
+            status.setText("Updating...");  //TODO could cause race condition when recreating view - network request completes and then this runs
+            if (statusFetched[position] == false) {
+                statusFetched[position] = true;
+                API.getInstance().getFlightStatus(flight.getAirline().getID(), flight.getNumber(), destination.getContext(),
+                        new NetworkRequestCallback<FlightStatus>() {
+                            @Override
+                            public void execute(Context c, FlightStatus param) {
+                                flight.setStatus(param);
+                                String prettyStatus = param.toString();
+                                prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
+                                //Can't use #destination here, adapter recycles views. Manually find view
+                                View myCoolView = parent.getChildAt(getPosition(flight) - ((ListView) parent).getFirstVisiblePosition());   //http://stackoverflow.com/questions/6766625/listview-getchildat-returning-null-for-visible-children
+                                TextView myCoolText = (TextView) myCoolView.findViewById(R.id.status);
+                                myCoolText.setText(prettyStatus);
+                            }
+                        },
+                        new NetworkRequestCallback<String>() {
+                            @Override
+                            public void execute(Context c, String param) {
+                                status.setText("Error");
+                                Log.d("VOLANDO", "Couldn't get status for " + flight.toString() + ": " + param);
+                                statusFetched[position] = false;    //TODO should leave this here? Will send network request again
+                            }
+                        });
             }
-        });
-
+        } else {
+            String prettyStatus = flight.getStatus().toString();
+            prettyStatus = prettyStatus.substring(0, 1).toUpperCase() + prettyStatus.substring(1);
+            status.setText(prettyStatus);
+        }
 
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
