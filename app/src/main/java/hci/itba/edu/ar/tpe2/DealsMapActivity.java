@@ -19,6 +19,7 @@ import android.os.Bundle;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -267,6 +268,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     if (nearbyAirports.length == 0) {
                         Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
                     } else {
+                        //AlertDialog.Builder dialogBox = new AlertDialog.Builder(getActivity());
                         Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
                         closestAirport = nearbyAirports[0]; //TODO Discutir cómo devolvemos el mas cercano y demás
                         LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
