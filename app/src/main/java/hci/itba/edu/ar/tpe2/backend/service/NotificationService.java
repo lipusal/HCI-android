@@ -8,15 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +22,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
-import hci.itba.edu.ar.tpe2.backend.FileManager;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatusComparator;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
@@ -49,8 +46,9 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-            ACTION_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
-            PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
+            ACTION_FLIGHTS_UPDATED = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
+            PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE",
+            EXTRA_CHANGED_FLIGHT_IDS = "hci.itba.edu.ar.tpe2.backend.service.extra.CHANGED_FLIGHT_IDS";
 
     public NotificationService() {
         super("NotificationService");
@@ -82,7 +80,8 @@ public class NotificationService extends IntentService {
         } else {
             Log.d("VOLANDO", "No watched flights, not checking updates");
             if (broadcastOnComplete) {
-                Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
+                Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
+                intent.putExtra(EXTRA_CHANGED_FLIGHT_IDS, (Serializable) Collections.EMPTY_SET);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
             return;
@@ -121,7 +120,8 @@ public class NotificationService extends IntentService {
                                     }
                                 }
                                 if (broadcastOnComplete) {
-                                    Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
+                                    Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
+                                    intent.putExtra(EXTRA_CHANGED_FLIGHT_IDS, (Serializable) notifications.keySet());
                                     LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
                                 }
                             }
