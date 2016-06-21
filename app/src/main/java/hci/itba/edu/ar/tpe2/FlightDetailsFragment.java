@@ -117,10 +117,6 @@ public class FlightDetailsFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //        mParam1 = getArguments().getString(ARG_PARAM1);
-            //        mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     private void updateView(){
@@ -141,14 +137,13 @@ public class FlightDetailsFragment extends Fragment {
         else {
 
 
-            String firstPartDetailStr = flightStatus.getAirline().getName() + "(" + flightStatus.getAirline().getID() + ")#" + flightStatus.getFlight().getNumber(); /*+
+            String firstPartDetailStr = flightStatus.getAirline().getName() + " (" + flightStatus.getAirline().getID() + ") #" + flightStatus.getFlight().getNumber(); /*+
                 "Estado: "+flight.getStatus().getStatus()*/
             String firstPartDetailStr2 = "Desde: " + departureAirport.getID() + " con destino a " + arrivalAirport.getID();
             firstPartDetail1.setText(firstPartDetailStr);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
             firstPartDetail2.setText(firstPartDetailStr2);
-            originTitle.setText("Origen");
-            originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
-            originDetail1.setText(departureAirport.getDescription());
+            originTitle.setText(flightStatus.getOriginAirport().getDescription());
+//            originDetail1.setText(departureAirport.getDescription());
             // originDepartureTime.setText(fligh.getDurationStr());
             originDepartureTime.setText("FALTA METODO GET DURATION STR");
             originDepartureTimeLabel.setText(departureAirport.getID());
@@ -159,9 +154,8 @@ public class FlightDetailsFragment extends Fragment {
             // originDetail2.setText(departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) );
             //originDetail3.setText(flight.getPrettyDepartureDate() /*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
             originDetail3.setText("GET PRETTY DEPARTURE DATE");
-            arrivalTitle.setText("Destino");
-            arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
-            arrivalDetail1.setText(arrivalAirport.getDescription());
+            arrivalTitle.setText(flightStatus.getDestinationAirport().getDescription());
+//            arrivalDetail1.setText(arrivalAirport.getDescription());
             //arrivalDepartureTime.setText(flight.getDurationStr());
             arrivalDepartureTime.setText("FALTA METODO GET DURATION STR");
             arrivalDepartureTimeLabel.setText(arrivalAirport.getID());
