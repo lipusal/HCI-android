@@ -137,9 +137,11 @@ public class NotificationScheduler extends BroadcastReceiver {
             baseIntent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
             futureIntent = PendingIntent.getService(context, 0, baseIntent, 0);
             manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, frequency, futureIntent);
+
             Log.d("VOLANDO", "Set automatic update frequency to " + frequency + "ms");
         } else {
             Log.d("VOLANDO", "Disabled automatic updates");
+
         }
     }
 

@@ -92,15 +92,16 @@ public class FlightsActivity extends AppCompatActivity
         swipeRefreshLayout.setColorSchemeColors(
                 ContextCompat.getColor(this, R.color.colorAccent),
                 ContextCompat.getColor(this, R.color.colorPrimary));
-//                ContextCompat.getColor(this, android.R.color.holo_green_light),
-//                ContextCompat.getColor(this, android.R.color.holo_orange_light),
-//                ContextCompat.getColor(this, android.R.color.holo_red_light));
 
         //Configure the image loader GLOBALLY. Other activities can use it after this
         if (!ImageLoader.getInstance().isInited()) {
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
             ImageLoader.getInstance().init(config);
             //TODO init this in notif service?
+
+
+
+
         }
 
         persistentData = new PersistentData(this);
@@ -147,7 +148,8 @@ public class FlightsActivity extends AppCompatActivity
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
                 flightsFragment = null;
             }
-        } else {
+        }
+        else {
             flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();

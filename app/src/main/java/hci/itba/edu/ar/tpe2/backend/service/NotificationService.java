@@ -162,6 +162,7 @@ public class NotificationService extends IntentService {
         if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(getString(R.string.pref_default_vibrate_on_notify)))) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
+
         //Build content
         if (differences.size() > 1) {
             Log.d("VOLANDO", "Multiple differences for " + updatedStatus.getFlight().toString() + ": " + differences.entrySet().toString());
