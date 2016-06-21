@@ -7,8 +7,6 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
 
-    <string name="not_following_flights">No followed flights</string>
-    <string name="no_flights_found">No flights found</string>
     <string name="searching">Searching...</string>
 
     <string name="origin">Origen</string>
@@ -24,4 +22,10 @@
     <string name="action_follow">Seguir</string>
     <string name="action_review">Comentar</string>
     <string name="title_activity_make_review">MakeReviewActivity</string>
+
+
+
+    <string name="not_following_flights">No followed flights</string>
+    <string name="no_flights_found">No flights found</string>
+
 </resources>

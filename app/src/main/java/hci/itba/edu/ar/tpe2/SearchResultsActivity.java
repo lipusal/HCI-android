@@ -98,6 +98,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 //            title.setText(flights.size() + " " + from + "=>" + to + " flights for " + departureDate);
 //        }
 
+
         //TODO cancel all network requests onDestroy()
         API.getInstance().getAllFlights(from, to, departureDate, airlineID, this,
                 new NetworkRequestCallback<List<Flight>>() {
@@ -124,5 +125,6 @@ public class SearchResultsActivity extends AppCompatActivity {
                         }
                     }
                 });
+
     }
 }

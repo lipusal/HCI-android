@@ -46,7 +46,9 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
+
             ACTION_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
+
             PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
 
     public NotificationService() { super("NotificationService"); }
@@ -77,7 +79,9 @@ public class NotificationService extends IntentService {
         else {
             Log.d("VOLANDO", "No followed flights, not checking updates");
             if (broadcastOnComplete) {
+
                 Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
+
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
             return;
@@ -102,11 +106,13 @@ public class NotificationService extends IntentService {
                     //Calculate differences and build notifications as appropriate
                     if (flight.getStatus() == null) {    //First time checking for update, notify as if it were a status change
                         flight.setStatus(newStatus);
+
                         if (sendNotifications) {
                             NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(NotificationService.this);
                             buildNotificationForSatatusChange(notifBuilder, flight);
                             notifications.put(flight.getID(), notifBuilder.build());
                         }
+
                         changed[0] = true;
                     } else {
                         Map<FlightStatusComparator.ComparableField, Object> statusDifferences = new FlightStatusComparator(flight.getStatus()).compare(newStatus);
@@ -131,7 +137,9 @@ public class NotificationService extends IntentService {
                             }
                         }
                         if (broadcastOnComplete) {
+
                             Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
+
                             LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
                         }
                     }
@@ -172,6 +180,7 @@ public class NotificationService extends IntentService {
         if (preferences.getBoolean(NotificationService.this.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(getString(R.string.pref_default_vibrate_on_notify)))) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
+
         //Build content
         if (differences.size() > 1) {
             Log.d("VOLANDO", "Multiple differences for " + updatedFlight.toString() + ": " + differences.entrySet().toString());
@@ -252,6 +261,7 @@ public class NotificationService extends IntentService {
     private void buildNotificationForSatatusChange(NotificationCompat.Builder notifBuilder, Flight flightWithNewStatus) {
         FlightStatus newStatus = flightWithNewStatus.getStatus();
         notifBuilder.setContentTitle(flightWithNewStatus.toString() + " " + newStatus.toString());
+
         switch (newStatus.getStatus()) {
             case "S":   //Scheduled
                 notifBuilder.setSmallIcon(R.drawable.ic_scheduled);
@@ -276,5 +286,6 @@ public class NotificationService extends IntentService {
                 notifBuilder.setContentText("=(");  //TODO wat say?
                 break;
         }
+
     }
 }

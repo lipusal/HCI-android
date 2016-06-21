@@ -22,9 +22,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import android.widget.ImageView;
 import android.widget.AbsListView;
 import android.widget.ListView;
+
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -102,6 +104,9 @@ public class FlightsActivity extends AppCompatActivity
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setColorSchemeColors(
+
+
+
                 ContextCompat.getColor(this, R.color.colorAccent),
                 ContextCompat.getColor(this, R.color.colorPrimary));
 //                ContextCompat.getColor(this, android.R.color.holo_green_light),
@@ -113,6 +118,10 @@ public class FlightsActivity extends AppCompatActivity
             ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
             ImageLoader.getInstance().init(config);
             //TODO init this in notif service?
+
+
+
+
         }
 
         persistentData = new PersistentData(this);
@@ -159,6 +168,7 @@ public class FlightsActivity extends AppCompatActivity
                 getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
                 flightsFragment = null;
             }
+
         } else {
             flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
             if (flightsFragment == null) {    //Creating for the first time

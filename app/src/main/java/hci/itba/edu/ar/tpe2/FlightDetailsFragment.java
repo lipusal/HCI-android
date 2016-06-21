@@ -45,10 +45,22 @@ public class FlightDetailsFragment extends Fragment {
     TextView firstPartDetail;
     TextView originDetail1;
     TextView originDetail2;
+    TextView originGateLabel;
+    TextView originGate;
+    TextView originTerminal;
+    TextView originTerminalLabel;
+    TextView originDepartureTime;
+    TextView originDepartureTimeLabel;
     TextView originDetail3;
     TextView originTitle;
     TextView arrivalDetail1;
     TextView arrivalDetail2;
+    TextView arrivalGateLabel;
+    TextView arrivalGate;
+    TextView arrivalTerminal;
+    TextView arrivalTerminalLabel;
+    TextView arrivalDepartureTime;
+    TextView arrivalDepartureTimeLabel;
     TextView arrivalDetail3;
     TextView arrivalTitle;
     TextView extraDetail;
@@ -113,37 +125,48 @@ public class FlightDetailsFragment extends Fragment {
         FragmentActivity context = getActivity();
         Airport departureAirport = flightStatus.getOriginAirport();
         Airport arrivalAirport = flightStatus.getDestinationAirport();
-        firstPartDetail.setText("ALUHAKBAR ALEXIS!!");
 
-//        Flight flight = flightStatus.getFlight();
-//
-//        firstPartDetail.setText(flight.getAirline().getName() + "(" + flight.getAirline().getID() + ")#" + flight.getNumber() + "" +
-//                "\n" + departureAirport.getID() + "->" + flight.getArrivalAirport().getID() + "\n" /*+
-//                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
-//        originTitle.setText("Origen");
-//        originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
-//        originDetail1.setText(departureAirport.getDescription() + ", " + departureAirport.getCity().getName() + ", " +
-//                departureAirport.getCity().getCountry().getName() + "" +
-//                flight.getPrettyDepartureDate() + "\n" +
-//                departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) + "\n" +
-//                flight.getPrettyDepartureDate() + "   "/*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
-//        originDetail2.setText("Ayy lmao");
-//        originDetail3.setText("Dank");
-//        arrivalTitle.setText("Destino");
-//        arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
-//        arrivalDetail1.setText(arrivalAirport.getDescription() + ", " + arrivalAirport.getCity().getName() + ", " +
-//                arrivalAirport.getCity().getCountry().getName() + "" +
-//                flight.getPrettyArrivalDate() + "\n" +
-//                arrivalAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) +
-//                flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
-//        arrivalDetail2.setText("allo");
-//        arrivalDetail3.setText("bpnjouir");
-//        extraDetail.setText(context.getString(R.string.extra_details) + "\n" +
-//                context.getString(R.string.direct_flight) + "\n" + //Hardcodeado?
-//                context.getString(R.string.duration) + flight.getDurationStr() + "\n" +
-//                context.getString(R.string.equipage) + "Donde? \n" +
-//                context.getString(R.string.price) + flight.getTotal() + "\n" +
-//                context.getString(R.string.score) + "puntaje?Aca?  ");
+
+        firstPartDetail.setText(flightStatus.getAirline().getName() + "(" + flightStatus.getAirline().getID() + ")#" + flightStatus.getFlight().getNumber() + "" +
+                "\n" + departureAirport.getID() + "->" + arrivalAirport.getID() + "\n" /*+
+                "Estado: "+flight.getStatus().getStatus()*/);   //FIXME los vuelos no vienen con estado, habría que hacer una query por vuelo (no lo vamos a hacer). Los únicos vuelos que tienen estado guardado son los que sigue el usuario
+        originTitle.setText("Origen");
+        originTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_takeoff_black, getActivity().getTheme()), null, null, null);
+        originDetail1.setText(departureAirport.getDescription());
+       // originDepartureTime.setText(fligh.getDurationStr());
+        originDepartureTime.setText("FALTA METODO GET DURATION STR");
+        originDepartureTimeLabel.setText(departureAirport.getID());
+        originTerminalLabel.setText("Terminal");
+        originTerminal.setText("A12");
+        originGateLabel.setText("Title Gate");
+        originGate.setText("Desc de Gate");
+        // originDetail2.setText(departureAirport.getID() + context.getString(R.string.terminal) + context.getString(R.string.gate) );
+        //originDetail3.setText(flight.getPrettyDepartureDate() /*+flight.getStatus().getDepartureTerminal() + "   "+  flight.getStatus().getDepartureGate()*/);
+        originDetail3.setText("GET PRETTY DEPARTURE DATE");
+        arrivalTitle.setText("Destino");
+        arrivalTitle.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_land_black, getActivity().getTheme()), null, null, null);
+        arrivalDetail1.setText(arrivalAirport.getDescription());
+        //arrivalDepartureTime.setText(flight.getDurationStr());
+        arrivalDepartureTime.setText("FALTA METODO GET DURATION STR");
+        arrivalDepartureTimeLabel.setText(arrivalAirport.getID());
+        arrivalTerminalLabel.setText("Terminal");
+        arrivalTerminal.setText("A12");
+        arrivalGateLabel.setText("Title Gate");
+        arrivalGate.setText("Desc de Gate");
+        //arrivalDetail3.setText(flight.getPrettyArrivalDate() + "   "/*+flight.getStatus().getArrivalTerminal() + "   "+  flight.getStatus().getArrivalGate()*/);
+        arrivalDetail3.setText("GET PRETTY");
+        extraDetail.setText(context.getString(R.string.extra_details)+"\n" +
+                context.getString(R.string.direct_flight)+"\n" + //Hardcodeado?
+                context.getString(R.string.duration) +
+                //flight.getDurationStr()
+                "GET DuRARAtotTIN"
+                + "\n" +
+                context.getString(R.string.equipage)+ "Donde? \n" +
+                context.getString(R.string.price) +
+                //flightStatus.getTotal()
+                "TOTAL, MONEEYYHH"
+                + "\n" +
+                context.getString(R.string.score) + "puntaje?Aca?  ");
 
 
     }
@@ -163,11 +186,22 @@ public class FlightDetailsFragment extends Fragment {
 
         firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
         originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
-        originDetail2 = (TextView) view.findViewById(R.id.originDetail2);
+        originGate = (TextView) view.findViewById(R.id.originGate);
+        originGateLabel = (TextView) view.findViewById(R.id.originGateLabel);
+        originTerminal = (TextView) view.findViewById(R.id.originTerminal);
+        originTerminalLabel = (TextView) view.findViewById(R.id.originTerminalLabel);
+        originDepartureTime = (TextView) view.findViewById(R.id.originDepartureTime);
+        originDepartureTimeLabel = (TextView) view.findViewById(R.id.originDepartureTimeLabel);
         originDetail3 = (TextView) view.findViewById(R.id.originDetail3);
         originTitle = (TextView) view.findViewById(R.id.originTitle);
         arrivalDetail1 = (TextView) view.findViewById(R.id.arrivalDetail1);
-        arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
+        //    arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
+        arrivalGate = (TextView) view.findViewById(R.id.arrivalGate);
+        arrivalGateLabel = (TextView) view.findViewById(R.id.arrivalGateLabel);
+        arrivalTerminal = (TextView) view.findViewById(R.id.arrivalTerminal);
+        arrivalTerminalLabel = (TextView) view.findViewById(R.id.arrivalTerminalLabel);
+        arrivalDepartureTime = (TextView) view.findViewById(R.id.arrivalDepartureTime);
+        arrivalDepartureTimeLabel = (TextView) view.findViewById(R.id.arrivalDepartureTimeLabel);
         arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
         arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
         extraDetail = (TextView) view.findViewById(R.id.extraDetail);
