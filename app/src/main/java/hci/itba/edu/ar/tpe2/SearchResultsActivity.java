@@ -110,7 +110,7 @@ public class SearchResultsActivity extends AppCompatActivity {
                             return;
                         }
                         if (result.isEmpty()) {
-                            title.setText(getString(R.string.no_flights_found));
+                            title.setText(getString(R.string.err_no_flights_found));
                         } else {
                             //TODO won't need this when deleting this activity
 //                            FlightStatusListFragment newFragment = FlightStatusListFragment.newInstance(SearchResultsActivity.this.flights);

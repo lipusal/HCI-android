@@ -1,35 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--Notifications-->
-    <string name="pref_key_notify_on_update">notify_on_update</string>
-    <string name="pref_key_notification_ringtone">notification_ringtone</string>
-    <string name="pref_key_vibrate_on_notify">vibrate_on_notify</string>
+    <string name="pref_key_notify_on_update" translatable="false">notify_on_update</string>
+    <string name="pref_key_notification_ringtone" translatable="false">notification_ringtone</string>
+    <string name="pref_key_vibrate_on_notify" translatable="false">vibrate_on_notify</string>
     <string name="pref_header_notifications">Notifications</string>
-    <string name="pref_title_notify_on_update">Notify on flight status changes</string>
+    <string name="pref_title_notify_on_update">Notify status changes</string>
+    <string name="pref_summary_notify_on_update_enabled">Send a notification when your followed flights change status</string>
+    <string name="pref_summary_notify_on_update_disabled">Automatic updates are off</string>
     <string name="pref_title_ringtone">Ringtone</string>
     <string name="pref_ringtone_silent">Silent</string>
     <string name="pref_title_vibrate">Vibrate</string>
-    <string name="pref_default_notify_on_update">true</string>
-    <string name="pref_default_vibrate_on_notify">true</string>
-    <string name="pref_default_ringtone">content://settings/system/notification_sound</string>
+    <string name="pref_default_notify_on_update" translatable="false">true</string>
+    <string name="pref_default_vibrate_on_notify" translatable="false">true</string>
+    <string name="pref_default_ringtone" translatable="false">content://settings/system/notification_sound</string>
 
     <!--Updates-->
-    <string name="pref_key_update_frequency">update_frequency</string>
-    <string name="pref_key_update_on_cellular_network">update_on_cellular_network</string>
+    <string name="pref_key_update_frequency" translatable="false">update_frequency</string>
+    <string name="pref_key_update_on_cellular_network" translatable="false">update_on_cellular_network</string>
     <string name="pref_header_data_sync">Updates</string>
-    <string name="pref_title_update_on_cellular_network">Update over cellular network</string>
-    <string name="pref_default_update_on_cellular_network">true</string>
-    <string name="pref_summary_update_on_cellular_network">When WiFi is unavailable and cellular data is on</string>
-    <string name="pref_title_update_frequency">Update frequency</string>
-    <string name="pref_default_update_frequency">300000</string>    <!-- 5 minutes -->
+    <string name="pref_title_update_on_cellular_network">Check for updates over cellular</string>
+    <string name="pref_default_update_on_cellular_network" translatable="false">true</string>
+    <string name="pref_summary_update_on_cellular_network">When WiFi is unavailable and mobile data is on</string>
+    <string name="pref_title_update_frequency">Automatically update status</string>
+    <string name="pref_default_update_frequency" translatable="false">300000</string>    <!-- 5 minutes -->
+    <string name="pref_update_frequency_1_min">Every minute</string>
+    <string name="pref_update_frequency_5_min">Every 5 minutes</string>
+    <string name="pref_update_frequency_10_min">Every 10 minutes</string>
+    <string name="pref_update_frequency_30_min">Every 30 minutes</string>
+    <string name="pref_update_frequency_1_hr">Every hour</string>
+    <string name="pref_update_frequency_2_hr">Every 2 hours</string>
+    <string name="pref_update_frequency_never">Off</string>
     <string-array name="pref_update_frequency_titles">
-        <item>1 minute</item>
-        <item>5 minutes</item>
-        <item>10 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>2 hours</item>
-        <item>Never</item>
+        <item>@string/pref_update_frequency_1_min</item>
+        <item>@string/pref_update_frequency_5_min</item>
+        <item>@string/pref_update_frequency_10_min</item>
+        <item>@string/pref_update_frequency_30_min</item>
+        <item>@string/pref_update_frequency_1_hr</item>
+        <item>@string/pref_update_frequency_2_hr</item>
+        <item>@string/pref_update_frequency_never</item>
     </string-array>
     <string-array name="pref_update_frequency_values">
         <item>60000</item>

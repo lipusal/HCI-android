@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 
@@ -122,7 +121,7 @@ public class FlightDetailsFragment extends Fragment {
                 //flight.getDurationStr()
                 "GET DuRARAtotTIN"
                 + "\n" +
-                context.getString(R.string.equipage)+ "Donde? \n" +
+                context.getString(R.string.baggage)+ "Donde? \n" +
                 context.getString(R.string.price) +
                 //flightStatus.getTotal()
                 "TOTAL, MONEEYYHH"
