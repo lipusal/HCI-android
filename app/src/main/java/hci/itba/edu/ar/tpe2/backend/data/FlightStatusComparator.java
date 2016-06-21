@@ -75,7 +75,8 @@ public class FlightStatusComparator {
             result.put(ComparableField.BAGGAGE_CLAIM, newStatus.getBaggageClaim());
         }
         //Status
-        if (!originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null
+        //TODO uncomment true, for debugging only
+        if (true || !originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
             result.put(ComparableField.STATUS, newStatus.getStatus());
         }
         //Airport (i.e. if diverted)
