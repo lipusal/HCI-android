@@ -109,9 +109,8 @@ public class FlightStatusListFragment extends ListFragment {
         @Override
         public void onFlightClicked(FlightStatus clickedStatus) {
             Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
-            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, clickedStatus);           //TODO finalize contract to send flight status or params to search a flight status
-            Log.d("VOLANDO", "Would start details activity for " + clickedStatus.getFlight().toString());
-//            startActivity(detailsIntent); //TODO uncomment
+            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
+            startActivity(detailsIntent);
         }
     }
 

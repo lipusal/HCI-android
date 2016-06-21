@@ -15,11 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
 
-
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
@@ -64,7 +60,7 @@ public class SearchActivity extends AppCompatActivity
                                 public void execute(Context context, FlightStatus fetchedStatus) {
                                     FlightStatus flightStatus = fetchedStatus;
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
-                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus);
+                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
                                     startActivity(searchIntent);
 
                                 }
@@ -77,7 +73,6 @@ public class SearchActivity extends AppCompatActivity
                                     Log.d("VOLANDO", "Couldn't get status for " + airlineField.getText().toString() + "# " + flightField.getText().toString());
                                 }
                             });
-
 
                 } else {
                     //wat do

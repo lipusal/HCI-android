@@ -32,6 +32,7 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
@@ -136,8 +137,8 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
         //Add/refresh the flights fragment, enable/disable swipe to refresh
-        List<Flight> followedFlights = persistentData.getFollowedFlights();
-        if (followedFlights == null || followedFlights.isEmpty()) {
+        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
+        if (watchedFlights == null || watchedFlights.isEmpty()) {
             swipeRefreshLayout.setEnabled(false);
             TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
             if (flightsFragment == null) {    //Creating for the first time
@@ -147,7 +148,7 @@ public class FlightsActivity extends AppCompatActivity
                 flightsFragment = null;
             }
         } else {
-            flightsFragment = FlightStatusListFragment.newInstance(new FileManager(this).loadWatchedStatuses());
+            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
             } else {

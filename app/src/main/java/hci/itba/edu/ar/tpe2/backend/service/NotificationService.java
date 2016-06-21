@@ -222,7 +222,7 @@ public class NotificationService extends IntentService {
 
         //Build its action and set it to the notification
         Intent baseIntent = new Intent(NotificationService.this, FlightDetailMainActivity.class);
-        baseIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, updatedStatus);  //TODO send flight status rather than flight
+        baseIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, updatedStatus);
         //Set flags to take user back to Home when navigating back from details
 //        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
         //Build a pending intent with the recently constructed base intent and set it to the notification
