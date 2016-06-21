@@ -1,10 +1,14 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +17,7 @@ import android.widget.TextView;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 
 
 /**
@@ -49,10 +54,33 @@ public class FlightDetailsFragment extends Fragment {
     TextView extraDetail;
     FlightStatus flightStatus;
 
+    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateView();
+        }
+    };
 
     public FlightDetailsFragment() {
         // Required empty public constructor
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        //(Re-)register refresh broadcast receiver
+        updateView();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshCompleteBroadcastReceiver);
+    }
+
+
 
     /**
      * Use this factory method to create a new instance of
@@ -81,32 +109,10 @@ public class FlightDetailsFragment extends Fragment {
         }
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view;
-        view = inflater.inflate(R.layout.fragment_flight_details, container, false);
-
-        final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
-        flightStatus = activity.getFlightStatus();
-
+    private void updateView(){
+        FragmentActivity context = getActivity();
         Airport departureAirport = flightStatus.getOriginAirport();
         Airport arrivalAirport = flightStatus.getDestinationAirport();
-
-        firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
-        originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
-        originDetail2 = (TextView) view.findViewById(R.id.originDetail2);
-        originDetail3 = (TextView) view.findViewById(R.id.originDetail3);
-        originTitle = (TextView) view.findViewById(R.id.originTitle);
-        arrivalDetail1 = (TextView) view.findViewById(R.id.arrivalDetail1);
-        arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
-        arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
-        arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
-        extraDetail = (TextView) view.findViewById(R.id.extraDetail);
-
-        FragmentActivity context = getActivity();
-
         firstPartDetail.setText("ALUHAKBAR ALEXIS!!");
 
 //        Flight flight = flightStatus.getFlight();
@@ -138,6 +144,34 @@ public class FlightDetailsFragment extends Fragment {
 //                context.getString(R.string.equipage) + "Donde? \n" +
 //                context.getString(R.string.price) + flight.getTotal() + "\n" +
 //                context.getString(R.string.score) + "puntaje?Aca?  ");
+
+
+    }
+
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        View view;
+        view = inflater.inflate(R.layout.fragment_flight_details, container, false);
+
+        final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
+        flightStatus = activity.getFlightStatus();
+
+
+
+        firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
+        originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
+        originDetail2 = (TextView) view.findViewById(R.id.originDetail2);
+        originDetail3 = (TextView) view.findViewById(R.id.originDetail3);
+        originTitle = (TextView) view.findViewById(R.id.originTitle);
+        arrivalDetail1 = (TextView) view.findViewById(R.id.arrivalDetail1);
+        arrivalDetail2 = (TextView) view.findViewById(R.id.arrivalDetail2);
+        arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
+        arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
+        extraDetail = (TextView) view.findViewById(R.id.extraDetail);
+
 
         return view;
     }
