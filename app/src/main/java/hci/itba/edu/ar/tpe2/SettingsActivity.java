@@ -4,6 +4,7 @@ package hci.itba.edu.ar.tpe2;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
@@ -164,7 +165,7 @@ public class SettingsActivity extends SettingsWrapperActivity {
      */
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
-                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
+//                || GeneralPreferenceFragment.class.getName().equals(fragmentName)
                 || UpdatesPreferenceFragment.class.getName().equals(fragmentName)
                 || NotificationPreferenceFragment.class.getName().equals(fragmentName);
     }
@@ -180,29 +181,29 @@ public class SettingsActivity extends SettingsWrapperActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-            setHasOptionsMenu(true);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            int id = item.getItemId();
-            if (id == android.R.id.home) {
-                startActivity(new Intent(getActivity(), SettingsActivity.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-    }
+//    /**
+//     * This fragment shows general preferences only. It is used when the
+//     * activity is showing a two-pane settings UI.
+//     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    public static class GeneralPreferenceFragment extends PreferenceFragment {
+//        @Override
+//        public void onCreate(Bundle savedInstanceState) {
+//            super.onCreate(savedInstanceState);
+//            addPreferencesFromResource(R.xml.pref_general);
+//            setHasOptionsMenu(true);
+//        }
+//
+//        @Override
+//        public boolean onOptionsItemSelected(MenuItem item) {
+//            int id = item.getItemId();
+//            if (id == android.R.id.home) {
+//                startActivity(new Intent(getActivity(), SettingsActivity.class));
+//                return true;
+//            }
+//            return super.onOptionsItemSelected(item);
+//        }
+//    }
 
     /**
      * This fragment shows notification preferences only. It is used when the
@@ -216,10 +217,20 @@ public class SettingsActivity extends SettingsWrapperActivity {
             addPreferencesFromResource(R.xml.pref_notifications);
             setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
+            //Notify on Update preference depends on update frequency
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());   //TODO verify it's never null
+            long updateFrequency = Long.parseLong(preferences.getString(getString(R.string.pref_key_update_frequency), getString(R.string.pref_default_update_frequency)));
+            Preference notifyOnUpdatePref = findPreference(getString(R.string.pref_key_notify_on_update));
+            if(updateFrequency == -1) {
+                notifyOnUpdatePref.setEnabled(false);
+                notifyOnUpdatePref.setSummary(R.string.pref_summary_notify_on_update_disabled);
+            }
+            else {
+                notifyOnUpdatePref.setEnabled(true);
+                notifyOnUpdatePref.setSummary(R.string.pref_summary_notify_on_update_enabled);
+            }
+
+            //Update the Ringtone field summary when its value changes
             bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_key_notification_ringtone)));
         }
 

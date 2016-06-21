@@ -3,49 +3,31 @@ package hci.itba.edu.ar.tpe2;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 
 import android.content.Intent;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 
-/*
-import info.androidhive.materialtabs.R;
-import info.androidhive.materialtabs.fragments.OneFragment;
-import info.androidhive.materialtabs.fragments.ThreeFragment;
-import info.androidhive.materialtabs.fragments.TwoFragment;
-*/
 public class FlightDetailMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightReviewsFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener {
 
-    public static final String PARAM_FLIGHT = "FLIGHT";
+    public static final String PARAM_STATUS = "hci.itba.edu.ar.tpe2.FlightDetailMainActivity.STATUS";
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -68,22 +50,19 @@ public class FlightDetailMainActivity extends AppCompatActivity
         tabLayout.setupWithViewPager(viewPager);
         //Get info from the specified flight
         Intent callerIntent = getIntent();
-        if (!callerIntent.hasExtra(PARAM_FLIGHT)) {
-            throw new IllegalStateException("Flight details activity started without " + PARAM_FLIGHT + " parameter in Intent");
+        if (!callerIntent.hasExtra(PARAM_STATUS)) {
+            throw new IllegalStateException("Flight details activity started without " + PARAM_STATUS + " parameter in Intent");
         }
-        flightStatus = (FlightStatus) callerIntent.getSerializableExtra(PARAM_FLIGHT);
+        flightStatus = (FlightStatus) callerIntent.getSerializableExtra(PARAM_STATUS);
         setTitle(flightStatus.getAirline().getID() + "#" + flightStatus.getFlight().getNumber());
 
 
-        /**
-         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+         /*DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
          ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-         this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+         this, drawer, toolbar, R.string.navigation_drawer_open, R.string.drawer_close);
 
          NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-         navigationView.setNavigationItemSelectedListener(this);
-         */
-
+         navigationView.setNavigationItemSelectedListener(this);*/
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -180,7 +159,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         }
         if (id == R.id.action_review) {
             Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
-            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus);
+            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
             reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
 
             startActivity(reviewIntent);

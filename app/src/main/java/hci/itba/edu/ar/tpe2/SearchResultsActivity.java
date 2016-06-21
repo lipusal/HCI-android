@@ -11,8 +11,9 @@ import java.util.List;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
-import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
+import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 
+@Deprecated
 public class SearchResultsActivity extends AppCompatActivity {
     public static final String PARAM_FROM = "FROM",
             PARAM_TO = "TO",
@@ -26,7 +27,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 
     //View elements
     private TextView title;
-    private FlightsListFragment flightsFragment;
+    private FlightStatusListFragment flightsFragment;
 
     @Override
     public void onResume() {
@@ -44,11 +45,11 @@ public class SearchResultsActivity extends AppCompatActivity {
         //Creating for the first time
         if (savedInstanceState == null) {
             if (flightsFragment == null) {
-                flightsFragment = FlightsListFragment.newInstance(null);
+                flightsFragment = FlightStatusListFragment.newInstance(null);
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
             }
         } else {
-            flightsFragment = (FlightsListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
+            flightsFragment = (FlightStatusListFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container);
             if (savedInstanceState.containsKey(PARAM_FLIGHTS)) {
                 flights = (List<Flight>) savedInstanceState.getSerializable(PARAM_FLIGHTS);
             }
@@ -93,7 +94,7 @@ public class SearchResultsActivity extends AppCompatActivity {
 //            flights.add(Flight.fromJson(flight.getAsJsonObject()));
 //        }
 //        if(!isDestroyed) {
-//            FlightsListFragment newFragment = FlightsListFragment.newInstance(SearchResultsActivity.this.flights);
+//            FlightStatusListFragment newFragment = FlightStatusListFragment.newInstance(SearchResultsActivity.this.flights);
 //            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
 //            title.setText(flights.size() + " " + from + "=>" + to + " flights for " + departureDate);
 //        }
@@ -109,10 +110,11 @@ public class SearchResultsActivity extends AppCompatActivity {
                             return;
                         }
                         if (result.isEmpty()) {
-                            title.setText(getString(R.string.no_flights_found));
+                            title.setText(getString(R.string.err_no_flights_found));
                         } else {
-                            FlightsListFragment newFragment = FlightsListFragment.newInstance(SearchResultsActivity.this.flights);
-                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
+                            //TODO won't need this when deleting this activity
+//                            FlightStatusListFragment newFragment = FlightStatusListFragment.newInstance(SearchResultsActivity.this.flights);
+//                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, newFragment).commit();
                             title.setText(result.size() + " " + from + "=>" + to + " flights for " + departureDate);
                         }
                     }

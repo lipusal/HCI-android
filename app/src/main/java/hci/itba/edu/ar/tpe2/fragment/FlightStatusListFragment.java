@@ -14,33 +14,33 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 
 /**
- * A fragment representing a list of Flights.
+ * A fragment representing a list of flight statuses.
  * <p/><p/>
  * Activities containing this fragment MAY implement the {@link OnFragmentInteractionListener}
  * interface. If not implemented, fragment falls back to standard behavior defined in
  * {@link DefaultInteractionHandler}.
  */
-public class FlightsListFragment extends ListFragment {
-    public static final String PARAM_FLIGHTS_LIST = "hci.itba.edu.ar.tpe2.fragment.FlightsListFragment.FLIGHTS_LIST";
+public class FlightStatusListFragment extends ListFragment {
+    public static final String PARAM_STATUS_LIST = "hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment.STATUS_LIST";
 
     private OnFragmentInteractionListener interactionListener;
-    private List<Flight> flights;
+    private List<FlightStatus> statuses;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public FlightsListFragment() {
+    public FlightStatusListFragment() {
     }
 
-    public static FlightsListFragment newInstance(List<Flight> flights) {
-        FlightsListFragment result = new FlightsListFragment();
-        if (flights != null) {
+    public static FlightStatusListFragment newInstance(List<FlightStatus> statuses) {
+        FlightStatusListFragment result = new FlightStatusListFragment();
+        if (statuses != null) {
             Bundle params = new Bundle();
-            params.putSerializable(PARAM_FLIGHTS_LIST, (Serializable) flights);
+            params.putSerializable(PARAM_STATUS_LIST, (Serializable) statuses);
             result.setArguments(params);
         }
         return result;
@@ -49,14 +49,14 @@ public class FlightsListFragment extends ListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null && getArguments().containsKey(PARAM_FLIGHTS_LIST)) {
-            flights = (List<Flight>) getArguments().getSerializable(PARAM_FLIGHTS_LIST);
+        if (getArguments() != null && getArguments().containsKey(PARAM_STATUS_LIST)) {
+            statuses = (List<FlightStatus>) getArguments().getSerializable(PARAM_STATUS_LIST);
         } else {
-            if (flights == null) {
-                flights = Collections.EMPTY_LIST;
+            if (statuses == null) {
+                statuses = Collections.EMPTY_LIST;
             }
         }
-        setListAdapter(new FlightAdapter(getActivity(), flights, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
+        setListAdapter(new FlightStatusAdapter(getActivity(), statuses, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
     }
 
     @Override
@@ -85,7 +85,7 @@ public class FlightsListFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
-        interactionListener.onFlightClicked((Flight) listView.getItemAtPosition(position));
+        interactionListener.onFlightClicked((FlightStatus) listView.getItemAtPosition(position));
     }
 
     /**
@@ -94,20 +94,20 @@ public class FlightsListFragment extends ListFragment {
     public interface OnFragmentInteractionListener {
 
         /**
-         * Called when a flight is clicked. Default behavior is to start the {@link FlightDetailMainActivity}
-         * with the clicked Flight.
+         * Called when a flight status is clicked. Default behavior is to start the
+         * {@link FlightDetailMainActivity} with the clicked status.
          *
-         * @param clickedFlight The clicked flight.
+         * @param clickedStatus The clicked status.
          */
-        void onFlightClicked(Flight clickedFlight);
+        void onFlightClicked(FlightStatus clickedStatus);
     }
 
     private class DefaultInteractionHandler implements OnFragmentInteractionListener {
 
         @Override
-        public void onFlightClicked(Flight clickedFlight) {
+        public void onFlightClicked(FlightStatus clickedStatus) {
             Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
-            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, clickedFlight);
+            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
             startActivity(detailsIntent);
         }
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -15,11 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.Toast;
 
-
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
@@ -64,23 +62,21 @@ public class SearchActivity extends AppCompatActivity
                                 public void execute(Context context, FlightStatus fetchedStatus) {
                                     FlightStatus flightStatus = fetchedStatus;
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
-                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_FLIGHT, flightStatus);
+                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
                                     startActivity(searchIntent);
-
                                 }
                             },
                             new NetworkRequestCallback<String>() {
                                 @Override
                                 public void execute(Context c, String param) {
-                                    //TODO snackbar/toast or error icon
-
+                                    //TODO show something nicer
+                                    Toast.makeText(SearchActivity.this, getString(R.string.err_no_flights_found), Toast.LENGTH_SHORT).show();    //TODO network error or no flights found?
                                     Log.d("VOLANDO", "Couldn't get status for " + airlineField.getText().toString() + "# " + flightField.getText().toString());
                                 }
                             });
 
-
                 } else {
-                    //wat do
+                    //TODO wat do
                 }
             }
         });
@@ -170,13 +166,13 @@ public class SearchActivity extends AppCompatActivity
         String airline = airlineField.getText().toString(),
                 flight = flightField.getText().toString();
         if (airline.isEmpty()) {
-            airlineField.setError("Enter the airline id");
+            airlineField.setError(getString(R.string.err_empty_airline_id));
             valid = false;
         } else if (false) {    //TODO handle invalid input
 
         }
         if (flight.isEmpty()) {
-            flightField.setError("Enter the flight number");
+            flightField.setError(getString(R.string.err_empty_flight_number));
             valid = false;
         } else if (false) {    //TODO handle invalid input
 
