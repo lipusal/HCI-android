@@ -7,15 +7,13 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-
+import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,11 +21,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
-import hci.itba.edu.ar.tpe2.backend.FileManager;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatusComparator;
 import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 
 /**
@@ -46,8 +43,9 @@ import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
  */
 public class NotificationService extends IntentService {
     public static final String ACTION_NOTIFY_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.NOTIFY_UPDATES",
-            ACTION_UPDATES_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
-            PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE";
+            ACTION_FLIGHTS_UPDATED = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATES_COMPLETE",
+            PARAM_BROADCAST_WHEN_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.param.BROADCAST_WHEN_COMPLETE",
+            EXTRA_CHANGED_FLIGHT_IDS = "hci.itba.edu.ar.tpe2.backend.service.extra.CHANGED_FLIGHT_IDS";
 
     public NotificationService() { super("NotificationService"); }
 
@@ -77,7 +75,8 @@ public class NotificationService extends IntentService {
         else {
             Log.d("VOLANDO", "No followed flights, not checking updates");
             if (broadcastOnComplete) {
-                Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
+                Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
+                intent.putExtra(EXTRA_CHANGED_FLIGHT_IDS, (Serializable) Collections.EMPTY_SET);
                 LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             }
             return;
@@ -88,60 +87,48 @@ public class NotificationService extends IntentService {
         final Boolean[] changed = {false};
         //Make an async network request for each flight that needs updates. Send all notifications at
         //the same time once ALL updates have been completed.
-        for(final Flight flight : flights) {
-            Bundle params = new Bundle();
-            params.putString("method", API.Method.getflightstatus.name());
-            params.putString("airline_id", flight.getAirline().getID());
-            params.putString("flight_number", Integer.toString(flight.getNumber()));
-            new APIRequest(API.Service.status, params) {
-                @Override
-                protected void successCallback(String result) {
-                    JsonObject json = g.fromJson(result, JsonObject.class);
-                    FlightStatus newStatus = FlightStatus.fromJson(json.getAsJsonObject("status"));
-                    boolean sendNotifications = PreferenceManager.getDefaultSharedPreferences(NotificationService.this).getBoolean(getString(R.string.pref_key_notify_on_update), Boolean.parseBoolean(getString(R.string.pref_default_notify_on_update)));
-                    //Calculate differences and build notifications as appropriate
-                    if (flight.getStatus() == null) {    //First time checking for update, notify as if it were a status change
-                        flight.setStatus(newStatus);
-                        if (sendNotifications) {
-                            NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(NotificationService.this);
-                            buildNotificationForSatatusChange(notifBuilder, flight);
-                            notifications.put(flight.getID(), notifBuilder.build());
-                        }
-                        changed[0] = true;
-                    } else {
-                        Map<FlightStatusComparator.ComparableField, Object> statusDifferences = new FlightStatusComparator(flight.getStatus()).compare(newStatus);
-                        if (!statusDifferences.isEmpty()) {
-                            Log.d("VOLANDO", "Status changed for " + flight.toString());
-                            flight.setStatus(newStatus);
-                            if (sendNotifications) {
-                                notifications.put(flight.getID(), buildNotification(flight, statusDifferences));
+        for (final FlightStatus status : statuses) {
+            API.getInstance().getFlightStatus(
+                    status.getAirline().getID(),
+                    status.getFlight().getNumber(),
+                    this,
+                    new NetworkRequestCallback<FlightStatus>() {
+                        @Override
+                        public void execute(Context c, FlightStatus newStatus) {
+                            boolean sendNotifications = PreferenceManager.getDefaultSharedPreferences(NotificationService.this).getBoolean(getString(R.string.pref_key_notify_on_update), Boolean.parseBoolean(getString(R.string.pref_default_notify_on_update)));
+                            //Calculate differences and build notifications as appropriate
+                            Map<FlightStatusComparator.ComparableField, Object> statusDifferences = new FlightStatusComparator(status).compare(newStatus);
+                            if (!statusDifferences.isEmpty()) {
+                                Log.d("VOLANDO", "Status changed for " + status.getFlight().toString());
+                                persistentData.updateStatus(status, newStatus, NotificationService.this);
+                                if (sendNotifications) {
+                                    notifications.put(status.getFlight().getID(), buildNotification(status, statusDifferences));
+                                }
+                                changed[0] = true;
                             }
-                            changed[0] = true;
-                        }
-                    }
-                    //Last update finished?
-                    if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
-                        if (changed[0]) {
-                            //First, save the updated flights
-                            fileManager.saveFollowedFlights(flights);
-                            //All updates completed, send all notifications at the same time
-                            NotificationManager notifManager = (NotificationManager) NotificationService.this.getSystemService(NOTIFICATION_SERVICE);
-                            for (Map.Entry<Integer, Notification> entry : notifications.entrySet()) {
-                                notifManager.notify(entry.getKey(), entry.getValue());
+                            //Last update finished?
+                            if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
+                                if (changed[0]) {
+                                    //All updates completed, send all notifications at the same time
+                                    NotificationManager notifManager = (NotificationManager) NotificationService.this.getSystemService(NOTIFICATION_SERVICE);
+                                    for (Map.Entry<Integer, Notification> entry : notifications.entrySet()) {
+                                        notifManager.notify(entry.getKey(), entry.getValue());
+                                    }
+                                }
+                                if (broadcastOnComplete) {
+                                    Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
+                                    intent.putExtra(EXTRA_CHANGED_FLIGHT_IDS, (Serializable) notifications.keySet());
+                                    LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
+                                }
                             }
                         }
-                        if (broadcastOnComplete) {
-                            Intent intent = new Intent(ACTION_UPDATES_COMPLETE);
-                            LocalBroadcastManager.getInstance(NotificationService.this).sendBroadcast(intent);
+                    },
+                    new NetworkRequestCallback<String>() {
+                        @Override
+                        public void execute(Context c, String param) {
+                            Log.w("VOLANDO", "Error getting status updates for " + status.toString() + ":\n" + param);  //TODO notify user? Try again right away? Wait?
                         }
-                    }
-                }
-
-                @Override
-                protected void errorCallback(String result) {
-                    super.errorCallback("Error getting status updates for " + flight.toString() + ":\n" + result);
-                }
-            }.execute();
+                    });
         }
     }
 

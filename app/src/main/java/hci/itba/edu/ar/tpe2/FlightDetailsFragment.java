@@ -53,22 +53,19 @@ public class FlightDetailsFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FlightDetailsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FlightDetailsFragment newInstance(String param1, String param2) {
-        FlightDetailsFragment fragment = new FlightDetailsFragment();
-        Bundle args = new Bundle();
-        //   args.putString(ARG_PARAM1, param1);
-        //   args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    @Override
+    public void onResume() {
+        super.onResume();
+        //(Re-)register refresh broadcast receiver
+        updateView();
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_FLIGHTS_UPDATED));
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshCompleteBroadcastReceiver);
     }
 
     @Override

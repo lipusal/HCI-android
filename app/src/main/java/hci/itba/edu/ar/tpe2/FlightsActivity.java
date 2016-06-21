@@ -7,9 +7,11 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -29,15 +31,19 @@ import android.widget.ListView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.firebase.messaging.RemoteMessage;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.io.Serializable;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
@@ -63,10 +69,34 @@ public class FlightsActivity extends AppCompatActivity
      */
     private GoogleApiClient client;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
+    private CoordinatorLayout coordinatorLayout;
+    private BroadcastReceiver flightsUpdateBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             swipeRefreshLayout.setRefreshing(false);
+            Set<Integer> changedFlightIDs = (Set<Integer>) intent.getSerializableExtra(NotificationService.EXTRA_CHANGED_FLIGHT_IDS);
+            if (changedFlightIDs.isEmpty()) {
+                return;
+            }
+            if (changedFlightIDs.size() == 1) {
+                for (Integer ID : changedFlightIDs) { //Will only run once
+                    FlightStatus changedStatus = persistentData.getWatchedStatuses().get(ID);
+                    Snackbar.make(coordinatorLayout, changedStatus.getFlight().toString() + " " + changedStatus.toString(), Snackbar.LENGTH_LONG)
+                            .setAction(
+                                    "View",
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            //TODO NOW go to details
+                                            //TODO make this broadcast receiver a class and make its constructor receive a coordinator layout
+                                        }
+                                    })
+                            .show();
+                }
+            } else {  //Multiple flights changed
+
+            }
+            refreshFlights();
         }
     };
 
@@ -74,6 +104,7 @@ public class FlightsActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_flights);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -88,8 +119,7 @@ public class FlightsActivity extends AppCompatActivity
         });
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -98,6 +128,8 @@ public class FlightsActivity extends AppCompatActivity
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
         swipeRefreshLayout.setOnRefreshListener(this);
@@ -185,13 +217,13 @@ public class FlightsActivity extends AppCompatActivity
         }
 
         //(Re-)register refresh broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
+        LocalBroadcastManager.getInstance(this).registerReceiver(flightsUpdateBroadcastReceiver, new IntentFilter(NotificationService.ACTION_FLIGHTS_UPDATED));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshCompleteBroadcastReceiver);
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(flightsUpdateBroadcastReceiver);
     }
 
     @Override
