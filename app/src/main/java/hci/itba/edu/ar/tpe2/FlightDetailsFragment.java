@@ -131,7 +131,7 @@ public class FlightDetailsFragment extends Fragment {
             case "D": extraDetail.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_diverging, getActivity().getTheme()), null, getActivity().getResources().getDrawable(R.drawable.ic_flight_diverging, getActivity().getTheme()), null);;
             case "S": extraDetail.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_schelduled, getActivity().getTheme()), null, getActivity().getResources().getDrawable(R.drawable.ic_flight_schelduled, getActivity().getTheme()), null);;
             case "F": extraDetail.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_flying, getActivity().getTheme()), null, getActivity().getResources().getDrawable(R.drawable.ic_flight_flying, getActivity().getTheme()), null);
-            default;
+            default:;
         }
         Airport departureAirport = flightStatus.getOriginAirport();
         Airport arrivalAirport = flightStatus.getDestinationAirport();
