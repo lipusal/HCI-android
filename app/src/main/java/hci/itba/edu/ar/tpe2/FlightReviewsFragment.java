@@ -61,7 +61,7 @@ public class FlightReviewsFragment extends Fragment {
         API.getInstance().getAllReviews(activity.getFlightStatus().getFlight(), activity, new NetworkRequestCallback<Review[]>() {
             @Override
             public void execute(Context c, Review[] result) {
-                reviews = new ArrayList<Review>(Arrays.asList(result));
+                reviews = new ArrayList<>(Arrays.asList(result));
                 if (reviewsAdapter == null) {
                     reviewsAdapter = new ReviewAdapter(activity, reviews);
                     reviewsList.setAdapter(reviewsAdapter);
