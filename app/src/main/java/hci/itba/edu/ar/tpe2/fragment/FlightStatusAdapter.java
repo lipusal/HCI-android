@@ -27,11 +27,13 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 /**
  * Adapter for displaying list of flights.
  */
-public class FlightAdapter extends ArrayAdapter<FlightStatus> {
+public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
     private CoordinatorLayout mCoordinatorLayout;
+    private final PersistentData persistentData;
 
-    FlightAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB) {
+    FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB) {
         super(context, 0, objects);
+        persistentData = new PersistentData(context);
         mCoordinatorLayout = layoutWithFAB;
     }
 
@@ -40,16 +42,17 @@ public class FlightAdapter extends ArrayAdapter<FlightStatus> {
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.list_item_flight_status, parent, false);
         }
-        final PersistentData persistentData = new PersistentData(destination.getContext());
         final List<FlightStatus> watchedStatuses = persistentData.getWatchedStatuses();
         final FlightStatus status = getItem(position);
         final Flight flight = status.getFlight();
+
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
         ImageLoader.getInstance().displayImage(status.getAirline().getLogoURL(), icon);
+
         //Text
         TextView title = (TextView) destination.findViewById(R.id.flight_text);
-        title.setText(status.getAirline().getName() + " #" + flight.getNumber());
+        title.setText(flight.toString());
 
         //Status
         ImageView statusIcon = (ImageView) destination.findViewById(R.id.status_icon);
@@ -64,21 +67,25 @@ public class FlightAdapter extends ArrayAdapter<FlightStatus> {
             public void onClick(View v) {
                 if (watchedStatuses.contains(status)) {
                     persistentData.stopWatchingStatus(status, finalDestination.getContext());
+                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_off_24dp);
-                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + status.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.watchStatus(status, finalDestination.getContext());
+                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_on_24dp);
                         }
                     }).show();
                 } else {
                     persistentData.watchStatus(status, finalDestination.getContext());
+                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_on_24dp);
-                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + status.toString(), Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.stopWatchingStatus(status, finalDestination.getContext());
+                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_off_24dp);
                         }
                     }).show();

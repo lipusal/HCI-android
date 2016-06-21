@@ -87,7 +87,6 @@ public class NotificationService extends IntentService {
             }
             return;
         }
-        final Gson g = new Gson();
         final AtomicInteger requestsLeft = new AtomicInteger(statuses.size());       //To avoid race condition when waiting for all AsyncTasks to complete
         final Map<Integer, Notification> notifications = new HashMap<>(statuses.size());
         final Boolean[] changed = {false};

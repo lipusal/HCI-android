@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 
@@ -15,7 +14,6 @@ import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.R;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 
 /**
@@ -58,7 +56,7 @@ public class FlightStatusListFragment extends ListFragment {
                 statuses = Collections.EMPTY_LIST;
             }
         }
-        setListAdapter(new FlightAdapter(getActivity(), statuses, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
+        setListAdapter(new FlightStatusAdapter(getActivity(), statuses, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
     }
 
     @Override

@@ -69,7 +69,6 @@ public class SearchActivity extends AppCompatActivity
                                 @Override
                                 public void execute(Context c, String param) {
                                     //TODO snackbar/toast or error icon
-
                                     Log.d("VOLANDO", "Couldn't get status for " + airlineField.getText().toString() + "# " + flightField.getText().toString());
                                 }
                             });

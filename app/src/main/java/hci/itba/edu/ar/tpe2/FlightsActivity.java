@@ -50,6 +50,7 @@ public class FlightsActivity extends AppCompatActivity
         @Override
         public void onReceive(Context context, Intent intent) {
             swipeRefreshLayout.setRefreshing(false);
+            refreshFlights();
         }
     };
     /**
@@ -114,7 +115,7 @@ public class FlightsActivity extends AppCompatActivity
                             //TODO remove loading animation
                             //TODO refresh Your Flights list if necessary
                             if (!NotificationScheduler.areUpdatesEnabled()) {
-                                Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);
+                                Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);   //Set automatic updates (NotificationScheduler will handle all the logic)
                                 sendBroadcast(i);
                             }
                         }
@@ -126,7 +127,6 @@ public class FlightsActivity extends AppCompatActivity
                         }
                     });
         }
-
     }
 
     @Override
@@ -137,42 +137,7 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
-        //Add/refresh the flights fragment, enable/disable swipe to refresh
-        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
-        if (watchedFlights == null || watchedFlights.isEmpty()) {
-            swipeRefreshLayout.setEnabled(false);
-            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
-                flightsFragment = null;
-            }
-        }
-        else {
-            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
-            }
-
-            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
-            getSupportFragmentManager().executePendingTransactions();   //Otherwise the view in the next line might not yet exist
-            final ListView flightsFragmentListView = flightsFragment.getListView();
-            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if (flightsFragmentListView.getChildAt(0) != null) {
-                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
-                    }
-                }
-            });
-        }
+        refreshFlights();
 
         //(Re-)register refresh broadcast receiver
         LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
@@ -295,5 +260,48 @@ public class FlightsActivity extends AppCompatActivity
         client.disconnect();
     }
 
+    /**
+     * (Re-)fills the fragment container with the latest info in the followed flights. If there are
+     * no watched flights, places a text fragment to show this. Otherwise, places a list fragment
+     * listing the status of all watched flights with their latest available status.
+     */
+    private void refreshFlights() {
+        //Add/refresh the flights fragment, enable/disable swipe to refresh
+        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
+        if (watchedFlights == null || watchedFlights.isEmpty()) {
+            //No watched flights, put text fragment in the fragment container
+            swipeRefreshLayout.setEnabled(false);
+            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
+            if (flightsFragment == null) {    //Creating for the first time
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
+                flightsFragment = null;
+            }
+        } else {
+            //Watched flights, put text flights list fragment in the fragment container
+            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
+            if (flightsFragment == null) {    //Creating for the first time
+                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+            } else {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+            }
 
+            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
+            getSupportFragmentManager().executePendingTransactions();   //Otherwise the view in the next line might not yet exist
+            final ListView flightsFragmentListView = flightsFragment.getListView();
+            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if (flightsFragmentListView.getChildAt(0) != null) {
+                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
+                    }
+                }
+            });
+        }
+    }
 }
