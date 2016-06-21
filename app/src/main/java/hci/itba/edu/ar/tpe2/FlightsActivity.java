@@ -4,10 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.content.ContextCompat;
@@ -18,11 +16,9 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.AbsListView;
 import android.widget.ListView;
 
@@ -32,36 +28,22 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import hci.itba.edu.ar.tpe2.backend.FileManager;
-import hci.itba.edu.ar.tpe2.backend.data.Airline;
-import hci.itba.edu.ar.tpe2.backend.data.Airport;
-import hci.itba.edu.ar.tpe2.backend.data.City;
-import hci.itba.edu.ar.tpe2.backend.data.Country;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
-import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
-import hci.itba.edu.ar.tpe2.fragment.FlightsListFragment;
+import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     private PersistentData persistentData;
-    private FlightsListFragment flightsFragment;
-    /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
-     * See https://g.co/AppIndexing/AndroidStudio for more information.
-     */
-    private GoogleApiClient client;
+    private FlightStatusListFragment flightsFragment;
     private SwipeRefreshLayout swipeRefreshLayout;
     private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
         @Override
@@ -69,6 +51,11 @@ public class FlightsActivity extends AppCompatActivity
             swipeRefreshLayout.setRefreshing(false);
         }
     };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -160,7 +147,7 @@ public class FlightsActivity extends AppCompatActivity
                 flightsFragment = null;
             }
         } else {
-            flightsFragment = FlightsListFragment.newInstance(new FileManager(this).loadFollowedFlights());
+            flightsFragment = FlightStatusListFragment.newInstance(new FileManager(this).loadWatchedStatuses());
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
             } else {

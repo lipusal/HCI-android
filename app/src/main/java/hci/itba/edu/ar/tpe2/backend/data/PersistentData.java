@@ -123,6 +123,19 @@ public class PersistentData {
         fileManager.saveWatchedStatuses(watchedStatuses);
     }
 
+    public void updateStatus(FlightStatus oldStatus, FlightStatus newStatus, Context context) {
+        int pos = watchedStatuses.indexOf(newStatus);
+        if (pos == -1) {
+            throw new IllegalArgumentException("Status for " + oldStatus.getFlight().toString() + " not watched, can't replace.");
+        }
+        if (newStatus == null) {
+            throw new IllegalArgumentException("Can't replace status with null status, use stopWatchingStatus() to remove it.");
+        }
+        watchedStatuses.remove(pos);
+        watchedStatuses.add(newStatus);
+        fileManager.saveWatchedStatuses(watchedStatuses);
+    }
+
     public void stopWatchingStatus(FlightStatus status, Context context) {
         if (watchedStatuses == null) {
             throw new IllegalStateException("Watched statuses have not been set, can't unwatch status.");
