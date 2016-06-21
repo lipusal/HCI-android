@@ -19,25 +19,10 @@ import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 
-
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link FlightDetailsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link FlightDetailsFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * Fragment used to show details of a flight, given its Status object.
  */
 public class FlightDetailsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     public static final String PARAM_FLIGHT = "FLIGHT";
@@ -92,33 +77,9 @@ public class FlightDetailsFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshCompleteBroadcastReceiver);
     }
 
-
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FlightDetailsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FlightDetailsFragment newInstance(String param1, String param2) {
-        FlightDetailsFragment fragment = new FlightDetailsFragment();
-        Bundle args = new Bundle();
-        //   args.putString(ARG_PARAM1, param1);
-        //   args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            //        mParam1 = getArguments().getString(ARG_PARAM1);
-            //        mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     private void updateView(){
@@ -182,8 +143,6 @@ public class FlightDetailsFragment extends Fragment {
         final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
         flightStatus = activity.getFlightStatus();
 
-
-
         firstPartDetail = (TextView) view.findViewById(R.id.firstPartDetail);
         originDetail1 = (TextView) view.findViewById(R.id.originDetail1);
         originGate = (TextView) view.findViewById(R.id.originGate);
@@ -205,7 +164,6 @@ public class FlightDetailsFragment extends Fragment {
         arrivalDetail3 = (TextView) view.findViewById(R.id.arrivalDetail3);
         arrivalTitle = (TextView) view.findViewById(R.id.arrivalTitle);
         extraDetail = (TextView) view.findViewById(R.id.extraDetail);
-
 
         return view;
     }

@@ -24,14 +24,8 @@ import java.util.List;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 
-/*
-import info.androidhive.materialtabs.R;
-import info.androidhive.materialtabs.fragments.OneFragment;
-import info.androidhive.materialtabs.fragments.ThreeFragment;
-import info.androidhive.materialtabs.fragments.TwoFragment;
-*/
 public class FlightDetailMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightReviewsFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener {
 
     public static final String PARAM_STATUS = "hci.itba.edu.ar.tpe2.FlightDetailMainActivity.STATUS";
     private Toolbar toolbar;
