@@ -8,6 +8,12 @@
     android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
+    <FrameLayout
+    android:id="@+id/fragment_container_main_details"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_centerHorizontal="true"/>
+
     <include
         layout="@layout/app_bar_flight_detail_main"
         android:layout_width="match_parent"

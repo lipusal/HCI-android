@@ -1,5 +1,8 @@
 package hci.itba.edu.ar.tpe2;
 
+
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,9 +15,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+
 
 import android.content.Intent;
 
@@ -25,13 +28,13 @@ import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 
 public class FlightDetailMainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener,  FlightDetailsMainFragment.OnFragmentInteractionListener {
 
     public static final String PARAM_STATUS = "hci.itba.edu.ar.tpe2.FlightDetailMainActivity.STATUS";
     private Toolbar toolbar;
-    private TabLayout tabLayout;
-    private ViewPager viewPager;
+
     FlightStatus flightStatus;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,73 +46,38 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
 
-        tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-        //Get info from the specified flight
+
+
         Intent callerIntent = getIntent();
         if (!callerIntent.hasExtra(PARAM_STATUS)) {
             throw new IllegalStateException("Flight details activity started without " + PARAM_STATUS + " parameter in Intent");
         }
         flightStatus = (FlightStatus) callerIntent.getSerializableExtra(PARAM_STATUS);
+
         setTitle(flightStatus.getAirline().getID() + "#" + flightStatus.getFlight().getNumber());
 
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
 
-        /**
-         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-         this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        fm.beginTransaction();
+        Fragment fragmentDetailsMain = new FlightDetailsMainFragment();
+        Bundle arguments = new Bundle();
+        arguments.putString(PARAM_STATUS,flightStatus.toString());
+        fragmentDetailsMain.setArguments(arguments);
+        ft.add(R.id.fragment_container_main_details, fragmentDetailsMain);
+        ft.commit();
 
-         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-         navigationView.setNavigationItemSelectedListener(this);
-         */
 
     }
 
-    private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-
-        adapter.addFragment(new FlightDetailsFragment(), "Detalles");
-        adapter.addFragment(new FlightReviewsFragment(), "Comentarios");
-
-        viewPager.setAdapter(adapter);
-    }
 
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 
-    class ViewPagerAdapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragmentList = new ArrayList<>();
-        private final List<String> mFragmentTitleList = new ArrayList<>();
 
-        public ViewPagerAdapter(FragmentManager manager) {
-            super(manager);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragmentList.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragmentList.size();
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragmentList.add(fragment);
-            mFragmentTitleList.add(title);
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitleList.get(position);
-        }
-    }
 
     @Override
     public void onBackPressed() {
