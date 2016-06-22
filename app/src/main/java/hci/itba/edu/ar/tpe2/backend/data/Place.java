@@ -7,4 +7,5 @@ public abstract class Place {
     public abstract double getLatitude();
     public abstract double getLongitude();
     public abstract String getID();
+    public abstract String getName();
 }

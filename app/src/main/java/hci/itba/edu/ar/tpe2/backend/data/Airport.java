@@ -18,6 +18,11 @@ public class Airport extends Place implements Serializable {
         return id;
     }
 
+    @Override
+    public String getName() {
+        return description;
+    }
+
     public String getDescription() {
         return description;
     }

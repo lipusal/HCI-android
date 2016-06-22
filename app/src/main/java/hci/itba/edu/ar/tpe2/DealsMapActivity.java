@@ -10,8 +10,10 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -26,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.Correlator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -38,21 +41,25 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.backend.data.Place;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
 
     private GoogleMap mMap;
-    private Deal[] deals;
+    private List<Deal> deals;
     private GoogleApiClient mGoogleApiClient;
     private double latitude;
     private double longitude;
@@ -60,11 +67,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     private static final int PERM_LOCATION = 42;
     private boolean locationPermissionGranted = false;
     private PersistentData persistentData;
+    private CoordinatorLayout coordinatorLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.map_coordinator_layout);
 
         persistentData = new PersistentData(this);
 
@@ -76,11 +85,43 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Go to flights search activity
-                Intent i = new Intent(DealsMapActivity.this, SearchActivity.class);
-                startActivity(i);
+                mMap.clear();
+                Snackbar.make(coordinatorLayout,"Choose your origin airport", Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        cancelEditMap();
+                        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                            @Override
+                            public void onInfoWindowClick(Marker marker) {
+                                return;
+                            }
+                        });
+                    }
+                }).show();
+                Collection<Airport> airports = persistentData.getAirports().values();
+                for(Airport a : airports){
+                    LatLng airportPosition = new LatLng(a.getLatitude(), a.getLongitude());
+                    mMap.addMarker(new MarkerOptions()
+                            .position(airportPosition)
+                            .title(a.getID())
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+                }
+                mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                    @Override
+                    public void onInfoWindowClick(Marker marker) {
+                        findDeals(persistentData.getAirports().get(marker.getTitle()));
+                        closestAirport = persistentData.getAirports().get(marker.getTitle());
+                        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                            @Override
+                            public void onInfoWindowClick(Marker marker) {
+                                return;
+                            }
+                        });
+                    }
+                });
             }
         });
+
         //Drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
@@ -143,20 +184,18 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public View getInfoContents(final Marker marker) {
                 View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
-                City city = persistentData.getCities().get(marker.getTitle());
+                Place place = persistentData.getCities().get(marker.getTitle());
+                if(place == null) {
+                    place = persistentData.getAirports().get(marker.getTitle());
+                }
+
 
                 TextView title = (TextView) view.findViewById(R.id.title);
-                title.setText(city == null ? marker.getTitle() : city.getName());   //Marker for closest airport will cause NPE, take its title directly
+                title.setText(place == null ? marker.getTitle() : place.getName());   //Marker for closest airport will cause NPE, take its title directly
 
                 TextView price = (TextView) view.findViewById(R.id.price);
                 price.setText(marker.getSnippet());
 
-                ImageView image = (ImageView) view.findViewById(R.id.image_marker);
-                if (!marker.getTitle().equals(closestAirport.toString())) {
-                    image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
-                } else {
-                    image.setVisibility(View.GONE);
-                }
 
 
                 /*if(city.getFlickrUrl() == null) {
@@ -211,14 +250,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 return view;
             }
         });
-        googleMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                return false;
-            }
-        });
 
-        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+
+/*        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
 
             @Override
             public void onInfoWindowClick(Marker marker) {
@@ -231,7 +265,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     return;
                 }
             }
-        });
+        });*/
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
     }
@@ -399,9 +433,10 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         API.getInstance().getDeals(origin, this, new NetworkRequestCallback<Deal[]>() {
             @Override
             public void execute(Context c, Deal[] param) {
-                deals = param;
-                List<Deal> orderedDeals = Arrays.asList(deals);
+                Deal[] dealsArray = param;
+                List<Deal> orderedDeals = Arrays.asList(dealsArray);
                 Collections.sort(orderedDeals);
+                deals = orderedDeals;
                 LatLng aux;
 //                float average = 0;
 //                int i = 0;
@@ -413,8 +448,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 float colorValue;
                 for (Deal d : deals) {
                     aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-                    colorValue = (float) (orderedDeals.indexOf(d) * 120.0 / (orderedDeals.size() - (orderedDeals.size() == 1 ? 0 : 1)));
-                    mMap.addMarker(new MarkerOptions()
+                    colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
+                    Marker m = mMap.addMarker(new MarkerOptions()
                             .position(aux)
                             .title(d.getCity().getID())
                             .snippet("$" + Double.toString(d.getPrice()))
@@ -422,5 +457,26 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 }
             }
         });
+    }
+
+    private void cancelEditMap(){
+        mMap.clear();
+        LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
+        mMap.addMarker(new MarkerOptions()
+                .position(airportPosition)
+                .title(closestAirport.toString())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+        float colorValue;
+        LatLng aux;
+
+        for(Deal d: deals){
+            aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
+            colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
+            Marker m = mMap.addMarker(new MarkerOptions()
+                    .position(aux)
+                    .title(d.getCity().getID())
+                    .snippet("$" + Double.toString(d.getPrice()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+        }
     }
 }
