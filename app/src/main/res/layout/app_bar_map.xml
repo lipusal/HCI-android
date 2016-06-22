@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:id="@+id/map_coordinator_layout"
     tools:context="hci.itba.edu.ar.tpe2.DealsMapActivity">
 
     <android.support.design.widget.AppBarLayout
@@ -27,6 +28,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:src="@drawable/ic_search_white" />
+        android:src="@drawable/ic_edit_location" />
 
 </android.support.design.widget.CoordinatorLayout>
