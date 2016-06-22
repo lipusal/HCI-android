@@ -121,13 +121,14 @@ public class FlightStatusListFragment extends ListFragment {
             }
 
             if(dualPane){
-                FlightDetailsMainFragment details = (FlightDetailsMainFragment) getFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+                FlightDetailsMainFragment details = (FlightDetailsMainFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
                 //TODO no crearlo si es el mismo que antes
                 details = new FlightDetailsMainFragment();
                 FlightsActivity flightsActivity =  (FlightsActivity)getActivity();
                 flightsActivity.setFlightStatus(clickedStatus);
-                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
                 ft.replace(R.id.fragment_container_flight_details,details);
+                ft.commit();
             }else{
                 Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
                 detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);

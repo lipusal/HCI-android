@@ -44,7 +44,7 @@ import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, YourFlightsFragment.OnFragmentInteractionListener {
+        implements NavigationView.OnNavigationItemSelectedListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
     @Override
     public void onFragmentInteraction(Uri uri) {
 

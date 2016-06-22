@@ -4,6 +4,10 @@
     android:layout_height="match_parent"
     tools:context="hci.itba.edu.ar.tpe2.FlightDetailsMainFragment">
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/viewpager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 
 </FrameLayout>

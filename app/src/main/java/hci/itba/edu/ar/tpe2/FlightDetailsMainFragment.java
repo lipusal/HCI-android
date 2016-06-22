@@ -75,7 +75,7 @@ public class FlightDetailsMainFragment extends Fragment {
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getActivity().getSupportFragmentManager());
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
 
         adapter.addFragment(new FlightDetailsFragment(), "Detalles");
         adapter.addFragment(new FlightReviewsFragment(), "Comentarios");
@@ -124,7 +124,7 @@ public class FlightDetailsMainFragment extends Fragment {
 
 
         //Get info from the specified flight
-
+        viewPager = (ViewPager) view.findViewById(R.id.viewpager);
 
 
 
@@ -142,7 +142,15 @@ public class FlightDetailsMainFragment extends Fragment {
 
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
+        setupViewPager(viewPager);
+
+        tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
+    }
 
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -155,11 +163,7 @@ public class FlightDetailsMainFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        viewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
 
-        tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
