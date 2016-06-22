@@ -1,5 +1,6 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,11 +39,11 @@ public class FlightStatusComparator {
      * @return A map of the calculated differences, identified by {@link ComparableField} keys. If
      * {@code newStatus} is null, an empty map will be returned.
      */
-    public Map<ComparableField, Object> compare(FlightStatus newStatus) {
+    public Map<ComparableField, Serializable> compare(FlightStatus newStatus) {
         if (newStatus == null) {
             return Collections.emptyMap();
         }
-        Map<ComparableField, Object> result = new HashMap<>();
+        Map<ComparableField, Serializable> result = new HashMap<>();
         //Times TODO contemplate un/boarding delays and landing/takeoff delays
         if (originalStatus.getScheduledDepartureTime() != originalStatus.getScheduledDepartureTime()    //Contemplates null original value and non-null new value and vice-versa
                 || (originalStatus.getScheduledDepartureTime() != null && newStatus.getScheduledDepartureTime() != null && !originalStatus.getScheduledDepartureTime().equals(newStatus.getScheduledDepartureTime()))) {

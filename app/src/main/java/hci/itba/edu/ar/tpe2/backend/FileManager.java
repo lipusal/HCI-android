@@ -15,7 +15,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
@@ -160,22 +162,26 @@ public class FileManager {
         return result.toArray(new Airline[]{});
     }
 
-    public boolean saveWatchedStatuses(List<FlightStatus> statuses) {
+    public boolean saveWatchedStatuses(Map<Integer, FlightStatus> statuses) {
         try {
-            return saveObjects(statuses.toArray(new FlightStatus[0]), StorageFile.STATUSES);
+            return saveObjects(statuses.values().toArray(new FlightStatus[0]), StorageFile.STATUSES);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public List<FlightStatus> loadWatchedStatuses() {
-        List<FlightStatus> result = new ArrayList<>();
+    public Map<Integer, FlightStatus> loadWatchedStatuses() {
+        Map<Integer, FlightStatus> result = new HashMap<>();
         try {
-            loadObjects(context, StorageFile.STATUSES, result);
+            List<FlightStatus> loadedObjects = new ArrayList<>();
+            loadObjects(context, StorageFile.STATUSES, loadedObjects);
+            for(FlightStatus status : loadedObjects) {
+                result.put(status.getFlight().getID(), status);
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return Collections.EMPTY_LIST;
+            return new HashMap<>(); //Collections.EMPTY_MAP does not support put()
         }
         return result;
     }

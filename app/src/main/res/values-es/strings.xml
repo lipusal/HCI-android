@@ -54,4 +54,6 @@
     <string name="pref_update_frequency_never">Deshabilitado</string>
     <string name="pref_summary_notify_on_update_enabled">Enviar una notificación cuando tus vuelos seguidos cambian de estado</string>
     <string name="pref_summary_notify_on_update_disabled">Las actualizaciones automáticas están deshabilitadas</string>
+    <string name="action_view">Ver</string>
+    <string name="no_changes">Sin cambios</string>
 </resources>

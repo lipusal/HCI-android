@@ -1,24 +1,22 @@
 package hci.itba.edu.ar.tpe2;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
-import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,26 +26,21 @@ import android.widget.ListView;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.firebase.messaging.RemoteMessage;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-import java.io.Serializable;
-import java.io.Serializable;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
-import hci.itba.edu.ar.tpe2.backend.FileManager;
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
-import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
+import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
+import hci.itba.edu.ar.tpe2.backend.service.UpdateService;
 import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
@@ -58,35 +51,14 @@ public class FlightsActivity extends AppCompatActivity
     private FlightStatusListFragment flightsFragment;
     private SwipeRefreshLayout swipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
-    private BroadcastReceiver flightsUpdateBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            swipeRefreshLayout.setRefreshing(false);
-            Set<Integer> changedFlightIDs = (Set<Integer>) intent.getSerializableExtra(NotificationService.EXTRA_CHANGED_FLIGHT_IDS);
-            if (changedFlightIDs.isEmpty()) {
-                return;
-            }
-            if (changedFlightIDs.size() == 1) {
-                for (Integer ID : changedFlightIDs) { //Will only run once
-                    FlightStatus changedStatus = persistentData.getWatchedStatuses().get(ID);
-                    Snackbar.make(coordinatorLayout, changedStatus.getFlight().toString() + " " + changedStatus.toString(), Snackbar.LENGTH_LONG)
-                            .setAction(
-                                    "View",
-                                    new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            //TODO NOW go to details
-                                            //TODO make this broadcast receiver a class and make its constructor receive a coordinator layout
-                                        }
-                                    })
-                            .show();
-                }
-            } else {  //Multiple flights changed
+    /**
+     * Broadcast receiver, overrides onReceive() to show a snackbar if there are no changes. Used
+     * only for manual refresh.
+     */
+    private UpdatePriorityReceiver manualRefreshBroadcastReceiver,
+            defaultBroadcastReceiver;
+    private IntentFilter broadcastPriorityFilter;
 
-            }
-            refreshFlights();
-        }
-    };
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -137,8 +109,6 @@ public class FlightsActivity extends AppCompatActivity
             //TODO init this in notif service?
 
 
-
-
         }
 
         persistentData = new PersistentData(this);
@@ -163,6 +133,41 @@ public class FlightsActivity extends AppCompatActivity
                         }
                     });
         }
+
+        //Register receivers with high priority
+        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_FLIGHTS_UPDATED);
+        broadcastPriorityFilter.setPriority(1);
+
+        defaultBroadcastReceiver = new UpdatePriorityReceiver(coordinatorLayout);
+        manualRefreshBroadcastReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
+            @Override
+            public void onNoFlightsChanged() {
+                toggleReceivers();
+                swipeRefreshLayout.setRefreshing(false);
+                Snackbar.make(coordinatorLayout, R.string.no_changes, Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onSingleFlightChanged(FlightStatus newStatus) {
+                toggleReceivers();
+                swipeRefreshLayout.setRefreshing(false);
+                super.onSingleFlightChanged(newStatus);
+                refreshFlights();
+            }
+
+            @Override
+            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses) {
+                toggleReceivers();
+                swipeRefreshLayout.setRefreshing(false);
+                refreshFlights();
+                Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
+            }
+
+            private void toggleReceivers() {
+                FlightsActivity.this.unregisterReceiver(manualRefreshBroadcastReceiver);
+                FlightsActivity.this.registerReceiver(defaultBroadcastReceiver, broadcastPriorityFilter);
+            }
+        };
     }
 
     @Override
@@ -175,14 +180,20 @@ public class FlightsActivity extends AppCompatActivity
 
         refreshFlights();
 
-        //(Re-)register refresh broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(flightsUpdateBroadcastReceiver, new IntentFilter(NotificationService.ACTION_FLIGHTS_UPDATED));
+        //(Re-)register default refresh broadcast receiver
+        registerReceiver(defaultBroadcastReceiver, broadcastPriorityFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(flightsUpdateBroadcastReceiver);
+        try {
+            unregisterReceiver(defaultBroadcastReceiver);
+        } catch (IllegalArgumentException e) { //Default receiver isn't registered, so the manual one must be.
+            Log.d("VOLANDO", "Default receiver not registered in Flights, unregistering manual refresh receiver");
+            swipeRefreshLayout.setRefreshing(false);
+            unregisterReceiver(manualRefreshBroadcastReceiver);
+        }
     }
 
     @Override
@@ -268,11 +279,14 @@ public class FlightsActivity extends AppCompatActivity
 
     @Override
     public void onRefresh() {
-        Intent intent = new Intent(this, NotificationService.class);
-        intent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
-        intent.putExtra(NotificationService.PARAM_BROADCAST_WHEN_COMPLETE, true);
-        startService(intent);
+        //Unregister default receiver, register manual receiver
+        unregisterReceiver(defaultBroadcastReceiver);
+        registerReceiver(manualRefreshBroadcastReceiver, broadcastPriorityFilter);
+        //Send intent to fetch updates now
+        Intent intent = new Intent(this, UpdateService.class);
+        intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
         swipeRefreshLayout.setRefreshing(true);
+        startService(intent);
     }
 
 
@@ -303,7 +317,7 @@ public class FlightsActivity extends AppCompatActivity
      */
     private void refreshFlights() {
         //Add/refresh the flights fragment, enable/disable swipe to refresh
-        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
+        Map<Integer, FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
         if (watchedFlights == null || watchedFlights.isEmpty()) {
             //No watched flights, put text fragment in the fragment container
             swipeRefreshLayout.setEnabled(false);
@@ -316,7 +330,9 @@ public class FlightsActivity extends AppCompatActivity
             }
         } else {
             //Watched flights, put text flights list fragment in the fragment container
-            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
+            List<FlightStatus> list = new ArrayList<>(watchedFlights.size());
+            list.addAll(watchedFlights.values());
+            flightsFragment = FlightStatusListFragment.newInstance(list);
             if (flightsFragment == null) {    //Creating for the first time
                 getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
             } else {

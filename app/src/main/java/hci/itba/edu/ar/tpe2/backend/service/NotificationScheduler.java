@@ -10,7 +10,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
@@ -133,10 +132,10 @@ public class NotificationScheduler extends BroadcastReceiver {
         disableUpdates(context);
         if (frequency != -1) {
             AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            Intent baseIntent = new Intent(context, NotificationService.class);
-            baseIntent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
+            Intent baseIntent = new Intent(context, UpdateService.class);
+            baseIntent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
             futureIntent = PendingIntent.getService(context, 0, baseIntent, 0);
-            manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, 0, frequency, futureIntent);
+            manager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, frequency, frequency, futureIntent);
 
             Log.d("VOLANDO", "Set automatic update frequency to " + frequency + "ms");
         } else {

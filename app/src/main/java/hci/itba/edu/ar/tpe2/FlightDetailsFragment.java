@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
-import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
+import hci.itba.edu.ar.tpe2.backend.service.UpdateService;
 
 /**
  * Fragment used to show details of a flight, given its Status object.
@@ -66,7 +66,7 @@ public class FlightDetailsFragment extends Fragment {
         super.onResume();
         //(Re-)register refresh broadcast receiver
         updateView();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(UpdateService.ACTION_FLIGHTS_UPDATED));
 
     }
 

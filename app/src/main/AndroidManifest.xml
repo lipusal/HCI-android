@@ -12,6 +12,12 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+        App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAp748kzFIPqNtm3pbBlHIJxe6obz0Gm_M" />
@@ -25,19 +31,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/title_activity_search"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".SearchResultsActivity"
             android:label="Results"
             android:parentActivityName=".SearchActivity" />
-        <!--
-        android:excludeFromRecents="true"
-        android:launchMode="singleTask"
-        android:taskAffinity=""
-        -->
 
         <activity
             android:name=".DealsMapActivity"
@@ -56,21 +59,29 @@
         </receiver>
 
         <service
-            android:name=".backend.service.NotificationService"
-            android:exported="false" /><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
+            android:name=".backend.service.UpdateService"
+            android:exported="false" />
+
+        <receiver
+            android:name=".backend.service.NotificationSender"
+            android:enabled="true">
+            <intent-filter>
+                <action
+                    android:name="hci.itba.edu.ar.tpe2.backend.service.action.FLIGHTS_UPDATED"
+                    android:priority="0" /> <!-- Will only receive broadcast if no activity intercepts it -->
+            </intent-filter>
+        </receiver>
 
         <activity
             android:name=".FlightDetailMainActivity"
             android:label="@string/title_activity_flight_detail_main"
             android:parentActivityName=".FlightsActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".SettingsActivity"
             android:label="@string/title_activity_settings" />
+
         <activity
             android:parentActivityName=".FlightDetailMainActivity"
             android:name=".MakeReviewActivity"

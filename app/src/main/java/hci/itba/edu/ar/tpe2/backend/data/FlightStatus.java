@@ -283,4 +283,9 @@ public class FlightStatus implements Serializable {
     public String toString() {
         return validStatus.get(status);
     }
+
+    @Override
+    public int hashCode() {
+        return flight.getID();
+    }
 }

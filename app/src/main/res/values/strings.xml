@@ -16,6 +16,8 @@
     <string name="score">Score</string>
     <string name="action_follow">Follow</string>
     <string name="action_review">Review</string>
+    <string name="action_view">View</string>
+    <string name="no_changes">No changes</string>
 
 
     <string name="searching">Searching</string>

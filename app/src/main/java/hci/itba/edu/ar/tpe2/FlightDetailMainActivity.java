@@ -126,7 +126,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
       //  Flight flight = flightStatus.getFlight();
 
         int id = R.id.action_follow;
-        if (new PersistentData(this).getWatchedStatuses().contains(flightStatus)) {
+        if (new PersistentData(this).getWatchedStatuses().containsValue(flightStatus)) {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
         } else {
             toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
@@ -148,11 +148,11 @@ public class FlightDetailMainActivity extends AppCompatActivity
         if (id == R.id.action_follow) {
             PersistentData persistentData = new PersistentData(this);
 
-            if (persistentData.getWatchedStatuses().contains(flightStatus)) {
-                persistentData.stopWatchingStatus(flightStatus,this);
+            if (persistentData.getWatchedStatuses().containsValue(flightStatus)) {
+                persistentData.stopWatchingStatus(flightStatus);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_off_24dp);
             } else {
-                persistentData.watchStatus(flightStatus, this);
+                persistentData.watchStatus(flightStatus);
                 toolbar.getMenu().findItem(id).setIcon(R.drawable.ic_star_white_on_24dp);
             }
             return true;

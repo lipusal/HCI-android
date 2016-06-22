@@ -27,7 +27,7 @@ public class PersistentData {
     private static Map<String, Currency> currencies;
     @Deprecated
     private static List<Flight> followedFlights;
-    private static List<FlightStatus> watchedStatuses;
+    private static Map<Integer, FlightStatus> watchedStatuses;
     private static Map<String, Language> languages;
 
 
@@ -104,43 +104,47 @@ public class PersistentData {
         PersistentData.airlines = airlines;
     }
 
-    public List<FlightStatus> getWatchedStatuses() {
+    public Map<Integer, FlightStatus> getWatchedStatuses() {
         return watchedStatuses;
     }
 
-    private void setWatchedStatuses(List<FlightStatus> watchedStatuses) {
+    private void setWatchedStatuses(Map<Integer, FlightStatus> watchedStatuses) {
         PersistentData.watchedStatuses = watchedStatuses;
     }
 
-    public void watchStatus(FlightStatus status, Context context) {
+    public void watchStatus(FlightStatus status) {
         if (watchedStatuses == null) {
             throw new IllegalStateException("Watched statuses have not been set, can't watch status.");
         }
-        if (watchedStatuses.contains(status)) {
+        int key = status.getFlight().getID();
+        if (watchedStatuses.containsKey(key)) {
             throw new IllegalArgumentException("Status for " + status.getFlight().toString() + " already watched");
         }
-        watchedStatuses.add(status);
+        watchedStatuses.put(key, status);
         fileManager.saveWatchedStatuses(watchedStatuses);
     }
 
-    public void updateStatus(FlightStatus oldStatus, FlightStatus newStatus, Context context) {
-        int pos = watchedStatuses.indexOf(newStatus);
-        if (pos == -1) {
-            throw new IllegalArgumentException("Status for " + oldStatus.getFlight().toString() + " not watched, can't replace.");
+    public void updateStatus(FlightStatus newStatus) {
+        Flight flight = newStatus.getFlight();
+        if (!watchedStatuses.containsKey(flight.getID())) {
+            throw new IllegalArgumentException("Status for " + flight.toString() + " not watched, can't replace.");
         }
         if (newStatus == null) {
             throw new IllegalArgumentException("Can't replace status with null status, use stopWatchingStatus() to remove it.");
         }
-        watchedStatuses.remove(pos);
-        watchedStatuses.add(newStatus);
+        watchedStatuses.put(flight.getID(), newStatus);
         fileManager.saveWatchedStatuses(watchedStatuses);
     }
 
-    public void stopWatchingStatus(FlightStatus status, Context context) {
+    public void stopWatchingStatus(FlightStatus status) {
         if (watchedStatuses == null) {
             throw new IllegalStateException("Watched statuses have not been set, can't unwatch status.");
         }
-        watchedStatuses.remove(status);
+        Flight flight = status.getFlight();
+        if(!watchedStatuses.containsKey(flight.getID())) {
+            throw new IllegalArgumentException("Status for " + flight.toString() + " not watched, can't unwatch.");
+        }
+        watchedStatuses.remove(flight.getID());
         fileManager.saveWatchedStatuses(watchedStatuses);
     }
 
