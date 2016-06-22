@@ -46,7 +46,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search"
+            android:text="@string/search"
             android:id="@+id/search_button"
             android:layout_below="@+id/flight_number"
             android:layout_centerHorizontal="true"

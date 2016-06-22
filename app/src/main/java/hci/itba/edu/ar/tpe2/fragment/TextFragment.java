@@ -12,12 +12,8 @@ import android.widget.TextView;
 import hci.itba.edu.ar.tpe2.R;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link TextFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link TextFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A simple {@link Fragment} to display text. The text can be changed, but the fragment does not
+ * react to interaction.
  */
 public class TextFragment extends Fragment {
     private String text;
@@ -32,11 +28,6 @@ public class TextFragment extends Fragment {
     public TextFragment() {
         // Required empty public constructor
     }
-
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//    }
 
     public void setText(String text) {
         textView.setText(text);
@@ -64,29 +55,4 @@ public class TextFragment extends Fragment {
         }
         return v;
     }
-
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//    }
-//
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        void onFragmentInteraction(Uri uri);
-//    }
 }

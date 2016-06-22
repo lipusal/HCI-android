@@ -3,6 +3,8 @@ package hci.itba.edu.ar.tpe2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
@@ -10,14 +12,11 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
-
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
@@ -30,6 +29,8 @@ public class SearchActivity extends AppCompatActivity
     private EditText flightField, airlineField;
     private Button searchButton;
     private Toolbar toolbar;
+    private CoordinatorLayout coordinatorLayout;
+
     private UpdatePriorityReceiver updatesReceiver;
 
     @Override
@@ -48,11 +49,17 @@ public class SearchActivity extends AppCompatActivity
         toolbar.setTitle(R.string.title_activity_search);
         setSupportActionBar(toolbar);
 
+        coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
-                    //Go toField flights search activity
+                    final Snackbar searchingSnackbar = Snackbar.make(coordinatorLayout, R.string.searching, Snackbar.LENGTH_INDEFINITE);
+                    searchingSnackbar.show();
+                    searchButton.setEnabled(false);
+                    searchButton.setText(R.string.searching);
+                    //Search and go if found
                     String airlineID = airlineField.getText().toString();
                     int flightNumber = Integer.parseInt(flightField.getText().toString());
                     API.getInstance().getFlightStatus(
@@ -62,18 +69,27 @@ public class SearchActivity extends AppCompatActivity
                             new NetworkRequestCallback<FlightStatus>() {
                                 @Override
                                 public void execute(Context context, FlightStatus fetchedStatus) {
-                                    FlightStatus flightStatus = fetchedStatus;
+                                    searchingSnackbar.dismiss();
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
-                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
+                                    searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, fetchedStatus);
                                     startActivity(searchIntent);
                                 }
                             },
                             new NetworkRequestCallback<String>() {
                                 @Override
                                 public void execute(Context c, String param) {
-                                    //TODO show something nicer
-                                    Toast.makeText(SearchActivity.this, getString(R.string.err_no_flights_found), Toast.LENGTH_SHORT).show();    //TODO network error or no flights found?
-                                    Log.d("VOLANDO", "Couldn't get status for " + airlineField.getText().toString() + "# " + flightField.getText().toString());
+                                    //Dismiss current snackbar, and only when done show the new one
+//                                    searchingSnackbar.setCallback(new Snackbar.Callback() {
+//                                        @Override
+//                                        public void onDismissed(Snackbar snackbar, int event) {
+//                                            super.onDismissed(snackbar, event);
+//                                        }
+//                                    });
+                                    searchingSnackbar.dismiss();
+                                    Snackbar.make(coordinatorLayout, R.string.err_no_flights_found, Snackbar.LENGTH_LONG).show();
+                                    searchButton.setEnabled(true);
+                                    searchButton.setText(R.string.search);
+                                    //Wait until the "Searching" snackbar has been dismissed, then show the new one
                                 }
                             });
 
@@ -98,10 +114,15 @@ public class SearchActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
-        updatesReceiver = UpdatePriorityReceiver.registerNewInstance(this, findViewById(android.R.id.content));
+
+        searchButton.setEnabled(true);
+        searchButton.setText(R.string.search);
+
+        updatesReceiver = UpdatePriorityReceiver.registerNewInstance(this, coordinatorLayout);
     }
 
     @Override
