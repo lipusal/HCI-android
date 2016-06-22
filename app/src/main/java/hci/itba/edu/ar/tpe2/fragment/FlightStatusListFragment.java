@@ -2,8 +2,10 @@ package hci.itba.edu.ar.tpe2.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.ListFragment;
 import android.view.View;
 import android.widget.ListView;
@@ -13,6 +15,8 @@ import java.util.Collections;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
+import hci.itba.edu.ar.tpe2.FlightDetailsMainFragment;
+import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 
@@ -106,9 +110,29 @@ public class FlightStatusListFragment extends ListFragment {
 
         @Override
         public void onFlightClicked(FlightStatus clickedStatus) {
-            Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
-            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
-            startActivity(detailsIntent);
+            boolean dualPane;
+// = ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
+            View detailsFrame = getActivity().findViewById(R.id.fragment_container_flight_details);
+            dualPane = detailsFrame !=null && detailsFrame.getVisibility() == View.VISIBLE;
+            if(dualPane){
+                getActivity().setTitle("true");
+            }else{
+                getActivity().setTitle("false");
+            }
+
+            if(dualPane){
+                FlightDetailsMainFragment details = (FlightDetailsMainFragment) getFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+                //TODO no crearlo si es el mismo que antes
+                details = new FlightDetailsMainFragment();
+                FlightsActivity flightsActivity =  (FlightsActivity)getActivity();
+                flightsActivity.setFlightStatus(clickedStatus);
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.replace(R.id.fragment_container_flight_details,details);
+            }else{
+                Intent detailsIntent = new Intent(getActivity(), FlightDetailMainActivity.class);
+                detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
+                startActivity(detailsIntent);
+            }
         }
     }
 

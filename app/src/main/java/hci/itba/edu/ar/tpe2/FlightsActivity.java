@@ -8,6 +8,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
@@ -41,23 +44,21 @@ import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
+        implements NavigationView.OnNavigationItemSelectedListener, YourFlightsFragment.OnFragmentInteractionListener {
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
 
     private PersistentData persistentData;
-    private FlightStatusListFragment flightsFragment;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            swipeRefreshLayout.setRefreshing(false);
-            refreshFlights();
-        }
-    };
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,11 +89,7 @@ public class FlightsActivity extends AppCompatActivity
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(this, R.color.colorAccent),
-                ContextCompat.getColor(this, R.color.colorPrimary));
+
 
         //Configure the image loader GLOBALLY. Other activities can use it after this
         if (!ImageLoader.getInstance().isInited()) {
@@ -127,6 +124,17 @@ public class FlightsActivity extends AppCompatActivity
                         }
                     });
         }
+
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+
+        fm.beginTransaction();
+        Fragment fragmentYourFlight = new YourFlightsFragment();
+//        Bundle arguments = new Bundle();
+//        arguments.putString(PARAM_STATUS,flightStatus.toString());
+//        fragmentDetailsMain.setArguments(arguments);
+        ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
+        ft.commit();
     }
 
     @Override
@@ -137,16 +145,12 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
-        refreshFlights();
-
-        //(Re-)register refresh broadcast receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(refreshCompleteBroadcastReceiver);
+
     }
 
     @Override
@@ -230,14 +234,7 @@ public class FlightsActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onRefresh() {
-        Intent intent = new Intent(this, NotificationService.class);
-        intent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
-        intent.putExtra(NotificationService.PARAM_BROADCAST_WHEN_COMPLETE, true);
-        startService(intent);
-        swipeRefreshLayout.setRefreshing(true);
-    }
+
 
 
     @Override
@@ -260,48 +257,12 @@ public class FlightsActivity extends AppCompatActivity
         client.disconnect();
     }
 
-    /**
-     * (Re-)fills the fragment container with the latest info in the followed flights. If there are
-     * no watched flights, places a text fragment to show this. Otherwise, places a list fragment
-     * listing the status of all watched flights with their latest available status.
-     */
-    private void refreshFlights() {
-        //Add/refresh the flights fragment, enable/disable swipe to refresh
-        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
-        if (watchedFlights == null || watchedFlights.isEmpty()) {
-            //No watched flights, put text fragment in the fragment container
-            swipeRefreshLayout.setEnabled(false);
-            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
-                flightsFragment = null;
-            }
-        } else {
-            //Watched flights, put text flights list fragment in the fragment container
-            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
-            }
-
-            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
-            getSupportFragmentManager().executePendingTransactions();   //Otherwise the view in the next line might not yet exist
-            final ListView flightsFragmentListView = flightsFragment.getListView();
-            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if (flightsFragmentListView.getChildAt(0) != null) {
-                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
-                    }
-                }
-            });
-        }
+    private FlightStatus flightStatus;
+    public FlightStatus getFlightStatus(){
+        return flightStatus;
     }
+    public void setFlightStatus(FlightStatus newFlightStatus){
+        flightStatus = newFlightStatus;
+    }
+
 }

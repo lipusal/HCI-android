@@ -1,12 +1,31 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
+import android.widget.ListView;
+
+import java.util.List;
+
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
+import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
+import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 
 /**
@@ -17,7 +36,7 @@ import android.view.ViewGroup;
  * Use the {@link YourFlightsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class YourFlightsFragment extends Fragment {
+public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -27,7 +46,20 @@ public class YourFlightsFragment extends Fragment {
     private String mParam1;
     private String mParam2;
 
+    private boolean dualPane;
+
+    private PersistentData persistentData;
     private OnFragmentInteractionListener mListener;
+
+    private FlightStatusListFragment flightsFragment;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            swipeRefreshLayout.setRefreshing(false);
+            refreshFlights();
+        }
+    };
 
     public YourFlightsFragment() {
         // Required empty public constructor
@@ -64,7 +96,38 @@ public class YourFlightsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_your_flights, container, false);
+        View view = inflater.inflate(R.layout.fragment_your_flights, container, false);
+
+
+
+
+
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        swipeRefreshLayout.setColorSchemeColors(
+                ContextCompat.getColor(view.getContext(), R.color.colorAccent),
+                ContextCompat.getColor(view.getContext(), R.color.colorPrimary));
+
+        return view;
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+
+        refreshFlights();
+
+        //(Re-)register refresh broadcast receiver
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(NotificationService.ACTION_UPDATES_COMPLETE));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshCompleteBroadcastReceiver);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -77,6 +140,9 @@ public class YourFlightsFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        View detailsFrame = getActivity().findViewById(R.id.fragment_container_flight_details);
+        dualPane = detailsFrame !=null && detailsFrame.getVisibility() == View.VISIBLE;
+        persistentData = new PersistentData(getActivity());
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
         } else {
@@ -104,5 +170,60 @@ public class YourFlightsFragment extends Fragment {
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
         void onFragmentInteraction(Uri uri);
+    }
+
+    /**
+     * (Re-)fills the fragment container with the latest info in the followed flights. If there are
+     * no watched flights, places a text fragment to show this. Otherwise, places a list fragment
+     * listing the status of all watched flights with their latest available status.
+     */
+    private void refreshFlights() {
+        //Add/refresh the flights fragment, enable/disable swipe to refresh
+        List<FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
+        FragmentManager fm = getChildFragmentManager();
+        if (watchedFlights == null || watchedFlights.isEmpty()) {
+            //No watched flights, put text fragment in the fragment container
+            swipeRefreshLayout.setEnabled(false);
+            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
+            if (flightsFragment == null) {    //Creating for the first time
+                fm.beginTransaction().add(R.id.fragment_container, textFragment).commit();
+            } else {
+                fm.beginTransaction().replace(R.id.fragment_container, textFragment).commit();
+                flightsFragment = null;
+            }
+        } else {
+            //Watched flights, put text flights list fragment in the fragment container
+            flightsFragment = FlightStatusListFragment.newInstance(watchedFlights);
+            if (flightsFragment == null) {    //Creating for the first time
+                fm.beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
+            } else {
+                fm.beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+            }
+
+            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
+            fm.executePendingTransactions();   //Otherwise the view in the next line might not yet exist
+            final ListView flightsFragmentListView = flightsFragment.getListView();
+            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+
+                @Override
+                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                    if (flightsFragmentListView.getChildAt(0) != null) {
+                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
+                    }
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onRefresh() {
+        Intent intent = new Intent(getActivity(), NotificationService.class);
+        intent.setAction(NotificationService.ACTION_NOTIFY_UPDATES);
+        intent.putExtra(NotificationService.PARAM_BROADCAST_WHEN_COMPLETE, true);
+        getActivity().startService(intent);
+        swipeRefreshLayout.setRefreshing(true);
     }
 }
