@@ -16,7 +16,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,7 +30,6 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -52,11 +50,9 @@ public class FlightsActivity extends AppCompatActivity
     private SwipeRefreshLayout swipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
     /**
-     * Broadcast receiver, overrides onReceive() to show a snackbar if there are no changes. Used
-     * only for manual refresh.
+     * Broadcast receiver, reacts differently to manual and automatic updates.
      */
-    private UpdatePriorityReceiver manualRefreshBroadcastReceiver,
-            defaultBroadcastReceiver;
+    private UpdatePriorityReceiver updatesReceiver;
     private IntentFilter broadcastPriorityFilter;
 
     /**
@@ -134,38 +130,35 @@ public class FlightsActivity extends AppCompatActivity
                     });
         }
 
-        //Register receivers with high priority
-        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_FLIGHTS_UPDATED);
+        //Register receiver with high priority
+        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
         broadcastPriorityFilter.setPriority(1);
-
-        defaultBroadcastReceiver = new UpdatePriorityReceiver(coordinatorLayout);
-        manualRefreshBroadcastReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
+        updatesReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
             @Override
-            public void onNoFlightsChanged() {
-                toggleReceivers();
-                swipeRefreshLayout.setRefreshing(false);
-                Snackbar.make(coordinatorLayout, R.string.no_changes, Snackbar.LENGTH_LONG).show();
+            public void onNoFlightsChanged(boolean manuallyTriggered) {
+                //Manual update completed
+                if (manuallyTriggered) {
+                    swipeRefreshLayout.setRefreshing(false);
+                    Snackbar.make(coordinatorLayout, R.string.no_changes, Snackbar.LENGTH_LONG).show();
+                }
+                //Automatic update completed, do default behavior
+                else {
+                    super.onNoFlightsChanged(manuallyTriggered);
+                }
             }
 
             @Override
-            public void onSingleFlightChanged(FlightStatus newStatus) {
-                toggleReceivers();
+            public void onSingleFlightChanged(FlightStatus newStatus, boolean manuallyTriggered) {
+                super.onSingleFlightChanged(newStatus, manuallyTriggered);
                 swipeRefreshLayout.setRefreshing(false);
-                super.onSingleFlightChanged(newStatus);
                 refreshFlights();
             }
 
             @Override
-            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses) {
-                toggleReceivers();
+            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
                 swipeRefreshLayout.setRefreshing(false);
                 refreshFlights();
                 Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
-            }
-
-            private void toggleReceivers() {
-                FlightsActivity.this.unregisterReceiver(manualRefreshBroadcastReceiver);
-                FlightsActivity.this.registerReceiver(defaultBroadcastReceiver, broadcastPriorityFilter);
             }
         };
     }
@@ -180,20 +173,14 @@ public class FlightsActivity extends AppCompatActivity
 
         refreshFlights();
 
-        //(Re-)register default refresh broadcast receiver
-        registerReceiver(defaultBroadcastReceiver, broadcastPriorityFilter);
+        //(Re-)register updates receiver
+        registerReceiver(updatesReceiver, broadcastPriorityFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        try {
-            unregisterReceiver(defaultBroadcastReceiver);
-        } catch (IllegalArgumentException e) { //Default receiver isn't registered, so the manual one must be.
-            Log.d("VOLANDO", "Default receiver not registered in Flights, unregistering manual refresh receiver");
-            swipeRefreshLayout.setRefreshing(false);
-            unregisterReceiver(manualRefreshBroadcastReceiver);
-        }
+        unregisterReceiver(updatesReceiver);
     }
 
     @Override
@@ -279,12 +266,10 @@ public class FlightsActivity extends AppCompatActivity
 
     @Override
     public void onRefresh() {
-        //Unregister default receiver, register manual receiver
-        unregisterReceiver(defaultBroadcastReceiver);
-        registerReceiver(manualRefreshBroadcastReceiver, broadcastPriorityFilter);
         //Send intent to fetch updates now
         Intent intent = new Intent(this, UpdateService.class);
         intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
+        intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, true);
         swipeRefreshLayout.setRefreshing(true);
         startService(intent);
     }

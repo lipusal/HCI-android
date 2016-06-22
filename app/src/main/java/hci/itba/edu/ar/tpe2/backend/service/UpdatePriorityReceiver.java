@@ -30,8 +30,8 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
 
     /**
      * Reacts to flights being updated. Updates the statuses in persistent data and calls
-     * {@link #onNoFlightsChanged()}, {@link #onSingleFlightChanged(FlightStatus)} or
-     * {@link #onMultipleFlightsChanged(Collection)} as appropriate.
+     * {@link #onNoFlightsChanged(boolean)}, {@link #onSingleFlightChanged(FlightStatus, boolean)} or
+     * {@link #onMultipleFlightsChanged(Collection, boolean)} as appropriate.
      *
      * @param context Received broadcast context.
      * @param intent  Received broadcast intent.
@@ -39,10 +39,10 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
     @Override
     public final void onReceive(final Context context, Intent intent) {
         abortBroadcast();   //So notification isn't sent
-        Log.d("VOLANDO", "Broadcast aborted: " + getAbortBroadcast());
+        boolean manuallyTriggered = intent.getBooleanExtra(UpdateService.EXTRA_MANUAL_UPDATE, false);
         Map<Integer, FlightStatus> updatedStatuses = (Map<Integer, FlightStatus>) intent.getSerializableExtra(UpdateService.EXTRA_UPDATES);
         if (updatedStatuses.isEmpty()) {
-            onNoFlightsChanged();
+            onNoFlightsChanged(manuallyTriggered);
             return;
         }
         //Find the old statuses and update them
@@ -51,16 +51,19 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
             newStatus = entry.getValue();
         }
         if (updatedStatuses.size() == 1) {      //newStatus has the only status in the Map
-            onSingleFlightChanged(newStatus);
+            onSingleFlightChanged(newStatus, manuallyTriggered);
         } else {
-            onMultipleFlightsChanged(updatedStatuses.values());
+            onMultipleFlightsChanged(updatedStatuses.values(), manuallyTriggered);
         }
     }
 
     /**
      * Called when no flights were updated.
+     *
+     * @param manualUpdate Whether this occurred from a manual update (e.g. pull to refresh in
+     *                     Flights activity)
      */
-    public void onNoFlightsChanged() {
+    public void onNoFlightsChanged(boolean manualUpdate) {
         //Do nothing
     }
 
@@ -68,8 +71,10 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      * Called when exactly 1 flight was updated.
      *
      * @param newStatus The updated flight status.
+     * @param manualUpdate Whether this occurred from a manual update (e.g. pull to refresh in
+     *                     Flights activity)
      */
-    public void onSingleFlightChanged(FlightStatus newStatus) {
+    public void onSingleFlightChanged(FlightStatus newStatus, boolean manualUpdate) {
         showSnackbar(newStatus);
     }
 
@@ -77,9 +82,11 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      * Called when more than 1 flight was updated.
      *
      * @param newStatuses The updated flight statuses.
+     * @param manualUpdate Whether this occurred from a manual update (e.g. pull to refresh in
+     *                     Flights activity)
      */
-    public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses) {
-
+    public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manualUpdate) {
+        showSnackbar(newStatuses.size());
     }
 
     /**

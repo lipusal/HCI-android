@@ -66,7 +66,7 @@ public class FlightDetailsFragment extends Fragment {
         super.onResume();
         //(Re-)register refresh broadcast receiver
         updateView();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(UpdateService.ACTION_FLIGHTS_UPDATED));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE));
 
     }
 

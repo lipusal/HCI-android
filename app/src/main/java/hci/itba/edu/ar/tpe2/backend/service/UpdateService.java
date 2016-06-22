@@ -26,22 +26,31 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
  * {@code
  *   Intent intent = new Intent(this, UpdateService.class);
  *      intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
+ *      intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, true);
  *      this.startService(intent);
  * }
  * </pre>
  */
 public class UpdateService extends IntentService {
     public static final String ACTION_CHECK_FOR_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.action.CHECK_FOR_UPDATES",
-            ACTION_FLIGHTS_UPDATED = "hci.itba.edu.ar.tpe2.backend.service.action.FLIGHTS_UPDATED";
+            ACTION_UPDATE_COMPLETE = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATE_COMPLETE",
+            ACTION_UPDATE_FAILED = "hci.itba.edu.ar.tpe2.backend.service.action.UPDATE_FAILED";
 
     /**
-     * Extra broadcast parameter, a Map&lt;Integer, FlightStatus&gt; indicating the updated
+     * Extra parameter, set it to {@code true} when triggering a manual update. This is important,
+     * as some activities (e.g. {@link hci.itba.edu.ar.tpe2.FlightsActivity}) react differently to
+     * manual and automatic updates.
+     */
+    public static final String EXTRA_MANUAL_UPDATE = "hci.itba.edu.ar.tpe2.backend.service.extra.MANUAL";
+
+    /**
+     * Extra broadcast parameter, a {@code Map<Integer, FlightStatus>} indicating the updated
      * statuses, identified by their flight ID.
      */
     public static final String EXTRA_UPDATES = "hci.itba.edu.ar.tpe2.backend.service.extra.UPDATES";
 
     /**
-     * Extra broadcast parameter, a Map&lt;Integer, Map&lt;FlightStatusComparator.ComparableField, Serializable&gt;&gt;
+     * Extra broadcast parameter, a {@code Map<Integer, Map<FlightStatusComparator.ComparableField, Serializable>>}
      * indicating the differences in the updated status with respect to their old version,
      * identified by their flight ID.
      */
@@ -56,7 +65,8 @@ public class UpdateService extends IntentService {
         if (intent != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_FOR_UPDATES:
-                    notifyUpdates();
+                    boolean manuallyTriggered = intent.getBooleanExtra(EXTRA_MANUAL_UPDATE, false);
+                    checkForUpdates(manuallyTriggered);
                     break;
             }
         }
@@ -67,16 +77,13 @@ public class UpdateService extends IntentService {
      * persistent data.  Sends an ordered broadcast with a Map of new statuses and their differences
      * with respect to the old ones.
      */
-    private void notifyUpdates() {
+    private void checkForUpdates(final boolean manuallyTriggered) {
         final PersistentData persistentData = new PersistentData(this);
         final Map<Integer, FlightStatus> statuses = persistentData.getWatchedStatuses();
         if (statuses.size() > 0) {
             Log.d("VOLANDO", "Fetching updates for " + statuses.size() + " watched flights");
         } else {
             Log.d("VOLANDO", "No watched flights, not checking updates");
-//            Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
-//            intent.putExtra(EXTRA_UPDATES, (Serializable) Collections.EMPTY_MAP);
-//            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
             return;
         }
 
@@ -104,9 +111,10 @@ public class UpdateService extends IntentService {
                             }
                             if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
                                 //Done, broadcast
-                                Intent intent = new Intent(ACTION_FLIGHTS_UPDATED);
+                                Intent intent = new Intent(ACTION_UPDATE_COMPLETE);
                                 intent.putExtra(EXTRA_UPDATES, (Serializable) updatedStatuses);
                                 intent.putExtra(EXTRA_DIFFERENCES, (Serializable) differences);
+                                intent.putExtra(EXTRA_MANUAL_UPDATE, manuallyTriggered);
                                 sendOrderedBroadcast(intent, null);
                             }
                         }

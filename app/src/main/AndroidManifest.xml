@@ -67,7 +67,7 @@
             android:enabled="true">
             <intent-filter>
                 <action
-                    android:name="hci.itba.edu.ar.tpe2.backend.service.action.FLIGHTS_UPDATED"
+                    android:name="hci.itba.edu.ar.tpe2.backend.service.action.UPDATE_COMPLETE"
                     android:priority="0" /> <!-- Will only receive broadcast if no activity intercepts it -->
             </intent-filter>
         </receiver>
