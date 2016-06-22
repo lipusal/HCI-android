@@ -22,6 +22,7 @@ import android.widget.Toast;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 
 public class SearchActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -29,6 +30,7 @@ public class SearchActivity extends AppCompatActivity
     private EditText flightField, airlineField;
     private Button searchButton;
     private Toolbar toolbar;
+    private UpdatePriorityReceiver updatesReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +101,13 @@ public class SearchActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(1).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
+        updatesReceiver = UpdatePriorityReceiver.registerNewInstance(this, findViewById(android.R.id.content));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(updatesReceiver);
     }
 
     @Override

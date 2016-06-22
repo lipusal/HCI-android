@@ -24,6 +24,7 @@ import android.view.MenuItem;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
+import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 import hci.itba.edu.ar.tpe2.settings.SettingsWrapperActivity;
 
 /**
@@ -38,6 +39,7 @@ import hci.itba.edu.ar.tpe2.settings.SettingsWrapperActivity;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends SettingsWrapperActivity {
+    private UpdatePriorityReceiver receiver;
 
     /**
      * Preference change listener. Changes option summaries and applies requested changes (e.g.
@@ -129,6 +131,18 @@ public class SettingsActivity extends SettingsWrapperActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        receiver = UpdatePriorityReceiver.registerNewInstance(this, findViewById(android.R.id.content));
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
     }
 
     /**

@@ -55,6 +55,7 @@ import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Place;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 
 public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
 
@@ -68,6 +69,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     private boolean locationPermissionGranted = false;
     private PersistentData persistentData;
     private CoordinatorLayout coordinatorLayout;
+    private UpdatePriorityReceiver updatesReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -333,6 +335,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onResume() {
         mGoogleApiClient.connect();     //TODO this may not be necessary on EVERY resume, check docs (also, do we need to check the user's location on EVERY app start?)
         super.onResume();
+        updatesReceiver = UpdatePriorityReceiver.registerNewInstance(this, coordinatorLayout);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(updatesReceiver);
     }
 
     @Override

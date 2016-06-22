@@ -3,9 +3,9 @@ package hci.itba.edu.ar.tpe2.backend.service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 
 import java.util.Collection;
@@ -26,6 +26,24 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      */
     public UpdatePriorityReceiver(View destinationView) {
         this.destinationView = destinationView;
+    }
+
+    /**
+     * Creates a new broadcast receiver and registers it to the specified context with high priority.
+     * Returns the created receiver.
+     *
+     * @param context         Context under which to register the created receiver.
+     * @param destinationView View in which to show the snackbar. If your activity has a FAB, it
+     *                        will be within a {@link CoordinatorLayout}. Pass it here as a parameter
+     *                        so the snackbar moves the FAB up properly.
+     * @return The created receiver.
+     */
+    public static UpdatePriorityReceiver registerNewInstance(Context context, View destinationView) {
+        UpdatePriorityReceiver result = new UpdatePriorityReceiver(destinationView);
+        IntentFilter priorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
+        priorityFilter.setPriority(1);
+        context.registerReceiver(result, priorityFilter);
+        return result;
     }
 
     /**
