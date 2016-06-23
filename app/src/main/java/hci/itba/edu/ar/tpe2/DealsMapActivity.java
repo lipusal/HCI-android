@@ -304,7 +304,12 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             onLocationObtained();
         } else {
-            findDeals(closestAirport);
+            LatLng closestAirportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(closestAirportPosition)
+                    .title(closestAirport.toString())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+            setMarkers(deals);
             //TODO Facu acá modulariza cositas
         }
     }
@@ -481,7 +486,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 List<Deal> orderedDeals = Arrays.asList(dealsArray);
                 Collections.sort(orderedDeals);
                 deals = orderedDeals;
-                LatLng aux;
+
 //                float average = 0;
 //                int i = 0;
 //                for (Deal d : deals) {
@@ -489,18 +494,23 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
 //                    i++;
 //                }
 //                average = average / i;
-                float colorValue;
-                for (Deal d : deals) {
-                    aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-                    colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-                    mMap.addMarker(new MarkerOptions()
-                            .position(aux)
-                            .title(d.getCity().getID())
-                            .snippet("U$S " + String.format("%.2f", d.getPrice()))
-                            .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
-                }
+                setMarkers(deals);
             }
         });
+    }
+
+    private void setMarkers(List<Deal> deals){
+        LatLng aux;
+        float colorValue;
+        for (Deal d : deals) {
+            aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
+            colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
+            mMap.addMarker(new MarkerOptions()
+                    .position(aux)
+                    .title(d.getCity().getID())
+                    .snippet(getResources().getString(R.string.currency) + String.format("%.2f", d.getPrice()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+        }
     }
 
     private void cancelEditMap() {
@@ -510,17 +520,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 .position(airportPosition)
                 .title(closestAirport.toString())
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        float colorValue;
-        LatLng aux;
-
-        for (Deal d : deals) {
-            aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-            colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-            mMap.addMarker(new MarkerOptions()
-                    .position(aux)
-                    .title(d.getCity().getID())
-                    .snippet("U$S " + String.format("%.2f", d.getPrice()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
-        }
+       setMarkers(deals);
     }
 }
