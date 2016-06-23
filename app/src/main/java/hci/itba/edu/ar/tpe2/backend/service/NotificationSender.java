@@ -7,12 +7,14 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +29,8 @@ import hci.itba.edu.ar.tpe2.backend.data.FlightStatusComparator;
  * the broadcast first.
  */
 public class NotificationSender extends BroadcastReceiver {
+    private static final String GROUP_NOTIFICATION_KEY = "hci.itba.edu.ar.tpe2.backend.service.NotificationSender.GROUP_NOTIFICATION_KEY";
+    private static final int GROUP_NOTIFICATION_ID = 42;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -40,25 +44,27 @@ public class NotificationSender extends BroadcastReceiver {
             return;
         }
 
-        /**
-         * Calculate differences and build notifications as appropriate
-         */
-        final Map<Integer, Notification> notifications = new HashMap<>(updatedStatuses.size());
-        for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) {
-            int id = entry.getKey();
-            notifications.put(
-                    id,
-                    buildNotification(
-                            entry.getValue(),
-                            differences.get(id),
-                            context
-                    )
-            );
+        //Build group notification or single notification
+        Notification notif = null;
+        int notifID = -1;
+        for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) { //Will only run once (at most)
+            if (updatedStatuses.size() == 1) {
+                notif = buildSingleNotification(
+                        entry.getValue(),
+                        differences.get(entry.getKey()),
+                        context
+                );
+                notifID = entry.getKey();
+            } else {    //Size > 1
+                notif = buildGroupNotification(updatedStatuses.values(), context);
+                notifID = GROUP_NOTIFICATION_ID;
+                break;
+            }
         }
-        //Notifications built, send all of them
-        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        for (Map.Entry<Integer, Notification> entry : notifications.entrySet()) {
-            notifManager.notify(entry.getKey(), entry.getValue());
+        //If built, send
+        if (notif != null) {
+            NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notifManager.notify(notifID, notif);
         }
     }
 
@@ -72,7 +78,7 @@ public class NotificationSender extends BroadcastReceiver {
      * @param context       Context to build notifications.
      * @return An appropriate notification.
      */
-    private Notification buildNotification(FlightStatus updatedStatus, Map<FlightStatusComparator.ComparableField, Serializable> differences, Context context) {
+    private Notification buildSingleNotification(FlightStatus updatedStatus, Map<FlightStatusComparator.ComparableField, Serializable> differences, Context context) {
         //TODO provide big icon (i.e. for Moto X active display)
         //TODO group notifications for various updates of the same flight
         //TODO if the user so desires, group all notifications of the app into one
@@ -82,8 +88,10 @@ public class NotificationSender extends BroadcastReceiver {
                 .setAutoCancel(true)                                                //Dismiss notification when clicking
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setPriority(Notification.PRIORITY_HIGH)                            //Trigger heads-up
-                //This mouthful gets the sound as set in settings, and falls back to default notification sound if not found TODO not working, plays no sound
-                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))));
+                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))))
+                .setGroup(GROUP_NOTIFICATION_KEY)
+                .setSmallIcon(R.drawable.ic_flight)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_flight));
         //Set extra parameters
         if (preferences.getBoolean(context.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(context.getString(R.string.pref_default_vibrate_on_notify)))) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
@@ -193,5 +201,31 @@ public class NotificationSender extends BroadcastReceiver {
                 notifBuilder.setContentText("=(");  //TODO wat say?
                 break;
         }
+    }
+
+    private Notification buildGroupNotification(Collection<FlightStatus> updatedStatuses, Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setAutoCancel(true)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_flight))
+                .setNumber(updatedStatuses.size())
+                .setGroup(GROUP_NOTIFICATION_KEY)
+                .setGroupSummary(true);
+        //Vibrate if enabled in settings
+        if (preferences.getBoolean(context.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(context.getString(R.string.pref_default_vibrate_on_notify)))) {
+            builder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
+        //Summarize everything
+        NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle()
+                .setBigContentTitle(updatedStatuses.size() + " flights updated")    //TODO use string resource
+                .setSummaryText(context.getString(R.string.app_name));
+        for (FlightStatus status : updatedStatuses) {
+            style.addLine(status.getFlight().toString() + "   " + context.getString(status.getStringResID()));
+        }
+        builder.setStyle(style);
+        return builder.build();
     }
 }

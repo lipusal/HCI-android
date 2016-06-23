@@ -43,20 +43,18 @@ public class FlightStatusComparator {
         }
         Map<ComparableField, Serializable> result = new HashMap<>();
         //Status
-        //TODO delete true, for debugging only
-//        in filght details, as new data arises (i.e. took off), show more rows of info
-        if (/*true || */!originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
+        if (true || !originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
             result.put(ComparableField.STATUS, newStatus.getStatus());
         }
         //Times - if actual departure date is different than scheduled time, add a delay field.
-        if (newStatus.getActualDepartureTime() != null
-                && !originalStatus.getScheduledDepartureTime().equals(newStatus.getActualDepartureTime())) {
-            result.put(ComparableField.DEPARTURE_TIME, newStatus.getActualDepartureTime());
-        }
-        if (newStatus.getActualArrivalTime() != null
-                && !originalStatus.getScheduledArrivalTime().equals(newStatus.getActualArrivalTime())) {
-            result.put(ComparableField.ARRIVAL_TIME, newStatus.getActualArrivalTime());
-        }
+//        if (newStatus.getActualDepartureTime() != null
+//                && !originalStatus.getScheduledDepartureTime().equals(newStatus.getActualDepartureTime())) {
+//            result.put(ComparableField.DEPARTURE_TIME, newStatus.getActualDepartureTime());
+//        }
+//        if (newStatus.getActualArrivalTime() != null
+//                && !originalStatus.getScheduledArrivalTime().equals(newStatus.getActualArrivalTime())) {
+//            result.put(ComparableField.ARRIVAL_TIME, newStatus.getActualArrivalTime());
+//        }
         //Terminals and gates
         if ((originalStatus.getDepartureTerminal() == null && newStatus.getDepartureTerminal() != null)
                 || (originalStatus.getDepartureTerminal() != null && !originalStatus.getDepartureTerminal().equals(newStatus.getDepartureTerminal()))) {
