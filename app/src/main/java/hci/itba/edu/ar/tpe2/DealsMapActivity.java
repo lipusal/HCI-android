@@ -39,6 +39,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,9 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 
 public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
+    private static final String PARAM_LAST_KNOWN_LOCATION = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.LAST_KNOWN_LOCATION";
+    private static final String PARAM_CLOSEST_AIRPORT = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.CLOSEST_AIRPORT";
+    private static final String PARAM_DEALS = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.DEALS";
 
     private GoogleMap mMap;
     private List<Deal> deals;
@@ -71,6 +75,19 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deals_map);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.map_coordinator_layout);
+
+        //Restore last known location and closest, if known
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(PARAM_LAST_KNOWN_LOCATION)) {
+                lastKnownLocation = savedInstanceState.getParcelable(PARAM_LAST_KNOWN_LOCATION);
+            }
+            if (savedInstanceState.containsKey(PARAM_CLOSEST_AIRPORT)) {
+                closestAirport = (Airport) savedInstanceState.getSerializable(PARAM_CLOSEST_AIRPORT);
+            }
+            if (savedInstanceState.containsKey(PARAM_DEALS)) {
+                deals = (List<Deal>) savedInstanceState.getSerializable(PARAM_DEALS);
+            }
+        }
 
         persistentData = new PersistentData(this);
         //Set up the toolbar
@@ -286,6 +303,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             }
             lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             onLocationObtained();
+        } else {
+            findDeals(closestAirport);
+            //TODO Facu acá modulariza cositas
         }
     }
 
@@ -338,6 +358,20 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     protected void onResume() {
         mGoogleApiClient.connect();     //TODO this may not be necessary on EVERY resume, check docs (also, do we need to check the user's location on EVERY app start?)
         super.onResume();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (lastKnownLocation != null) {
+            outState.putParcelable(PARAM_LAST_KNOWN_LOCATION, lastKnownLocation);
+        }
+        if (closestAirport != null) {
+            outState.putSerializable(PARAM_CLOSEST_AIRPORT, closestAirport);
+        }
+        if (deals != null) {
+            outState.putSerializable(PARAM_DEALS, (Serializable) deals);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -459,10 +493,10 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 for (Deal d : deals) {
                     aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
                     colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-                    Marker m = mMap.addMarker(new MarkerOptions()
+                    mMap.addMarker(new MarkerOptions()
                             .position(aux)
                             .title(d.getCity().getID())
-                            .snippet("$" + Double.toString(d.getPrice()))
+                            .snippet("U$S " + String.format("%.2f", d.getPrice()))
                             .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
                 }
             }
@@ -482,10 +516,10 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         for (Deal d : deals) {
             aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
             colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-            Marker m = mMap.addMarker(new MarkerOptions()
+            mMap.addMarker(new MarkerOptions()
                     .position(aux)
                     .title(d.getCity().getID())
-                    .snippet("$" + Double.toString(d.getPrice()))
+                    .snippet("U$S " + String.format("%.2f", d.getPrice()))
                     .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
         }
     }
