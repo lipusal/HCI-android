@@ -55,7 +55,7 @@ public class Review {
      * @return This review's overall score, mapped to a scale of 5. Decimals are rounded down.
      */
     public int getOverall() {
-        return (int) Math.floor(overall / 2);
+        return (int) Math.ceil(overall / 2);
     }
 
     /**
