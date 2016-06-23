@@ -63,4 +63,7 @@
     <string name="status_diverted">Desviado</string>
     <string name="status_landed">Aterrizado</string>
     <string name="status_scheduled">Programado</string>
+    <string name="scheduled">Programado</string>
+    <string name="actual">Real</string>
+    <string name="delay">Demora</string>
 </resources>

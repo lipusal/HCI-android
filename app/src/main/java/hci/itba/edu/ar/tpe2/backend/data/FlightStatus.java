@@ -3,11 +3,20 @@ package hci.itba.edu.ar.tpe2.backend.data;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Period;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.tz.DateTimeZoneBuilder;
+
 import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -20,6 +29,7 @@ import hci.itba.edu.ar.tpe2.R;
 public class FlightStatus implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
+    private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZZ").withOffsetParsed().withLocale(Locale.getDefault());
     private static final Map<String, String> validStatus = new HashMap<>();
     private static final Map<String, Integer> statusResIDs = new HashMap<>();
     static {
@@ -42,7 +52,7 @@ public class FlightStatus implements Serializable {
     private Airline airline;
     private Airport originAirport, destinationAirport;
     private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, baggageClaim;
-    private Date scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
+    private DateTime scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     //TODO incorporate delays
 
@@ -102,19 +112,21 @@ public class FlightStatus implements Serializable {
         }
     }
 
-    private Date parseDate(JsonObject arrivalOrDepartureObject, String dateTimeKey, String timezoneStr) {
-        Date result;
+    private DateTime parseDate(JsonObject arrivalOrDepartureObject, String dateTimeKey, String timezoneStr) {
+        Calendar cal = Calendar.getInstance();
+        DateTime la;
         try {
             JsonElement date = arrivalOrDepartureObject.get(dateTimeKey);
             if (date.isJsonNull()) {
                 return null;
             }
-            result = APIdateFormat.parse(date.getAsString() + " " + timezoneStr);
-        } catch (ParseException e) {
+            cal.setTime(APIdateFormat.parse(date.getAsString() + " " + timezoneStr));
+            la = dateTimeFormatter.parseDateTime(date.getAsString() + timezoneStr);
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
-        return result;
+        return la;
     }
 
     public String getStatus() {
@@ -129,7 +141,7 @@ public class FlightStatus implements Serializable {
         return departureGate;
     }
 
-    public Date getScheduledDepartureTime() {
+    public DateTime getScheduledDepartureTime() {
         return scheduledDepartureTime;
     }
 
@@ -137,7 +149,24 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledDepartureTime);
     }
 
-    public Date getActualDepartureTime() {
+//    public DateTime getDepartureDelay() {
+//        if(actualDepartureTime == null) {   //Hasn't taken off yet
+//            Date now = new Date();
+//            if(now.before(scheduledDepartureTime)) {
+//                return null;
+//            }
+//            else {
+//                Period period = new Period(scheduledDepartureTime, new DateTime(now, DateTimeZone.UTC));
+//            }
+//        }
+//        else {
+//            add delays
+//        }
+//
+//        return null;
+//    }
+
+    public DateTime getActualDepartureTime() {
         return actualDepartureTime;
     }
 
@@ -145,7 +174,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualDepartureTime);
     }
 
-    public Date getScheduledDepartureGateTime() {
+    public DateTime getScheduledDepartureGateTime() {
         return scheduledDepartureGateTime;
     }
 
@@ -153,7 +182,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledDepartureGateTime);
     }
 
-    public Date getActualDepartureGateTime() {
+    public DateTime getActualDepartureGateTime() {
         return actualDepartureGateTime;
     }
 
@@ -161,7 +190,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualDepartureGateTime);
     }
 
-    public Date getScheduledDepartureRunwayTime() {
+    public DateTime getScheduledDepartureRunwayTime() {
         return scheduledDepartureRunwayTime;
     }
 
@@ -169,7 +198,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledDepartureRunwayTime);
     }
 
-    public Date getActualDepartureRunwayTime() {
+    public DateTime getActualDepartureRunwayTime() {
         return actualDepartureRunwayTime;
     }
 
@@ -185,7 +214,7 @@ public class FlightStatus implements Serializable {
         return arrivalGate;
     }
 
-    public Date getScheduledArrivalTime() {
+    public DateTime getScheduledArrivalTime() {
         return scheduledArrivalTime;
     }
 
@@ -193,7 +222,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledArrivalTime);
     }
 
-    public Date getActualArrivalTime() {
+    public DateTime getActualArrivalTime() {
         return actualArrivalTime;
     }
 
@@ -201,7 +230,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualArrivalTime);
     }
 
-    public Date getScheduledArrivalGateTime() {
+    public DateTime getScheduledArrivalGateTime() {
         return scheduledArrivalGateTime;
     }
 
@@ -209,7 +238,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledArrivalGateTime);
     }
 
-    public Date getActualArrivalGateTime() {
+    public DateTime getActualArrivalGateTime() {
         return actualArrivalGateTime;
     }
 
@@ -217,7 +246,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(actualArrivalGateTime);
     }
 
-    public Date getScheduledArrivalRunwayTime() {
+    public DateTime getScheduledArrivalRunwayTime() {
         return scheduledArrivalRunwayTime;
     }
 
@@ -225,7 +254,7 @@ public class FlightStatus implements Serializable {
         return prettyFormat.format(scheduledArrivalRunwayTime);
     }
 
-    public Date getActualArrivalRunwayTime() {
+    public DateTime getActualArrivalRunwayTime() {
         return actualArrivalRunwayTime;
     }
 

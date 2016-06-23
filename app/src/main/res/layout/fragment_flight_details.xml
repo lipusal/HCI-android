@@ -88,15 +88,15 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:id="@+id/departureTimeLabel"
+                            android:id="@+id/scheduledDepartureTimeLabel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/departure"
+                            android:text="@string/scheduled"
                             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
                         <TextView
-                            android:id="@+id/departureTimeText"
+                            android:id="@+id/scheduledDepartureTimeText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -162,6 +162,74 @@
                     </LinearLayout>
                 </RelativeLayout>
             </LinearLayout>
+
+            <!--Extra departure details-->
+            <LinearLayout
+                android:id="@+id/departureExtraDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
+
+                <!--Actual arrival time-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".6">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/actualDepartureTimeLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/actual"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/actualDepartureTimeText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Arrival delay-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".6">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/departureDelayLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/delay"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/departureDelayText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+            </LinearLayout>
             <!--END ORIGIN-->
 
             <!--Divider-->
@@ -205,15 +273,15 @@
                         android:padding="5dp">
 
                         <TextView
-                            android:id="@+id/arrivalTimeLabel"
+                            android:id="@+id/scheduledArrivalTimeLabel"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="@string/arrival"
+                            android:text="@string/scheduled"
                             android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
 
                         <TextView
-                            android:id="@+id/arrivalTimeText"
+                            android:id="@+id/scheduledArrivalTimeText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
@@ -225,7 +293,7 @@
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".2">
+                    android:layout_weight=".3">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -254,7 +322,7 @@
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".2">
+                    android:layout_weight=".3">
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -278,12 +346,80 @@
                             android:textStyle="bold" />
                     </LinearLayout>
                 </RelativeLayout>
+            </LinearLayout>
+
+            <!--Extra arrival details-->
+            <LinearLayout
+                android:id="@+id/arrivalExtraDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="15dp"
+                android:orientation="horizontal">
+
+                <!--Actual arrival time-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".4">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/actualArrivalTimeLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/actual"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/actualArrivalTimeText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Arrival delay-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".3">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/arrivalDelayLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/delay"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/arrivalDelayText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
 
                 <!--Baggage claim-->
                 <RelativeLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight=".2">
+                    android:layout_weight=".3">
 
                     <LinearLayout
                         android:layout_width="match_parent"

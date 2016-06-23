@@ -44,6 +44,7 @@ public class FlightStatusComparator {
         Map<ComparableField, Serializable> result = new HashMap<>();
         //Status
         //TODO delete true, for debugging only
+//        in filght details, as new data arises (i.e. took off), show more rows of info
         if (/*true || */!originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
             result.put(ComparableField.STATUS, newStatus.getStatus());
         }

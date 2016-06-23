@@ -19,6 +19,9 @@
     <string name="action_view">View</string>
     <string name="no_changes">No changes</string>
 
+    <string name="scheduled">Scheduled</string>
+    <string name="actual">Actual</string>
+    <string name="delay">Delay</string>
     <string name="departure">Departure</string>
     <string name="arrival">Arrival</string>
     <string name="status_scheduled">Scheduled</string>
