@@ -4,7 +4,6 @@
     <string name="action_review">Comentar</string>
     <string name="action_settings">Ajustes</string>
     <string name="destination">Destino</string>
-    <string name="baggage">Equipaje</string>
     <string name="direct_flight">Vuelo directo</string>
     <string name="drawer_close">Cerrar cajón de navegación</string>
     <string name="drawer_open">Abrir cajón de navegación</string>
@@ -54,4 +53,11 @@
     <string name="pref_update_frequency_never">Deshabilitado</string>
     <string name="pref_summary_notify_on_update_enabled">Enviar una notificación cuando tus vuelos seguidos cambian de estado</string>
     <string name="pref_summary_notify_on_update_disabled">Las actualizaciones automáticas están deshabilitadas</string>
+    <string name="departure">Partida</string>
+    <string name="arrival">Llegada</string>
+    <string name="status_active">Activo</string>
+    <string name="status_canceled">Cancelado</string>
+    <string name="status_diverted">Desviado</string>
+    <string name="status_landed">Aterrizado</string>
+    <string name="status_scheduled">Programado</string>
 </resources>

@@ -16,7 +16,13 @@
     <string name="score">Score</string>
     <string name="action_follow">Follow</string>
     <string name="action_review">Review</string>
-
+    <string name="departure">Departure</string>
+    <string name="arrival">Arrival</string>
+    <string name="status_scheduled">Scheduled</string>
+    <string name="status_active">Active</string>
+    <string name="status_diverted">Diverted</string>
+    <string name="status_landed">Landed</string>
+    <string name="status_canceled">Canceled</string>
 
     <string name="searching">Searching</string>
     <string name="not_following_flights">No followed flights</string>
