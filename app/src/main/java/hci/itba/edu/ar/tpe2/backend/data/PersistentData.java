@@ -118,8 +118,10 @@ public class PersistentData {
         }
         int key = status.getFlight().getID();
         if (watchedStatuses.containsKey(key)) {
-            throw new IllegalArgumentException("Status for " + status.getFlight().toString() + " already watched");
+            Log.w("VOLANDO", "Status for " + status.getFlight().toString() + " already watched");
+            return;
         }
+
         watchedStatuses.put(key, status);
         fileManager.saveWatchedStatuses(watchedStatuses);
     }
@@ -153,7 +155,9 @@ public class PersistentData {
             throw new IllegalStateException("Followed flights have not been set, can't add flight.");
         }
         if (followedFlights.contains(f)) {
-            throw new IllegalArgumentException("Flight already followed: " + f.toString());
+            Log.w("VOLANDO", "Flight already followed: " + f.toString());
+            return;
+
         }
         followedFlights.add(f);
         fileManager.saveFollowedFlights(followedFlights);

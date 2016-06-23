@@ -58,6 +58,9 @@ public class MakeReviewActivity extends AppCompatActivity
                     API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
+                            if (isDestroyed()) {
+                                return;
+                            }
                             MakeReviewActivity.this.finish();
                         }
                     });

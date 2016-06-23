@@ -153,8 +153,14 @@ public class FlightDetailsFragment extends Fragment {
         View view;
         view = inflater.inflate(R.layout.fragment_flight_details, container, false);
 
-        final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
-        status = activity.getFlightStatus();
+        try {
+            FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
+            status = activity.getFlightStatus();
+        } catch (ClassCastException e) {
+            FlightsActivity activity = (FlightsActivity) getActivity();
+            status = activity.getFlightStatus();
+        }
+
 
         title = (TextView) view.findViewById(R.id.title);
         subtitle = (TextView) view.findViewById(R.id.subtitle);

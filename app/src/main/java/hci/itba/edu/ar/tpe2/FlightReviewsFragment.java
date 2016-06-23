@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -26,6 +27,7 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 public class FlightReviewsFragment extends Fragment {
     private boolean firstTime;
     private List<Review> reviews;
+    private boolean isDestroyed;
 
     //View elements
     private ListView reviewsList;
@@ -56,14 +58,25 @@ public class FlightReviewsFragment extends Fragment {
             title.setText("Updating...");
         }
         title.setVisibility(View.VISIBLE);
-        final FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
-       
-        API.getInstance().getAllReviews(activity.getFlightStatus().getFlight(), activity, new NetworkRequestCallback<Review[]>() {
+        FlightStatus flightStatus;
+        try {
+            FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
+            flightStatus = activity.getFlightStatus();
+        } catch (ClassCastException e) {
+            FlightsActivity activity = (FlightsActivity) getActivity();
+            flightStatus = activity.getFlightStatus();
+        }
+
+
+        API.getInstance().getAllReviews(flightStatus.getFlight(), getActivity(), new NetworkRequestCallback<Review[]>() {
             @Override
             public void execute(Context c, Review[] result) {
+                if (isDestroyed) {    //e.g. rotated screen before network request completed.
+                    return;
+                }
                 reviews = new ArrayList<>(Arrays.asList(result));
                 if (reviewsAdapter == null) {
-                    reviewsAdapter = new ReviewAdapter(activity, reviews);
+                    reviewsAdapter = new ReviewAdapter(getActivity(), reviews);
                     reviewsList.setAdapter(reviewsAdapter);
                 } else {
                     reviewsAdapter.clear();
@@ -76,8 +89,15 @@ public class FlightReviewsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isDestroyed = true;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view;
+        isDestroyed = false;
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_flight_reviews, container, false);
 

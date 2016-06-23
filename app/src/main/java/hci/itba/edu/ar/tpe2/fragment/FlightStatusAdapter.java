@@ -3,6 +3,8 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +18,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.List;
 import java.util.Map;
 
+import hci.itba.edu.ar.tpe2.FlightDetailsMainFragment;
+import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
@@ -28,12 +32,14 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
     private CoordinatorLayout mCoordinatorLayout;
     private final PersistentData persistentData;
     private Map<Integer, FlightStatus> watchedStatuses;
+    private StarInterface starInterface;
 
-    FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB) {
+    FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB, StarInterface starInterface) {
         super(context, 0, objects);
         persistentData = new PersistentData(context);
         mCoordinatorLayout = layoutWithFAB;
         watchedStatuses = persistentData.getWatchedStatuses();
+        this.starInterface = starInterface;
     }
 
     @Override
@@ -67,6 +73,8 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
                     persistentData.stopWatchingStatus(status);
                     FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_off_24dp);
+                    starInterface.onFlightUnstared(status);
+
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
