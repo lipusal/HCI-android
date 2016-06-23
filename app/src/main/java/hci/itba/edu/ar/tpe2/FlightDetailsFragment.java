@@ -82,10 +82,9 @@ public class FlightDetailsFragment extends Fragment {
 //        }
         Airport departureAirport = status.getOriginAirport();
         Airport arrivalAirport = status.getDestinationAirport();
-        if(arrivalAirport == null && departureAirport == null) {
+        if (arrivalAirport == null && departureAirport == null) {
             title.setText("Not Found");
-        }
-        else {
+        } else {
             String firstPartDetailStr = status.getAirline().getName() + " (" + status.getAirline().getID() + ") #" + status.getFlight().getNumber();
             String firstPartDetailStr2 = "Desde: " + departureAirport.getID() + " con destino a " + arrivalAirport.getID();
             //Title
