@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,17 +25,29 @@ public class FlightDetailsFragment extends Fragment {
 
     public static final String PARAM_FLIGHT = "FLIGHT";
 
-    TextView title;
-    TextView flightSubtitle;
-    TextView departureGate;
-    TextView departureTerminal;
-    TextView departureTime;
-    TextView departureAirportText;
-    TextView arrivalGate;
-    TextView arrivalTerminal;
-    TextView arrivalTime;
-    TextView arrivalAirportText;
-    TextView arrivalBaggageClaim;
+    TextView title,
+            flightSubtitle,
+            departureGate,
+            departureTerminal,
+            departureTime,
+            departureAirportText,
+            arrivalGate,
+            arrivalTerminal,
+            arrivalTime,
+            arrivalAirportText,
+            arrivalBaggageClaim;
+    //"Hideable" elements
+    View titleDivider, departure_arrivalDivider;
+    TextView departureAirportLabel,
+            departureTimeLabel,
+            departureTerminalLabel,
+            departureGateLabel,
+            arrivalAirportLabel,
+            arrivalTimeLabel,
+            arrivalTerminalLabel,
+            arrivalGateLabel,
+            arrivalBaggageClaimLabel;
+
     //    TextView extraDetail;
     FlightStatus status;
 
@@ -82,8 +93,20 @@ public class FlightDetailsFragment extends Fragment {
 //        }
         Airport departureAirport = status.getOriginAirport();
         Airport arrivalAirport = status.getDestinationAirport();
-        if (arrivalAirport == null && departureAirport == null) {
-            title.setText("Not Found");
+        if (status == null) {
+            title.setText("Not Found"); //TODO show something else and use String resource
+            //Hide all other elements
+            titleDivider.setVisibility(View.GONE);
+            departure_arrivalDivider.setVisibility(View.GONE);
+            departureAirportLabel.setVisibility(View.GONE);
+            departureTimeLabel.setVisibility(View.GONE);
+            departureTerminalLabel.setVisibility(View.GONE);
+            departureGateLabel.setVisibility(View.GONE);
+            arrivalAirportLabel.setVisibility(View.GONE);
+            arrivalTimeLabel.setVisibility(View.GONE);
+            arrivalTerminalLabel.setVisibility(View.GONE);
+            arrivalGateLabel.setVisibility(View.GONE);
+            arrivalBaggageClaimLabel.setVisibility(View.GONE);
         } else {
             String firstPartDetailStr = status.getAirline().getName() + " (" + status.getAirline().getID() + ") #" + status.getFlight().getNumber();
             String firstPartDetailStr2 = "Desde: " + departureAirport.getID() + " con destino a " + arrivalAirport.getID();
@@ -93,16 +116,15 @@ public class FlightDetailsFragment extends Fragment {
             flightSubtitle.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, getActivity().getDrawable(status.getIconID()), null);
             //Departure
             departureAirportText.setText(departureAirport.toString());
-            departureTime.setText(status.getPrettyScheduledDepartureTime());
+            departureTime.setText(status.getPrettyScheduledDepartureTime());    //TODO use proper timezone, this always uses the phone's (which may be different than the airport's)
             departureTerminal.setText(status.getDepartureTerminal() == null ? "—" : status.getDepartureTerminal());
             departureGate.setText(status.getDepartureGate() == null ? "—" : status.getDepartureGate());
             //Arrival
             arrivalAirportText.setText(arrivalAirport.toString());
-            arrivalTime.setText(status.getPrettyScheduledArrivalTime());
+            arrivalTime.setText(status.getPrettyScheduledArrivalTime());        //TODO use proper timezone, this always uses the phone's (which may be different than the airport's)
             arrivalTerminal.setText(status.getArrivalTerminal() == null ? "—" : status.getArrivalTerminal());
             arrivalGate.setText(status.getArrivalGate() == null ? "—" : status.getArrivalGate());
             arrivalBaggageClaim.setText(status.getBaggageClaim() == null ? "—" : status.getBaggageClaim());
-
         }
     }
 
@@ -119,15 +141,27 @@ public class FlightDetailsFragment extends Fragment {
 
         title = (TextView) view.findViewById(R.id.title);
         flightSubtitle = (TextView) view.findViewById(R.id.subtitle);
-        departureGate = (TextView) view.findViewById(R.id.originGateText);
+        departureGate = (TextView) view.findViewById(R.id.departureGateText);
         departureTerminal = (TextView) view.findViewById(R.id.departureTerminalText);
         departureTime = (TextView) view.findViewById(R.id.departureTimeText);
         departureAirportText = (TextView) view.findViewById(R.id.departureAirport);
         arrivalGate = (TextView) view.findViewById(R.id.arrivalGateText);
         arrivalTerminal = (TextView) view.findViewById(R.id.arrivalTerminalText);
-        arrivalTime = (TextView) view.findViewById(R.id.arrivalDepartureTimeText);
+        arrivalTime = (TextView) view.findViewById(R.id.arrivalTimeText);
         arrivalAirportText = (TextView) view.findViewById(R.id.arrivalAirport);
         arrivalBaggageClaim = (TextView) view.findViewById(R.id.arrivalBaggageClaimText);
+        //"Hideable" elements
+        titleDivider = view.findViewById(R.id.titleDivider);
+        departure_arrivalDivider = view.findViewById(R.id.departureArrivalDivider);
+        departureAirportLabel = (TextView) view.findViewById(R.id.departureAirport);
+        departureTimeLabel = (TextView) view.findViewById(R.id.departureTimeLabel);
+        departureTerminalLabel = (TextView) view.findViewById(R.id.departureTerminalLabel);
+        departureGateLabel = (TextView) view.findViewById(R.id.departureGateLabel);
+        arrivalAirportLabel = (TextView) view.findViewById(R.id.arrivalAirport);
+        arrivalTimeLabel = (TextView) view.findViewById(R.id.arrivalTimeLabel);
+        arrivalTerminalLabel = (TextView) view.findViewById(R.id.arrivalTerminalLabel);
+        arrivalGateLabel = (TextView) view.findViewById(R.id.arrivalGateLabel);
+        arrivalBaggageClaimLabel = (TextView) view.findViewById(R.id.arrivalBaggageClaimLabel);
 //        extraDetail = (TextView) view.findViewById(R.id.extraDetail);
 
         return view;
