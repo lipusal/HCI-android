@@ -4,19 +4,16 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.tz.DateTimeZoneBuilder;
+import org.joda.time.format.PeriodFormatter;
+import org.joda.time.format.PeriodFormatterBuilder;
 
 import java.io.Serializable;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -27,21 +24,33 @@ import hci.itba.edu.ar.tpe2.R;
  * Ugly POJO used to hold flight status data.
  */
 public class FlightStatus implements Serializable {
+    //Date/time formatters
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
-    private static DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZZ").withOffsetParsed().withLocale(Locale.getDefault());
+    private static DateTimeFormatter APIDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZZ").withOffsetParsed().withLocale(Locale.getDefault());
+    private static PeriodFormatter delayFormatter = new PeriodFormatterBuilder()
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendHours()
+            .appendSeparator(":")
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendMinutes()
+            .toFormatter();
+
     private static final Map<String, String> validStatus = new HashMap<>();
     private static final Map<String, Integer> statusResIDs = new HashMap<>();
+
     static {
         validStatus.put("S", "scheduled");
         validStatus.put("A", "active");
-        validStatus.put("D", "diverted");
+        validStatus.put("R", "diverted");
         validStatus.put("L", "landed");
         validStatus.put("C", "canceled");
 
         statusResIDs.put("S", R.string.status_scheduled);
         statusResIDs.put("A", R.string.status_active);
-        statusResIDs.put("D", R.string.status_diverted);
+        statusResIDs.put("R", R.string.status_diverted);
         statusResIDs.put("L", R.string.status_landed);
         statusResIDs.put("C", R.string.status_canceled);
 
@@ -54,6 +63,7 @@ public class FlightStatus implements Serializable {
     private String status, departureTerminal, arrivalTerminal, departureGate, arrivalGate, baggageClaim;
     private DateTime scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
+    private Integer originGateDelay, originRunwayDelay, arrivalRunwayDelay, arrivalGateDelay;
     //TODO incorporate delays
 
     private FlightStatus() {
@@ -66,11 +76,9 @@ public class FlightStatus implements Serializable {
         PersistentData persistentData = PersistentData.getContextLessInstance();
         result.status = statusObject.get("status").getAsString();
         result.airline = persistentData.getAirlines().get(statusObject.getAsJsonObject("airline").get("id").getAsString());
-        result.originAirport = persistentData.getAirports().get(departure.getAsJsonObject("airport").get("id").getAsString());
-        result.destinationAirport = persistentData.getAirports().get(arrival.getAsJsonObject("airport").get("id").getAsString());
-        result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.parseDeparture(departure);
         result.parseArrival(arrival);
+        result.baggageClaim = arrival.getAsJsonObject("airport").get("baggage").isJsonNull() ? null : arrival.getAsJsonObject("airport").get("baggage").getAsString();
         result.flight = new Flight(
                 statusObject.get("id").getAsInt(),
                 statusObject.get("number").getAsInt(),
@@ -92,6 +100,9 @@ public class FlightStatus implements Serializable {
         String timezone = airport.get("time_zone").getAsString();
         timezone = (timezone.charAt(0) == '-' ? "" : "+") + timezone;
         if (departureOrArrival.equals("departure")) {
+            originAirport = PersistentData.getContextLessInstance().getAirports().get(obj.getAsJsonObject("airport").get("id").getAsString());
+            originGateDelay = obj.get("gate_delay").isJsonNull() ? null : obj.get("gate_delay").getAsInt();
+            originRunwayDelay = obj.get("runway_delay").isJsonNull() ? null : obj.get("runway_delay").getAsInt();
             scheduledDepartureTime = parseDate(obj, "scheduled_time", timezone);
             actualDepartureTime = parseDate(obj, "actual_time", timezone);
             scheduledDepartureGateTime = parseDate(obj, "scheduled_gate_time", timezone);
@@ -101,6 +112,9 @@ public class FlightStatus implements Serializable {
             departureTerminal = airport.get("terminal").isJsonNull() ? null : airport.get("terminal").getAsString();
             departureGate = airport.get("gate").isJsonNull() ? null : airport.get("gate").getAsString();
         } else if (departureOrArrival.equals("arrival")) {
+            destinationAirport = PersistentData.getContextLessInstance().getAirports().get(obj.getAsJsonObject("airport").get("id").getAsString());
+            arrivalGateDelay = obj.get("gate_delay").isJsonNull() ? null : obj.get("gate_delay").getAsInt();
+            arrivalRunwayDelay = obj.get("runway_delay").isJsonNull() ? null : obj.get("runway_delay").getAsInt();
             scheduledArrivalTime = parseDate(obj, "scheduled_time", timezone);
             actualArrivalTime = parseDate(obj, "actual_time", timezone);
             scheduledArrivalGateTime = parseDate(obj, "scheduled_gate_time", timezone);
@@ -121,7 +135,7 @@ public class FlightStatus implements Serializable {
                 return null;
             }
             cal.setTime(APIdateFormat.parse(date.getAsString() + " " + timezoneStr));
-            la = dateTimeFormatter.parseDateTime(date.getAsString() + timezoneStr);
+            la = APIDateTimeFormatter.parseDateTime(date.getAsString() + timezoneStr);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -134,11 +148,11 @@ public class FlightStatus implements Serializable {
     }
 
     public String getDepartureTerminal() {
-        return departureTerminal;
+        return departureTerminal == null ? "—" : departureTerminal;
     }
 
     public String getDepartureGate() {
-        return departureGate;
+        return departureGate == null ? "—" : departureGate;
     }
 
     public DateTime getScheduledDepartureTime() {
@@ -146,32 +160,34 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledDepartureTime() {
-        return prettyFormat.format(scheduledDepartureTime);
+        return localizeDateTime(scheduledDepartureTime);
     }
 
-//    public DateTime getDepartureDelay() {
-//        if(actualDepartureTime == null) {   //Hasn't taken off yet
-//            Date now = new Date();
-//            if(now.before(scheduledDepartureTime)) {
-//                return null;
-//            }
-//            else {
-//                Period period = new Period(scheduledDepartureTime, new DateTime(now, DateTimeZone.UTC));
-//            }
-//        }
-//        else {
-//            add delays
-//        }
-//
-//        return null;
-//    }
+    public Period getDepartureDelay() {
+        if (actualDepartureTime == null) {   //Hasn't taken off yet
+            DateTime now = DateTime.now();
+            if (now.isBefore(scheduledDepartureTime)) {
+                return null;
+            } else {
+                return new Period(scheduledDepartureTime, now);
+            }
+        } else {
+            long delayMinutes = (originGateDelay == null ? 0 : originGateDelay) + (originRunwayDelay == null ? 0 : originRunwayDelay);
+            return new Period(delayMinutes * 60 * 1000);
+        }
+    }
+
+    public String getPrettyDepartureDelay() {
+        Period delay = getDepartureDelay();
+        return (delay == null || delay.equals(new Period())) ? "—" : delayFormatter.print(delay);   //Empty period
+    }
 
     public DateTime getActualDepartureTime() {
         return actualDepartureTime;
     }
 
     public String getPrettyActualDepartureTime() {
-        return prettyFormat.format(actualDepartureTime);
+        return actualDepartureTime == null ? "—" : localizeDateTime(actualDepartureTime);
     }
 
     public DateTime getScheduledDepartureGateTime() {
@@ -179,7 +195,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledDepartureGateTime() {
-        return prettyFormat.format(scheduledDepartureGateTime);
+        return scheduledDepartureGateTime == null ? "—" : localizeDateTime(scheduledDepartureGateTime);
     }
 
     public DateTime getActualDepartureGateTime() {
@@ -187,7 +203,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyActualDepartureGateTime() {
-        return prettyFormat.format(actualDepartureGateTime);
+        return actualDepartureGateTime == null ? "—" : localizeDateTime(actualDepartureGateTime);
     }
 
     public DateTime getScheduledDepartureRunwayTime() {
@@ -195,7 +211,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledDepartureRunwayTime() {
-        return prettyFormat.format(scheduledDepartureRunwayTime);
+        return scheduledDepartureRunwayTime == null ? "—" : localizeDateTime(scheduledDepartureRunwayTime);
     }
 
     public DateTime getActualDepartureRunwayTime() {
@@ -203,15 +219,15 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyActualDepartureRunwayTime() {
-        return prettyFormat.format(actualDepartureRunwayTime);
+        return actualDepartureRunwayTime == null ? "—" : localizeDateTime(actualDepartureRunwayTime);
     }
 
     public String getArrivalTerminal() {
-        return arrivalTerminal;
+        return arrivalTerminal == null ? "—" : arrivalTerminal;
     }
 
     public String getArrivalGate() {
-        return arrivalGate;
+        return arrivalGate == null ? "—" : arrivalGate;
     }
 
     public DateTime getScheduledArrivalTime() {
@@ -219,7 +235,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledArrivalTime() {
-        return prettyFormat.format(scheduledArrivalTime);
+        return localizeDateTime(scheduledArrivalTime);
     }
 
     public DateTime getActualArrivalTime() {
@@ -227,7 +243,26 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyActualArrivalTime() {
-        return prettyFormat.format(actualArrivalTime);
+        return actualArrivalTime == null ? "—" : localizeDateTime(actualArrivalTime);
+    }
+
+    public Period getArrivalDelay() {
+        if (actualArrivalTime == null) {   //Hasn't landed yet
+            DateTime now = DateTime.now();
+            if (now.isBefore(scheduledArrivalTime)) {
+                return null;
+            } else {
+                return new Period(scheduledArrivalTime, now);
+            }
+        } else {
+            long delayMinutes = (arrivalGateDelay == null ? 0 : arrivalGateDelay) + (arrivalRunwayDelay == null ? 0 : arrivalRunwayDelay);
+            return new Period(delayMinutes * 60 * 1000);
+        }
+    }
+
+    public String getPrettyArrivalDelay() {
+        Period delay = getArrivalDelay();
+        return (delay == null || delay.equals(new Period())) ? "—" : delayFormatter.print(delay);    //Empty period
     }
 
     public DateTime getScheduledArrivalGateTime() {
@@ -235,7 +270,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledArrivalGateTime() {
-        return prettyFormat.format(scheduledArrivalGateTime);
+        return scheduledArrivalGateTime == null ? "—" : localizeDateTime(scheduledArrivalGateTime);
     }
 
     public DateTime getActualArrivalGateTime() {
@@ -243,7 +278,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyActualArrivalGateTime() {
-        return prettyFormat.format(actualArrivalGateTime);
+        return actualArrivalGateTime == null ? "—" : localizeDateTime(actualArrivalGateTime);
     }
 
     public DateTime getScheduledArrivalRunwayTime() {
@@ -251,7 +286,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyScheduledArrivalRunwayTime() {
-        return prettyFormat.format(scheduledArrivalRunwayTime);
+        return scheduledArrivalRunwayTime == null ? "—" : localizeDateTime(scheduledArrivalRunwayTime);
     }
 
     public DateTime getActualArrivalRunwayTime() {
@@ -259,7 +294,7 @@ public class FlightStatus implements Serializable {
     }
 
     public String getPrettyActualArrivalRunwayTime() {
-        return prettyFormat.format(actualArrivalRunwayTime);
+        return actualArrivalRunwayTime == null ? "—" : localizeDateTime(actualArrivalRunwayTime);
     }
 
     public Airline getAirline() {
@@ -279,7 +314,23 @@ public class FlightStatus implements Serializable {
     }
 
     public String getBaggageClaim() {
-        return baggageClaim;
+        return baggageClaim == null ? "—" : baggageClaim;
+    }
+
+    public Integer getOriginGateDelay() {
+        return originGateDelay;
+    }
+
+    public Integer getOriginRunwayDelay() {
+        return originRunwayDelay;
+    }
+
+    public Integer getArrivalRunwayDelay() {
+        return arrivalRunwayDelay;
+    }
+
+    public Integer getArrivalGateDelay() {
+        return arrivalGateDelay;
     }
 
     public int getIconID() {
@@ -288,7 +339,7 @@ public class FlightStatus implements Serializable {
                 return R.drawable.ic_scheduled;
             case "A":
                 return R.drawable.ic_flight_takeoff_black;
-            case "D":
+            case "R":
                 return R.drawable.ic_diverted;
             case "L":
                 return R.drawable.ic_flight_land_black;
@@ -297,6 +348,11 @@ public class FlightStatus implements Serializable {
             default:
                 return -1;
         }
+    }
+
+    private String localizeDateTime(DateTime date) {
+        String full = DateTimeFormat.shortDateTime().print(date);
+        return full.replaceFirst(" ", "\n");
     }
 
     /**
@@ -328,6 +384,7 @@ public class FlightStatus implements Serializable {
 
     /**
      * Gets the String resource ID corresponding to this status. Makes this status translatable.
+     *
      * @return
      */
     public int getStringResID() {
