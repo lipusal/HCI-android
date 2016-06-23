@@ -60,7 +60,7 @@ public class FlightStatusListFragment extends ListFragment {
                 statuses = Collections.EMPTY_LIST;
             }
         }
-        setListAdapter(new FlightStatusAdapter(getActivity(), statuses, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout)));
+        setListAdapter(new FlightStatusAdapter(getActivity(), statuses, (CoordinatorLayout) getActivity().findViewById(R.id.coordinator_layout), (StarInterface) getActivity()));
     }
 
     @Override
@@ -114,11 +114,7 @@ public class FlightStatusListFragment extends ListFragment {
 // = ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
             View detailsFrame = getActivity().findViewById(R.id.fragment_container_flight_details);
             dualPane = detailsFrame !=null && detailsFrame.getVisibility() == View.VISIBLE;
-            if(dualPane){
-                getActivity().setTitle("true");
-            }else{
-                getActivity().setTitle("false");
-            }
+
 
             if(dualPane){
                 FlightDetailsMainFragment details = (FlightDetailsMainFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
@@ -134,6 +130,8 @@ public class FlightStatusListFragment extends ListFragment {
                 detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
                 startActivity(detailsIntent);
             }
+
+
         }
     }
 

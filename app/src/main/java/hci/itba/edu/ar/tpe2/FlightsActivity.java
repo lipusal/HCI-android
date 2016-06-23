@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -41,33 +42,41 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationService;
 import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
+import hci.itba.edu.ar.tpe2.fragment.StarInterface;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
+        implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 
+    private Toolbar toolbar;
+    private Menu menu;
     private PersistentData persistentData;
-
+    private boolean reviewVisiblle;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
 
+    private FloatingActionButton fab;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getResources().getBoolean(R.bool.landscape_only)) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        reviewVisiblle = false;
         setContentView(R.layout.activity_flights);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -187,24 +196,40 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.flights, menu);
+        this.menu = menu;
+
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if (dualPane) {
+            getMenuInflater().inflate(R.menu.flight, menu);
+            MenuItem item = menu.findItem(R.id.action_review);
+            item.setVisible(reviewVisiblle);
+        }
+
+
+
         return true;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_review) {
+            Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
+            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
+            reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+            startActivity(reviewIntent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -265,4 +290,58 @@ public class FlightsActivity extends AppCompatActivity
         flightStatus = newFlightStatus;
     }
 
+    @Override
+    public void onFlightClicked(FlightStatus clickedStatus) {
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+
+
+        if (dualPane) {
+            FlightDetailsMainFragment details = (FlightDetailsMainFragment) this.getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+            //TODO no crearlo si es el mismo que antes
+            details = new FlightDetailsMainFragment();
+            this.setFlightStatus(clickedStatus);
+
+            reviewVisiblle = true;
+//            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
+//            item.setVisible(true);
+            invalidateOptionsMenu();
+
+            FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container_flight_details, details);
+            ft.commit();
+
+            fab.bringToFront();
+
+        } else {
+            Intent detailsIntent = new Intent(this, FlightDetailMainActivity.class);
+            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
+            startActivity(detailsIntent);
+        }
+    }
+
+    @Override
+    public void onFlightUnstared(FlightStatus status) {
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if (dualPane) {
+            FlightDetailsMainFragment details = (FlightDetailsMainFragment) this.getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+//            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
+//            item.setVisible(false);
+
+            if (details == null) {
+                return;
+            }
+            if (status == getFlightStatus()) {
+                FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
+                ft.remove(details);
+                ft.commit();
+                reviewVisiblle = false;
+                this.invalidateOptionsMenu();
+            }
+
+
+            fab.bringToFront();
+        }
+    }
 }

@@ -27,6 +27,7 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 public class FlightReviewsFragment extends Fragment {
     private boolean firstTime;
     private List<Review> reviews;
+    private boolean isDestroyed;
 
     //View elements
     private ListView reviewsList;
@@ -70,6 +71,9 @@ public class FlightReviewsFragment extends Fragment {
         API.getInstance().getAllReviews(flightStatus.getFlight(), getActivity(), new NetworkRequestCallback<Review[]>() {
             @Override
             public void execute(Context c, Review[] result) {
+                if (isDestroyed) {    //e.g. rotated screen before network request completed.
+                    return;
+                }
                 reviews = new ArrayList<>(Arrays.asList(result));
                 if (reviewsAdapter == null) {
                     reviewsAdapter = new ReviewAdapter(getActivity(), reviews);
@@ -85,8 +89,15 @@ public class FlightReviewsFragment extends Fragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        isDestroyed = true;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view;
+        isDestroyed = false;
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_flight_reviews, container, false);
 
