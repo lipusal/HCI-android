@@ -56,4 +56,11 @@
     <string name="pref_summary_notify_on_update_disabled">Las actualizaciones automáticas están deshabilitadas</string>
     <string name="action_view">Ver</string>
     <string name="no_changes">Sin cambios</string>
+    <string name="departure">Partida</string>
+    <string name="arrival">Llegada</string>
+    <string name="status_active">Activo</string>
+    <string name="status_canceled">Cancelado</string>
+    <string name="status_diverted">Desviado</string>
+    <string name="status_landed">Aterrizado</string>
+    <string name="status_scheduled">Programado</string>
 </resources>

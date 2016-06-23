@@ -1,291 +1,321 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <RelativeLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         tools:context="hci.itba.edu.ar.tpe2.FlightDetailMainActivity">
 
-        <TextView
-            android:id="@+id/firstPartDetail"
-            android:textSize="20dp"
-            android:fontFamily="sans-serif-medium"
-            android:layout_alignParentTop="true"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:textAlignment="center"
-            android:layout_centerVertical="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerInParent="true"
-            android:fontFeatureSettings="@string/title_activity_flight_details"/>
+        <!-- TITLE -->
         <LinearLayout
+            android:id="@+id/titleLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:fontFamily="sans-serif-medium"
+            android:fontFeatureSettings="@string/title_activity_flight_details"
             android:orientation="vertical"
+            android:textAlignment="center">
+
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline" />
+
+            <TextView
+                android:id="@+id/subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:drawablePadding="10dp"
+                android:fontFamily="sans-serif-medium"
+                android:textAppearance="@style/TextAppearance.AppCompat.Subhead" />
+
+            <!--Divider-->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.4dp"
+                android:layout_marginBottom="10dp"
+                android:layout_marginTop="10dp"
+                android:background="#aaaaaa" />
+        </LinearLayout>
+        <!--END TITLE-->
+
+        <!--DETAILS-->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="5dp"
-            android:layout_below="@id/firstPartDetail">
+            android:layout_below="@id/titleLayout"
+            android:orientation="vertical"
+            android:padding="5dp">
+
+            <!--DEPARTURE-->
+            <!--Departure airport name-->
             <TextView
-                android:id="@+id/originTitle"
-                android:fontFamily="sans-serif-medium"
-                android:textSize="16dp"
-                android:layout_alignStart="@id/firstPartDetail"
-                android:layout_below="@id/firstPartDetail"
-                android:layout_height="wrap_content"
+                android:id="@+id/departureAirport"
                 android:layout_width="wrap_content"
-                android:layout_marginTop="10dp"/>
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:drawableLeft="@drawable/ic_flight_takeoff_black"
+                android:drawablePadding="10dp"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <!--Departure details-->
             <LinearLayout
-                android:orientation="vertical"
-                android:id="@+id/originDetail"
-                android:layout_alignStart="@id/originTitle"
-                android:layout_below="@id/originTitle"
-                android:layout_marginLeft="35dp"
-                android:layout_marginRight="35dp"
+                android:id="@+id/departureLayout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                >
-                <TextView
-                    android:id="@+id/originDetail1"
+                android:layout_marginLeft="30dp"
+                android:orientation="horizontal">
+
+                <!--Departure time-->
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="match_parent"
-                    />
-                <LinearLayout
-                    android:id="@+id/originDetail2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:layout_weight=".4">
+
                     <LinearLayout
-                        android:id="@+id/originGateDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:orientation="vertical">
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/departureTimeLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/departure"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/departureTimeText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Departure terminal-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".3">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/departureTerminalLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/terminal"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/departureTerminalText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Departure gate-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".3">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
                         <TextView
                             android:id="@+id/originGateLabel"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_alignStart="@id/originDetail1"
-                            />
+                            android:text="@string/gate"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
                         <TextView
-                            android:id="@+id/originGate"
+                            android:id="@+id/originGateText"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/originGateLabel"
-                            android:layout_alignStart="@id/originGateLabel"
-                            />
+                            android:textStyle="bold" />
                     </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/originTerminalDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="5dp"
-                        android:layout_alignRight="@id/originGateDescription">
-                        <TextView
-                            android:id="@+id/originTerminalLabel"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-medium"
-                            />
-                        <TextView
-                            android:id="@+id/originTerminal"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/originTerminalLabel"
-                            android:layout_alignStart="@id/originTerminalLabel"
-                            />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/originDepDateDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignRight="@id/originTerminalDescription"
-                        android:padding="5dp"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/originDepartureTimeLabel"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            />
-                        <TextView
-                            android:id="@+id/originDepartureTime"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/originDepartureTimeLabel"
-                            android:layout_alignStart="@id/originDepartureTimeLabel"
-                            android:layout_weight="1"
-                            />
-                    </LinearLayout>
-                    <!--<TextView
-                        android:id="@+id/originDetail2"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:layout_width="match_parent"
-                        android:layout_below="@id/originDetail1"
-                        android:layout_alignStart="@id/originDetail1"
-                        />-->
-                </LinearLayout>
-                <TextView
-                    android:id="@+id/originDetail3"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="match_parent"
-                    />
+                </RelativeLayout>
             </LinearLayout>
+            <!--END ORIGIN-->
+
+            <!--Divider-->
             <View
-                android:layout_below="@id/originDetail"
-                android:layout_alignStart="@id/originDetail"
-                android:layout_alignEnd="@id/originDetail"
                 android:layout_width="match_parent"
                 android:layout_height="0.4dp"
-                android:padding="10dp"
                 android:layout_margin="10dp"
-                android:background="#aaaaaa"/>
+                android:background="#aaaaaa" />
+
+            <!--ARRIVAL-->
+            <!--Arrival airport name-->
             <TextView
-                android:id="@+id/arrivalTitle"
-                android:textSize="16dp"
-                android:layout_below="@id/originDetail"
+                android:id="@+id/arrivalAirport"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:layout_width="wrap_content"
-                />
+                android:drawableLeft="@drawable/ic_flight_land_black"
+                android:drawablePadding="10dp"
+                android:textAppearance="?android:textAppearanceSmall"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <!--Arrival details-->
             <LinearLayout
                 android:id="@+id/arrivalDetail"
-                android:orientation="vertical"
-                android:layout_alignStart="@id/arrivalTitle"
-                android:layout_below="@id/arrivalTitle"
-                android:layout_height="wrap_content"
                 android:layout_width="match_parent"
-                android:layout_marginLeft="35dp">
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/arrivalDetail1"
+                <!--Arrival time-->
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content" />
+                    android:layout_weight=".4">
 
-                <LinearLayout
-                    android:id="@+id/arrivalDetail2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
                     <LinearLayout
-                        android:id="@+id/arrivalGateDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:padding="5dp"
-                        android:orientation="vertical">
-                        <TextView
-                            android:id="@+id/arrivalGateLabel"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_alignStart="@id/arrivalDetail1"
-                            />
-                        <TextView
-                            android:id="@+id/arrivalGate"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/arrivalGateLabel"
-                            android:layout_alignStart="@id/arrivalGateLabel"
-                            />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/arrivalTerminalDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:orientation="vertical"
-                        android:padding="5dp"
-                        android:layout_alignRight="@id/arrivalGateDescription">
-                        <TextView
-                            android:id="@+id/arrivalTerminalLabel"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:textStyle="bold"
-                            android:fontFamily="sans-serif-medium"
-                            />
-                        <TextView
-                            android:id="@+id/arrivalTerminal"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/arrivalTerminalLabel"
-                            android:layout_alignStart="@id/arrivalTerminalLabel"
-                            />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/arrivalDepDateDescription"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignRight="@id/arrivalTerminalDescription"
-                        android:padding="5dp"
-                        android:orientation="vertical">
+                        android:padding="5dp">
+
                         <TextView
                             android:id="@+id/arrivalDepartureTimeLabel"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:fontFamily="sans-serif-medium"
-                            android:textStyle="bold"
-                            />
+                            android:text="@string/arrival"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
                         <TextView
-                            android:id="@+id/arrivalDepartureTime"
+                            android:id="@+id/arrivalDepartureTimeText"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:layout_width="match_parent"
-                            android:layout_below="@id/arrivalDepartureTimeLabel"
-                            android:layout_alignStart="@id/arrivalDepartureTimeLabel"
-                            android:layout_weight="1"
-                            />
+                            android:textStyle="bold" />
                     </LinearLayout>
-                    <!--<TextView
-                        android:id="@+id/arrivalDetail2"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:layout_width="match_parent"
-                        android:layout_below="@id/arrivalDetail1"
-                        android:layout_alignStart="@id/arrivalDetail1"
-                        />-->
-                </LinearLayout>
-                <TextView
-                    android:id="@+id/arrivalDetail3"
+                </RelativeLayout>
+
+                <!--Arrival terminal-->
+                <RelativeLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content" />
+                    android:layout_weight=".2">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/arrivalTerminalLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/terminal"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/arrivalTerminalText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Arrival gate-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".2">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/arrivalGateLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/gate"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/arrivalGateText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
+
+                <!--Baggage claim-->
+                <RelativeLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight=".2">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:id="@+id/arrivalBaggageClaimLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:text="@string/baggage"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Caption" />
+
+                        <TextView
+                            android:id="@+id/arrivalBaggageClaimText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="2dp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </RelativeLayout>
             </LinearLayout>
-            <View
-                android:layout_below="@id/arrivalDetail"
-                android:layout_alignStart="@id/arrivalDetail"
-                android:layout_alignEnd="@id/originDetail"
-                android:layout_width="match_parent"
-                android:layout_height="0.4dp"
-                android:padding="10dp"
-                android:layout_margin="10dp"
-                android:background="#aaaaaa"/>
-            <TextView
-                android:id="@+id/extraDetail"
-                android:textAlignment="center"
-                android:layout_below="@id/arrivalDetail"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_width="match_parent"/>
+            <!--END ARRIVAL-->
+
+            <!--<TextView-->
+            <!--android:id="@+id/extraDetail"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@id/arrivalDetail"-->
+            <!--android:layout_marginTop="10dp"-->
+            <!--android:textAlignment="center"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat.Large" />-->
         </LinearLayout>
     </RelativeLayout>
 </ScrollView>

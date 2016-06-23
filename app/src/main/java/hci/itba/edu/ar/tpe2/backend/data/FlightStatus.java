@@ -21,12 +21,20 @@ public class FlightStatus implements Serializable {
     private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
             prettyFormat = DateFormat.getDateTimeInstance();
     private static final Map<String, String> validStatus = new HashMap<>();
+    private static final Map<String, Integer> statusResIDs = new HashMap<>();
     static {
         validStatus.put("S", "scheduled");
         validStatus.put("A", "active");
         validStatus.put("D", "diverted");
         validStatus.put("L", "landed");
         validStatus.put("C", "canceled");
+
+        statusResIDs.put("S", R.string.status_scheduled);
+        statusResIDs.put("A", R.string.status_active);
+        statusResIDs.put("D", R.string.status_diverted);
+        statusResIDs.put("L", R.string.status_landed);
+        statusResIDs.put("C", R.string.status_canceled);
+
     }
 
 
@@ -287,5 +295,13 @@ public class FlightStatus implements Serializable {
     @Override
     public int hashCode() {
         return flight.getID();
+    }
+
+    /**
+     * Gets the String resource ID corresponding to this status. Makes this status translatable.
+     * @return
+     */
+    public int getStringResID() {
+        return statusResIDs.get(status);
     }
 }
