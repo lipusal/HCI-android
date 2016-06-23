@@ -126,6 +126,10 @@ public class FlightDetailsMainFragment extends Fragment {
         //Get info from the specified flight
         viewPager = (ViewPager) view.findViewById(R.id.viewpager);
 
+        setupViewPager(viewPager);
+
+        tabLayout = (TabLayout) view.findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(viewPager);
 
 
 
@@ -146,10 +150,7 @@ public class FlightDetailsMainFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        setupViewPager(viewPager);
 
-        tabLayout = (TabLayout) getActivity().findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
     }
 
 
