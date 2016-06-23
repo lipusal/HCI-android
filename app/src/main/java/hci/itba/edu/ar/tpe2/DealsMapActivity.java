@@ -24,11 +24,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.Correlator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -41,15 +39,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
-import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Place;
@@ -63,11 +58,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     private GoogleApiClient mGoogleApiClient;
     private double latitude;
     private double longitude;
-    private Airport closestAirport;
+    private Airport closestAirport = null;
     private static final int PERM_LOCATION = 42;
     private boolean locationPermissionGranted = false;
     private PersistentData persistentData;
     private CoordinatorLayout coordinatorLayout;
+    private Location lastKnownLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,7 +73,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.map_coordinator_layout);
 
         persistentData = new PersistentData(this);
-
         //Set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -86,9 +82,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View view) {
                 mMap.clear();
-                Snackbar.make(coordinatorLayout,getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
+                Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(closestAirport == null){
+                            mMap.clear();
+                            return;
+                        }
                         cancelEditMap();
                         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                             @Override
@@ -99,7 +99,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     }
                 }).show();
                 Collection<Airport> airports = persistentData.getAirports().values();
-                for(Airport a : airports){
+                for (Airport a : airports) {
                     LatLng airportPosition = new LatLng(a.getLatitude(), a.getLongitude());
                     mMap.addMarker(new MarkerOptions()
                             .position(airportPosition)
@@ -186,7 +186,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             public View getInfoContents(final Marker marker) {
                 View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
                 Place place = persistentData.getCities().get(marker.getTitle());
-                if(place == null) {
+                if (place == null) {
                     place = persistentData.getAirports().get(marker.getTitle());
                 }
 
@@ -275,21 +275,25 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
-            if (!locationPermissionGranted) {
-                Toast.makeText(DealsMapActivity.this, "Y U NO LET ME LOCATE U", Toast.LENGTH_SHORT).show();
-                return;
+        if(lastKnownLocation == null) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
+                if (!locationPermissionGranted) {
+                    Toast.makeText(DealsMapActivity.this, "Y U NO LET ME LOCATE U", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
-            // Consider calling ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            onLocationObtained();
         }
-        Location lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    /**
+     * Called when {@link #lastKnownLocation} is set via Google Location Services. It does <b>NOT</b>
+     * guarantee that it is non-null.
+     */
+    private void onLocationObtained() {
         if (lastKnownLocation != null) {
             latitude = lastKnownLocation.getLatitude();
             longitude = lastKnownLocation.getLongitude();
@@ -304,7 +308,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                         //Got closest airport, find deals for it
                         findDeals(closestAirport);
                     } else {
-                        openDialog(nearbyAirports);
+                        chooseClosestAirport(nearbyAirports);
                     }
                 }
             });
@@ -377,14 +381,15 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         return true;
     }
 
-    private void openDialog(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
+    private void chooseClosestAirport(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog dialog = null;
         final String[] airportNames = new String[airports.length];
         for (int i = 0; i < airportNames.length; i++) {
             airportNames[i] = airports[i].getDescription();
         }
         dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));    //TODO use string resource (res/values/string.xml)
-        dialogBuilder.setSingleChoiceItems(airportNames, -1, new DialogInterface.OnClickListener() {
+        dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
                 //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
@@ -396,7 +401,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         dialogBuilder.setPositiveButton(getResources().getString(R.string.accept), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                    //TODO make API request of getDeals() and set markers and shtuff
+                //TODO make API request of getDeals() and set markers and shtuff
                     Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
                     Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
                     closestAirport = selectedAirport;
@@ -413,7 +418,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 //Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
             }
         });
-        AlertDialog dialog = dialogBuilder.create();
+        dialog = dialogBuilder.create();
         dialog.show();
     }
 
@@ -464,7 +469,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         });
     }
 
-    private void cancelEditMap(){
+    private void cancelEditMap() {
         mMap.clear();
         LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
         mMap.addMarker(new MarkerOptions()
@@ -474,7 +479,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         float colorValue;
         LatLng aux;
 
-        for(Deal d: deals){
+        for (Deal d : deals) {
             aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
             colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
             Marker m = mMap.addMarker(new MarkerOptions()
