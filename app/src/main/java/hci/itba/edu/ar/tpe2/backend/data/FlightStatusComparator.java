@@ -16,8 +16,6 @@ public class FlightStatusComparator {
         STATUS
     }
 
-    ;
-
     private FlightStatus originalStatus;
 
     public FlightStatusComparator(FlightStatus originalStatus) {
@@ -44,44 +42,46 @@ public class FlightStatusComparator {
             return Collections.emptyMap();
         }
         Map<ComparableField, Serializable> result = new HashMap<>();
-        //Times TODO contemplate un/boarding delays and landing/takeoff delays
-        if (originalStatus.getScheduledDepartureTime() != originalStatus.getScheduledDepartureTime()    //Contemplates null original value and non-null new value and vice-versa
-                || (originalStatus.getScheduledDepartureTime() != null && newStatus.getScheduledDepartureTime() != null && !originalStatus.getScheduledDepartureTime().equals(newStatus.getScheduledDepartureTime()))) {
-            result.put(ComparableField.DEPARTURE_TIME, newStatus.getScheduledDepartureTime());
+        //Status
+        //TODO delete true, for debugging only
+        if (/*true || */!originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
+            result.put(ComparableField.STATUS, newStatus.getStatus());
         }
-        if (originalStatus.getScheduledArrivalTime() != originalStatus.getScheduledArrivalTime()
-                || (originalStatus.getScheduledArrivalTime() != null && newStatus.getScheduledArrivalTime() != null && !originalStatus.getScheduledArrivalTime().equals(newStatus.getScheduledArrivalTime()))) {
-            result.put(ComparableField.ARRIVAL_TIME, newStatus.getScheduledArrivalTime());
+        //Times - if actual departure date is different than scheduled time, add a delay field.
+        if (newStatus.getActualDepartureTime() != null
+                && !originalStatus.getScheduledDepartureTime().equals(newStatus.getActualDepartureTime())) {
+            result.put(ComparableField.DEPARTURE_TIME, newStatus.getActualDepartureTime());
+        }
+        if (newStatus.getActualArrivalTime() != null
+                && !originalStatus.getScheduledArrivalTime().equals(newStatus.getActualArrivalTime())) {
+            result.put(ComparableField.ARRIVAL_TIME, newStatus.getActualArrivalTime());
         }
         //Terminals and gates
-        if (originalStatus.getDepartureTerminal() != originalStatus.getDepartureTerminal()
-                || (originalStatus.getDepartureTerminal() != null && newStatus.getDepartureTerminal() != null && !originalStatus.getDepartureTerminal().equals(newStatus.getDepartureTerminal()))) {
+        if ((originalStatus.getDepartureTerminal() == null && newStatus.getDepartureTerminal() != null)
+                || (originalStatus.getDepartureTerminal() != null && !originalStatus.getDepartureTerminal().equals(newStatus.getDepartureTerminal()))) {
             result.put(ComparableField.DEPARTURE_TERMINAL, newStatus.getDepartureTerminal());
         }
-        if (originalStatus.getDepartureGate() != originalStatus.getDepartureGate()
-                || (originalStatus.getDepartureGate() != null && newStatus.getDepartureGate() != null && !originalStatus.getDepartureGate().equals(newStatus.getDepartureGate()))) {
+        if ((originalStatus.getDepartureGate() == null && newStatus.getDepartureGate() != null)
+                || (originalStatus.getDepartureGate() != null && !originalStatus.getDepartureGate().equals(newStatus.getDepartureGate()))) {
             result.put(ComparableField.DEPARTURE_GATE, newStatus.getDepartureGate());
         }
-        if (originalStatus.getArrivalTerminal() != originalStatus.getArrivalTerminal()
-                || (originalStatus.getArrivalTerminal() != null && newStatus.getArrivalTerminal() != null && !originalStatus.getArrivalTerminal().equals(newStatus.getArrivalTerminal()))) {
+        if ((originalStatus.getArrivalTerminal() == null && newStatus.getArrivalTerminal() != null)
+                || (originalStatus.getArrivalTerminal() != null && !originalStatus.getArrivalTerminal().equals(newStatus.getArrivalTerminal()))) {
             result.put(ComparableField.ARRIVAL_TERMINAL, newStatus.getArrivalTerminal());
         }
-        if (originalStatus.getArrivalGate() != originalStatus.getArrivalGate()
-                || (originalStatus.getArrivalGate() != null && newStatus.getArrivalGate() != null && !originalStatus.getArrivalGate().equals(newStatus.getArrivalGate()))) {
+        if ((originalStatus.getArrivalGate() == null && newStatus.getArrivalGate() != null)
+                || (originalStatus.getArrivalGate() != null && !originalStatus.getArrivalGate().equals(newStatus.getArrivalGate()))) {
             result.put(ComparableField.ARRIVAL_GATE, newStatus.getArrivalGate());
         }
         //Baggage claim
-        if (originalStatus.getBaggageClaim() != originalStatus.getBaggageClaim()
-                || (originalStatus.getBaggageClaim() != null && newStatus.getBaggageClaim() != null && !originalStatus.getBaggageClaim().equals(newStatus.getBaggageClaim()))) {
+        if ((originalStatus.getBaggageClaim() == null && newStatus.getBaggageClaim() != null)
+                || (originalStatus.getBaggageClaim() != null && !originalStatus.getBaggageClaim().equals(newStatus.getBaggageClaim()))) {
             result.put(ComparableField.BAGGAGE_CLAIM, newStatus.getBaggageClaim());
         }
-        //Status
-        //TODO uncomment true, for debugging only
-        if (true || !originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
-            result.put(ComparableField.STATUS, newStatus.getStatus());
-        }
         //Airport (i.e. if diverted)
-        if (originalStatus != null && newStatus.getDestinationAirport() != null && !originalStatus.getDestinationAirport().equals(newStatus.getDestinationAirport())) {
+        if (originalStatus.getDestinationAirport() != null
+                && newStatus.getDestinationAirport() != null
+                && !originalStatus.getDestinationAirport().equals(newStatus.getDestinationAirport())) {
             result.put(ComparableField.ARRIVAL_AIRPORT, PersistentData.getContextLessInstance().getAirports().get(newStatus.getDestinationAirport().getID()));
         }
         return result;
