@@ -9,7 +9,6 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:paddingTop="55dp"
         tools:context="hci.itba.edu.ar.tpe2.FlightsActivity">
 
         <android.support.v4.widget.SwipeRefreshLayout
