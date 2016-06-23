@@ -86,7 +86,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View view) {
                 mMap.clear();
-                Snackbar.make(coordinatorLayout,"Choose your origin airport", Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
+                Snackbar.make(coordinatorLayout,getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         cancelEditMap();
@@ -109,8 +109,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
-                        findDeals(persistentData.getAirports().get(marker.getTitle()));
                         closestAirport = persistentData.getAirports().get(marker.getTitle());
+                        findDeals(closestAirport);
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + closestAirport.toString(), Toast.LENGTH_SHORT).show();
                         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                             @Override
                             public void onInfoWindowClick(Marker marker) {
@@ -296,9 +297,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 @Override
                 public void execute(Context c, Airport[] nearbyAirports) {
                     if (nearbyAirports.length == 0) {
-                        Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.no_airport_found), Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
                     } else if (nearbyAirports.length == 1) {
-                        Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.located) + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
                         closestAirport = nearbyAirports[0];
                         //Got closest airport, find deals for it
                         findDeals(closestAirport);
@@ -308,7 +309,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 }
             });
         } else {
-            Toast.makeText(DealsMapActivity.this, "WHER U AT BOI I CAN'T FIND U", Toast.LENGTH_SHORT).show();    //TODO remove plz
+            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.oh_shit_waddap), Toast.LENGTH_SHORT).show();    //TODO remove plz
             Log.w("VOLANDO", "Location is null");
         }
     }
@@ -377,35 +378,39 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     }
 
     private void openDialog(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         final String[] airportNames = new String[airports.length];
         for (int i = 0; i < airportNames.length; i++) {
             airportNames[i] = airports[i].getDescription();
         }
-        dialogBuilder.setTitle("Choose an airport");    //TODO use string resource (res/values/string.xml)
+        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));    //TODO use string resource (res/values/string.xml)
         dialogBuilder.setSingleChoiceItems(airportNames, -1, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
                 //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
+                //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
+
             }
         });
 
-        //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
-        dialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(getResources().getString(R.string.accept), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO make API request of getDeals() and set markers and shtuff
-                Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
-                Toast.makeText(DealsMapActivity.this, "Getting deals from " + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
-                closestAirport = selectedAirport;
-                findDeals(closestAirport);
+                    //TODO make API request of getDeals() and set markers and shtuff
+                    Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
+                    Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
+                    closestAirport = selectedAirport;
+                    findDeals(closestAirport);
             }
         });
+
+
         //Deberia llevarte a la actividad anterior?
-        dialogBuilder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+        dialogBuilder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            //Deberia hacer back o dejarte ahi para que puedas hacer edit?
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
             }
         });
         AlertDialog dialog = dialogBuilder.create();
