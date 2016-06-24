@@ -164,8 +164,12 @@ public class FlightStatus implements Serializable {
                 return new Period(scheduledDepartureTime, now);
             }
         } else {
-            long delayMinutes = (originGateDelay == null ? 0 : originGateDelay) + (originRunwayDelay == null ? 0 : originRunwayDelay);
-            return new Period(delayMinutes * 60 * 1000);
+            if (actualDepartureTime.equals(scheduledDepartureTime)) {
+                return null;
+            } else {
+                long delayMinutes = (originGateDelay == null ? 0 : originGateDelay) + (originRunwayDelay == null ? 0 : originRunwayDelay);
+                return new Period(delayMinutes * 60 * 1000);
+            }
         }
     }
 
@@ -249,8 +253,12 @@ public class FlightStatus implements Serializable {
                 return new Period(scheduledArrivalTime, now);
             }
         } else {
-            long delayMinutes = (arrivalGateDelay == null ? 0 : arrivalGateDelay) + (arrivalRunwayDelay == null ? 0 : arrivalRunwayDelay);
-            return new Period(delayMinutes * 60 * 1000);
+            if (actualArrivalTime.equals(scheduledArrivalTime)) {
+                return null;
+            } else {
+                long delayMinutes = (arrivalGateDelay == null ? 0 : arrivalGateDelay) + (arrivalRunwayDelay == null ? 0 : arrivalRunwayDelay);
+                return new Period(delayMinutes * 60 * 1000);
+            }
         }
     }
 
