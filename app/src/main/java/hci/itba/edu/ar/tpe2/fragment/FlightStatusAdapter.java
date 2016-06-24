@@ -29,6 +29,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
     private final PersistentData persistentData;
     private Map<Integer, FlightStatus> watchedStatuses;
     private StarInterface starInterface;
+    private boolean setBottomPadding;
 
     FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB, StarInterface starInterface) {
         super(context, 0, objects);
@@ -36,10 +37,18 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         mCoordinatorLayout = layoutWithFAB;
         watchedStatuses = persistentData.getWatchedStatuses();
         this.starInterface = starInterface;
+        setBottomPadding = false;
     }
 
     @Override
     public View getView(final int position, View destination, final ViewGroup parent) {
+        if (!setBottomPadding) {     //Add bottom padding to not cover up last item with FAB
+            float scale = parent.getContext().getResources().getDisplayMetrics().density;
+            int bottomPaddingDP = (int) ((56 + 16 + 5) * scale + 0.5f);   //56dp FAB size + 16dp FAB margin + 5dp for wiggle room
+            parent.setPadding(0, 0, 0, bottomPaddingDP);
+            parent.setClipToPadding(false);                 //http://stackoverflow.com/questions/28916426/last-item-of-listview-fab-hides-it
+            setBottomPadding = true;
+        }
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.list_item_flight_status, parent, false);
         }
