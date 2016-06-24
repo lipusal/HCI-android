@@ -37,21 +37,14 @@ public class FlightStatus implements Serializable {
             .appendMinutes()
             .toFormatter();
 
-    private static final Map<String, String> validStatus = new HashMap<>();
     private static final Map<String, Integer> statusResIDs = new HashMap<>();
-    static {
-        validStatus.put("S", "scheduled");
-        validStatus.put("A", "active");
-        validStatus.put("R", "diverted");
-        validStatus.put("L", "landed");
-        validStatus.put("C", "canceled");
 
+    static {
         statusResIDs.put("S", R.string.status_scheduled);
         statusResIDs.put("A", R.string.status_active);
         statusResIDs.put("R", R.string.status_diverted);
         statusResIDs.put("L", R.string.status_landed);
         statusResIDs.put("C", R.string.status_canceled);
-
     }
 
 
@@ -62,7 +55,6 @@ public class FlightStatus implements Serializable {
     private DateTime scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     private Integer originGateDelay, originRunwayDelay, arrivalRunwayDelay, arrivalGateDelay;
-    //TODO incorporate delays
 
     private FlightStatus() {
     }
@@ -162,7 +154,9 @@ public class FlightStatus implements Serializable {
     }
 
     public Period getDepartureDelay() {
-        if (actualDepartureTime == null) {   //Hasn't taken off yet
+        if (getStringResID() == R.string.status_canceled) {
+            return null;
+        } else if (actualDepartureTime == null) {   //Hasn't taken off yet
             DateTime now = DateTime.now();
             if (now.isBefore(scheduledDepartureTime)) {
                 return null;
@@ -245,7 +239,9 @@ public class FlightStatus implements Serializable {
     }
 
     public Period getArrivalDelay() {
-        if (actualArrivalTime == null) {   //Hasn't landed yet
+        if (getStringResID() == R.string.status_canceled) {
+            return null;
+        } else if (actualArrivalTime == null) {   //Hasn't landed yet
             DateTime now = DateTime.now();
             if (now.isBefore(scheduledArrivalTime)) {
                 return null;
@@ -368,11 +364,6 @@ public class FlightStatus implements Serializable {
         FlightStatus that = (FlightStatus) o;
         return this.flight.equals(that.flight);
 
-    }
-
-    @Override
-    public String toString() {
-        return validStatus.get(status);
     }
 
     @Override

@@ -76,8 +76,8 @@ public class FlightDetailsMainFragment extends Fragment {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getChildFragmentManager());
 
-        adapter.addFragment(new FlightDetailsFragment(), "Detalles");
-        adapter.addFragment(new FlightReviewsFragment(), "Comentarios");
+        adapter.addFragment(new FlightDetailsFragment(), "Detalles");       //TODO use string resource
+        adapter.addFragment(new FlightReviewsFragment(), "Comentarios");    //TODO use string resource
 
         viewPager.setAdapter(adapter);
     }

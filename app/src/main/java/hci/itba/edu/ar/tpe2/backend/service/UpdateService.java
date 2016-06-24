@@ -107,7 +107,7 @@ public class UpdateService extends IntentService {
                                 updatedStatuses.put(newStatus.getFlight().getID(), newStatus);
                                 differences.put(newStatus.getFlight().getID(), statusDifferences);
                                 persistentData.updateStatus(newStatus);
-                                Log.d("VOLANDO", status.getFlight().toString() + " is now " + newStatus.toString());
+                                Log.d("VOLANDO", status.getFlight().toString() + " is now " + getString(newStatus.getStringResID()));
                             }
                             if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
                                 //Done, broadcast
@@ -122,7 +122,7 @@ public class UpdateService extends IntentService {
                     new NetworkRequestCallback<String>() {
                         @Override
                         public void execute(Context c, String param) {
-                            Log.w("VOLANDO", "Error getting status updates for " + status.toString() + ":\n" + param);  //TODO notify user? Try again right away? Broadcast? Wait?
+                            Log.w("VOLANDO", "Error getting status updates for " + status.getFlight().toString() + ":\n" + param);  //TODO notify user? Try again right away? Broadcast? Wait?
                         }
                     });
         }

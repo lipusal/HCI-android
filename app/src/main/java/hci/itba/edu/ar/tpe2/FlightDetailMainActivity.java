@@ -59,7 +59,7 @@ public class FlightDetailMainActivity extends AppCompatActivity
         fm.beginTransaction();
         Fragment fragmentDetailsMain = new FlightDetailsMainFragment();
         Bundle arguments = new Bundle();
-        arguments.putString(PARAM_STATUS,flightStatus.toString());
+//        arguments.putString(PARAM_STATUS,flightStatus.toString());
         fragmentDetailsMain.setArguments(arguments);
         ft.add(R.id.fragment_container_main_details, fragmentDetailsMain);
         ft.commit();

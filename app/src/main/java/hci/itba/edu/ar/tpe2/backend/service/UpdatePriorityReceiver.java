@@ -115,7 +115,7 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      */
     public void showSnackbar(final FlightStatus newStatus) {
         final Context context = destinationView.getContext();
-        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + newStatus.toString(), Snackbar.LENGTH_LONG)
+        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()), Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.action_view,
                         new View.OnClickListener() {
