@@ -2,19 +2,16 @@ package hci.itba.edu.ar.tpe2;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -30,7 +27,6 @@ import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
-import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 import hci.itba.edu.ar.tpe2.fragment.FlightDetailsFragment;
 import hci.itba.edu.ar.tpe2.fragment.FlightDetailsMainFragment;
 import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
@@ -45,20 +41,12 @@ public class FlightsActivity extends AppCompatActivity
         //Do nothing for now
     }
 
-
-    private FlightStatusListFragment flightsFragment;
-    private SwipeRefreshLayout swipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
-
     private Toolbar toolbar;
     private Menu menu;
     private PersistentData persistentData;
     private boolean reviewVisiblle;
-    /**
-     * Broadcast receiver, reacts differently to manual and automatic updates.
-     */
-    private UpdatePriorityReceiver updatesReceiver;
-    private IntentFilter broadcastPriorityFilter;
+    YourFlightsFragment yourFlightsFragment;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -78,7 +66,7 @@ public class FlightsActivity extends AppCompatActivity
         reviewVisiblle = false;
         setContentView(R.layout.activity_flights);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -127,17 +115,17 @@ public class FlightsActivity extends AppCompatActivity
                     });
         }
 
-        if(savedInstanceState==null){
+        if (savedInstanceState == null) {
 
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
 
             fm.beginTransaction();
-            Fragment fragmentYourFlight = YourFlightsFragment.newInstance(coordinatorLayout);
+            yourFlightsFragment = YourFlightsFragment.newInstance(coordinatorLayout);
 //        Bundle arguments = new Bundle();
 //        arguments.putString(PARAM_STATUS,flightStatus.toString());
-//        fragmentDetailsMain.setArguments(arguments);
-            ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
+//        detailsFragment.setArguments(arguments);
+            ft.add(R.id.fragment_container_your_flight, yourFlightsFragment);
             ft.commit();
         }
 
@@ -317,21 +305,19 @@ public class FlightsActivity extends AppCompatActivity
         View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
         boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
         if (dualPane) {
-            FlightDetailsMainFragment details = (FlightDetailsMainFragment) this.getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+            FlightDetailsMainFragment details = (FlightDetailsMainFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
 //            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
 //            item.setVisible(false);
-
             if (details == null) {
                 return;
             }
             if (status == getFlightStatus()) {
-                FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.remove(details);
                 ft.commit();
                 reviewVisiblle = false;
                 this.invalidateOptionsMenu();
             }
-            
             fab.bringToFront();
         }
     }

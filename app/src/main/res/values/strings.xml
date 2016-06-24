@@ -17,6 +17,8 @@
     <string name="action_review">Review</string>
     <string name="action_view">View</string>
     <string name="no_changes">No changes</string>
+    <string name="details">Details</string>
+    <string name="comments">Comments</string>
 
     <string name="scheduled">Scheduled</string>
     <string name="actual">Actual</string>
@@ -69,6 +71,6 @@
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
-    <string name="currency">U$S\u0020</string>
+    <string name="currency" translatable="false">U$S\u0020</string>
 
 </resources>

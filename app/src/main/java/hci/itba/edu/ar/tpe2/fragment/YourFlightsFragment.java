@@ -1,6 +1,5 @@
 package hci.itba.edu.ar.tpe2.fragment;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -41,13 +40,6 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
     private UpdatePriorityReceiver updatesReceiver;
     private IntentFilter broadcastPriorityFilter;
     private PersistentData persistentData;
-    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            swipeRefreshLayout.setRefreshing(false);
-            refreshFlights();
-        }
-    };
 
     //View elements
     private CoordinatorLayout coordinatorLayout;
@@ -59,7 +51,7 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
 
     //Logic
     private boolean reviewVisiblle;
-    private boolean dualPane;
+    private boolean isDualPaneEnabled;
 
 
     public YourFlightsFragment() {
@@ -82,7 +74,7 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_your_flights, container, false);
 
-        //Register receiver with high priority
+        //Broadcast receiver with high priority
         broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
         broadcastPriorityFilter.setPriority(1);
         updatesReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
@@ -110,7 +102,8 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
             public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
                 swipeRefreshLayout.setRefreshing(false);
                 refreshFlights();
-                Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
+                //Same snackbar as super, but no action (user is already in Flights activity)
+                Snackbar.make(destinationView, String.format(getString(R.string.x_flights_updated), newStatuses.size()), Snackbar.LENGTH_LONG).show();
             }
         };
 
@@ -147,7 +140,7 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
     public void onAttach(Context context) {
         super.onAttach(context);
         View detailsFrame = getActivity().findViewById(R.id.fragment_container_flight_details);
-        dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        isDualPaneEnabled = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
         persistentData = new PersistentData(context);
         if (context instanceof OnFragmentInteractionListener) {
             mListener = (OnFragmentInteractionListener) context;
@@ -210,7 +203,7 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
             }
 
             //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
-            fm.executePendingTransactions();   //Otherwise the view in the next line might not yet exist
+            fm.executePendingTransactions();   //Otherwise the view in the next line might be null
             final ListView flightsFragmentListView = flightsFragment.getListView();
             flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
                 @Override

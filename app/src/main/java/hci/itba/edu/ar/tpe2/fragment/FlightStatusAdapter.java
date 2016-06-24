@@ -72,28 +72,32 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
             public void onClick(View v) {
                 if (watchedStatuses.containsValue(status)) {
                     persistentData.stopWatchingStatus(status);
-                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_off_24dp);
+                    remove(status);
+                    notifyDataSetChanged();
                     starInterface.onFlightUnstarred(status);
 
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.watchStatus(status);
-                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_on_24dp);
+                            add(status);
+                            notifyDataSetChanged();
                         }
                     }).show();
                 } else {
                     persistentData.watchStatus(status);
-                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_on_24dp);
+                    add(status);
+                    notifyDataSetChanged();
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.stopWatchingStatus(status);
-                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_off_24dp);
+                            remove(status);
+                            notifyDataSetChanged();
                         }
                     }).show();
                 }

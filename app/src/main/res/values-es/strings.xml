@@ -86,4 +86,8 @@
     <string name="embarks_at_terminal">Embarca en terminal %1$s</string>
     <string name="arrival_time_changed">Hora de aterrizaje %1$s cambiado</string>
     <string name="departure_time_changed">Hora de despegue %1$s cambiado</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="comments">Comentarios</string>
+    <string name="details">Detalles</string>
 </resources>
