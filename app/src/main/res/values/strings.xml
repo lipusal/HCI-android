@@ -30,6 +30,17 @@
     <string name="status_landed">Landed</string>
     <string name="status_canceled">Canceled</string>
 
+    <string name="departs_at">Departs %1$s</string>
+    <string name="departed_at">Departed %1$s</string>
+    <string name="departure_gate_changed">%1$s departure gate is now %2$s</string>
+    <string name="departure_terminal_changed">%1$s departure terminal is now %2$s</string>
+    <string name="arrives_at">Arrives %1$s</string>
+    <string name="arrived_at">Arrived %1$s</string>
+    <string name="arrival_gate_changed">%1$s arrival gate is now %2$s</string>
+    <string name="arrival_terminal_changed">%1$s arrival terminal is now %2$s</string>
+    <string name="arrival_airport_changed">Now arrives %1$s at %2$s</string>
+    <string name="baggage_claim_changed">%1$s baggage claim is now %2$s</string>
+
     <string name="searching">Searching</string>
     <string name="not_following_flights">No followed flights</string>
     <string name="err_no_flights_found">No flights found</string>

@@ -16,6 +16,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -174,13 +175,16 @@ public class FlightsActivity extends AppCompatActivity
         refreshFlights();
 
         //(Re-)register updates receiver
-        registerReceiver(updatesReceiver, broadcastPriorityFilter);
+//        registerReceiver(updatesReceiver, broadcastPriorityFilter);   TODO uncomment
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(updatesReceiver);
+//        unregisterReceiver(updatesReceiver);
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
