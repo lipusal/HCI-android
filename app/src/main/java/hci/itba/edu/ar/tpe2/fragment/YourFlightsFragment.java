@@ -80,14 +80,7 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
             @Override
             public void onNoFlightsChanged(boolean manuallyTriggered) {
                 swipeRefreshLayout.setRefreshing(false);
-                //Manual update completed
-                if (manuallyTriggered) {
-                    Snackbar.make(destinationView, R.string.no_changes, Snackbar.LENGTH_LONG).show();
-                }
-                //Automatic update completed, do default behavior
-                else {
-                    super.onNoFlightsChanged(manuallyTriggered);
-                }
+                super.onNoFlightsChanged(manuallyTriggered);
             }
 
             @Override

@@ -90,13 +90,22 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
     }
 
     /**
-     * Called when no flights were updated.
+     * Called when no flights were updated. If this was from a manual update, shows a Snackbar
+     * explicitly telling the user that there were no changes.
      *
      * @param manualUpdate Whether this occurred from a manual update (e.g. pull to refresh in
      *                     Flights activity)
      */
     public void onNoFlightsChanged(boolean manualUpdate) {
-        //Do nothing
+        if (manualUpdate) {
+            if (destinationView == null || destinationView.getContext() == null) {
+                return;
+            }
+            final Context context = destinationView.getContext();
+            Snackbar.make(destinationView, context.getString(R.string.no_changes), Snackbar.LENGTH_LONG)
+                    //No action
+                    .show();
+        }
     }
 
     /**
@@ -201,7 +210,7 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
                             public void onClick(View v) {
                                 Intent intent = new Intent(context, UpdateService.class);
                                 intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
-                                intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, manualUpdate);
+                                intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, true);
                                 context.startService(intent);
                             }
                         })
