@@ -1,5 +1,7 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.content.BroadcastReceiver;
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -48,24 +50,18 @@ import hci.itba.edu.ar.tpe2.fragment.StarInterface;
 import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements  StarInterface, NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener,FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
+        implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
 
     @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
 
-    private PersistentData persistentData;
+
     private FlightStatusListFragment flightsFragment;
     private SwipeRefreshLayout swipeRefreshLayout;
     private CoordinatorLayout coordinatorLayout;
-    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            swipeRefreshLayout.setRefreshing(false);
-            refreshFlights();
-        }
-    };
+
     private Toolbar toolbar;
     private Menu menu;
     private PersistentData persistentData;
@@ -164,37 +160,7 @@ public class FlightsActivity extends AppCompatActivity
         ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
         ft.commit();
 
-        //Register receiver with high priority
-        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        broadcastPriorityFilter.setPriority(1);
-        updatesReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
-            @Override
-            public void onNoFlightsChanged(boolean manuallyTriggered) {
-                //Manual update completed
-                if (manuallyTriggered) {
-                    swipeRefreshLayout.setRefreshing(false);
-                    Snackbar.make(coordinatorLayout, R.string.no_changes, Snackbar.LENGTH_LONG).show();
-                }
-                //Automatic update completed, do default behavior
-                else {
-                    super.onNoFlightsChanged(manuallyTriggered);
-                }
-            }
 
-            @Override
-            public void onSingleFlightChanged(FlightStatus newStatus, boolean manuallyTriggered) {
-                super.onSingleFlightChanged(newStatus, manuallyTriggered);
-                swipeRefreshLayout.setRefreshing(false);
-                refreshFlights();
-            }
-
-            @Override
-            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
-                swipeRefreshLayout.setRefreshing(false);
-                refreshFlights();
-                Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
-            }
-        };
     }
 
     @Override
@@ -205,16 +171,13 @@ public class FlightsActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
 
-        refreshFlights();
 
-        //(Re-)register updates receiver
-        registerReceiver(updatesReceiver, broadcastPriorityFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(updatesReceiver);
+
     }
 
     @Override
