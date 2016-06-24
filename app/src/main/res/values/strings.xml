@@ -57,6 +57,8 @@
     <string name="err_no_flights_found">No flights found</string>
     <string name="err_network">Network error</string>
 
+    <string name="no_review_found">No reviews</string>
+
 
     <string name="err_empty_airline_id">Enter airline ID</string>
     <string name="err_invalid_airline_id">Invalid airline ID</string>
@@ -71,6 +73,10 @@
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
+
+    <string name="updating">Updating</string>
+
     <string name="currency" translatable="false">U$S\u0020</string>
+
 
 </resources>
