@@ -127,16 +127,20 @@ public class FlightsActivity extends AppCompatActivity
                     });
         }
 
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
+        if(savedInstanceState==null){
+            setTitle("null");
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
 
-        fm.beginTransaction();
-        Fragment fragmentYourFlight = YourFlightsFragment.newInstance(coordinatorLayout);
+            fm.beginTransaction();
+            Fragment fragmentYourFlight = YourFlightsFragment.newInstance(coordinatorLayout);
 //        Bundle arguments = new Bundle();
 //        arguments.putString(PARAM_STATUS,flightStatus.toString());
 //        fragmentDetailsMain.setArguments(arguments);
-        ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
-        ft.commit();
+            ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
+            ft.commit();
+        }
+
     }
 
     @Override
