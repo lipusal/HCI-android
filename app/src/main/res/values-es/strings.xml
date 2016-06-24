@@ -79,10 +79,8 @@
     <string name="x_flights_updated">%1$d vuelos actualizados</string>
     <string name="status_changed_generic">Estado de %1$s actualizado</string>
     <string name="tap_to_see_details">Tocá para ver detalles</string>
-<<<<<<< HEAD
     <string name="no_review_found">No hay comentarios</string>
     <string name="updating">Actualizando</string>
-=======
     <string name="new_baggage_claim_belt_is">Ahora retira equipaje en cinta %1$s</string>
     <string name="disembarks_at_gate">Desembarca en puerta %1$s</string>
     <string name="disembarks_at_terminal">Desembarca en terminal %1$s</string>
@@ -94,5 +92,4 @@
     <string name="cancel">Cancelar</string>
     <string name="comments">Comentarios</string>
     <string name="details">Detalles</string>
->>>>>>> 91070fd870fb900eec9d3c3da0f4bef8669380f6
 </resources>

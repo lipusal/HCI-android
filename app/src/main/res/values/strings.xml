@@ -73,9 +73,7 @@
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
-
     <string name="updating">Updating</string>
-
     <string name="currency" translatable="false">U$S\u0020</string>
 
 
