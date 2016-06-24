@@ -38,8 +38,11 @@
     <string name="arrived_at">Arrived %1$s</string>
     <string name="arrival_gate_changed">%1$s arrival gate is now %2$s</string>
     <string name="arrival_terminal_changed">%1$s arrival terminal is now %2$s</string>
-    <string name="arrival_airport_changed">Now arrives %1$s at %2$s</string>
+    <string name="diverted_to">Lands at %1$s</string>
     <string name="baggage_claim_changed">%1$s baggage claim is now %2$s</string>
+    <string name="x_flights_updated">%1$d flights updated</string>
+    <string name="status_changed_generic">%1$s status changed</string>
+    <string name="tap_to_see_details">Tap to see details</string>
 
     <string name="searching">Searching</string>
     <string name="not_following_flights">No followed flights</string>

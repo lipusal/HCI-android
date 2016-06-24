@@ -43,7 +43,7 @@ public class FlightStatusComparator {
         }
         Map<ComparableField, Serializable> result = new HashMap<>();
         //Status
-        if (true || !originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
+        if (!originalStatus.getStatus().equals(newStatus.getStatus())) { //Contemplates null (left side should never be null)
             result.put(ComparableField.STATUS, newStatus.getStatus());
         }
         //Times - if actual departure date is different than scheduled time, add a delay field.

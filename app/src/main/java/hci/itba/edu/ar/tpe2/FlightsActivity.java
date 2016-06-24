@@ -159,7 +159,7 @@ public class FlightsActivity extends AppCompatActivity
             public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
                 swipeRefreshLayout.setRefreshing(false);
                 refreshFlights();
-                Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
+                Snackbar.make(destinationView, String.format(getString(R.string.x_flights_updated), newStatuses.size()), Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
             }
         };
     }
@@ -175,13 +175,13 @@ public class FlightsActivity extends AppCompatActivity
         refreshFlights();
 
         //(Re-)register updates receiver
-//        registerReceiver(updatesReceiver, broadcastPriorityFilter);   TODO uncomment
+        registerReceiver(updatesReceiver, broadcastPriorityFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-//        unregisterReceiver(updatesReceiver);
+        unregisterReceiver(updatesReceiver);
         if (swipeRefreshLayout.isRefreshing()) {
             swipeRefreshLayout.setRefreshing(false);
         }
