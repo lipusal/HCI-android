@@ -190,11 +190,6 @@ public class PersistentData {
      * @param errorCallback Callback to run if any errors occur.
      */
     public void init(final NetworkRequestCallback<Void> doneCallback, NetworkRequestCallback<String> errorCallback) {
-        //TODO stop saving flights
-        //Followed flights (done before the other data because it needs to be complete for either path to "finish")
-        setFollowedFlights(fileManager.loadFollowedFlights());
-        Log.d("VOLANDO", "Loaded " + getFollowedFlights().size() + " followed flights.");
-        //TODO delete up to here
         //Watched statuses (done before the other data because it needs to be complete for either path to "finish")
         setWatchedStatuses(fileManager.loadWatchedStatuses());
         Log.d("VOLANDO", "Loaded " + watchedStatuses.size() + " watched statuses.");

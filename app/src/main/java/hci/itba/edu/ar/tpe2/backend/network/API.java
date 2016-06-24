@@ -312,7 +312,11 @@ public class API {
                             @Override
                             protected void successCallback(String result) {
                                 JsonObject data = gson.fromJson(result, JsonObject.class);
-                                City[] cities = gson.fromJson(data.get("cities"), City[].class);
+                                JsonArray citiesJson = data.getAsJsonArray("cities");
+                                City[] cities = new City[citiesJson.size()];
+                                for (int i = 0; i < cities.length; i++) {
+                                    cities[i] = City.fromJson(citiesJson.get(i).getAsJsonObject());
+                                }
                                 if (successCallback != null) {
                                     successCallback.execute(context, cities);
                                 }
@@ -428,9 +432,13 @@ public class API {
                             @Override
                             protected void successCallback(String data) {
                                 JsonObject json = gson.fromJson(data, JsonObject.class);
-                                Country[] result = gson.fromJson(json.get("countries"), Country[].class);
+                                JsonArray countriesJson = json.getAsJsonArray("countries");
+                                Country[] countries = new Country[countriesJson.size()];
+                                for (int i = 0; i < countries.length; i++) {
+                                    countries[i] = Country.fromJson(countriesJson.get(i).getAsJsonObject());
+                                }
                                 if (callback != null) {
-                                    callback.execute(context, result);
+                                    callback.execute(context, countries);
                                 }
                             }
 

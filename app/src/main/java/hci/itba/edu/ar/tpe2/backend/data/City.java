@@ -1,5 +1,9 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import android.text.Html;
+
+import com.google.gson.JsonObject;
+
 import java.io.Serializable;
 
 public class City extends Place implements Serializable {
@@ -9,13 +13,24 @@ public class City extends Place implements Serializable {
     private boolean has_airport;
     private String flickrUrl;
 
-    public City(String id, String name, String countryID, double longitude, double latitude, boolean has_airport) {
+    private City(String id, String name, String countryID, double longitude, double latitude, boolean has_airport) {
         this.id = id;
         this.name = name;
-        this.country = new Country(countryID);
+        this.country = PersistentData.getContextLessInstance().getCountries().get(countryID);
         this.longitude = longitude;
         this.latitude = latitude;
         this.has_airport = has_airport;
+    }
+
+    public static City fromJson(JsonObject json) {
+        return new City(
+                json.get("id").getAsString(),
+                Html.fromHtml(json.get("name").getAsString()).toString(),
+                json.getAsJsonObject("country").get("id").getAsString(),
+                json.get("longitude").getAsDouble(),
+                json.get("latitude").getAsDouble(),
+                json.get("has_airport").getAsBoolean()
+        );
     }
 
     @Override

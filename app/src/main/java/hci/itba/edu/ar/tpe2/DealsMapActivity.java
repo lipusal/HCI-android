@@ -420,7 +420,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         for (int i = 0; i < airportNames.length; i++) {
             airportNames[i] = airports[i].getDescription();
         }
-        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));    //TODO use string resource (res/values/string.xml)
+        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));
         dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
