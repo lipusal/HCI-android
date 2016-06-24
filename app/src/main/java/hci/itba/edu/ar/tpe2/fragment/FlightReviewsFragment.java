@@ -55,10 +55,10 @@ public class FlightReviewsFragment extends Fragment {
 
     private void updateView() {
         if (firstTime) {
-            title.setText("Searching...");
+            title.setText(R.string.searching);
             firstTime = false;
         } else {
-            title.setText("Updating...");
+            title.setText(R.string.updating);
         }
         title.setVisibility(View.VISIBLE);
         FlightStatus flightStatus;
@@ -86,7 +86,12 @@ public class FlightReviewsFragment extends Fragment {
                     reviewsAdapter.addAll(reviews);
                     reviewsAdapter.notifyDataSetChanged();
                 }
-                title.setVisibility(View.GONE);
+                if(reviews.isEmpty()){
+                    title.setText(R.string.no_review_found);
+                }else{
+                    title.setVisibility(View.GONE);
+                }
+
             }
         });
     }

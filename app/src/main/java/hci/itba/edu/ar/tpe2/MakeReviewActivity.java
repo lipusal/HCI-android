@@ -139,7 +139,7 @@ public class MakeReviewActivity extends AppCompatActivity
 
         if (score == 0) {
             valid = false;
-            reviewText.setError("Ingrese el puntaje. Mover de lugar el error");
+            reviewText.setError("Ingrese el puntaje");
         }
 
         if (text.isEmpty()) {
