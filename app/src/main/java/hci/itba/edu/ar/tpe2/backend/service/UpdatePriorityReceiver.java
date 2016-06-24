@@ -93,7 +93,7 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      *                     Flights activity)
      */
     public void onSingleFlightChanged(FlightStatus newStatus, boolean manualUpdate) {
-        showSnackbar(newStatus);
+        showSnackbarForSingleFlight(newStatus);
     }
 
     /**
@@ -104,7 +104,7 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      *                     Flights activity)
      */
     public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manualUpdate) {
-        showSnackbar(newStatuses.size());
+        showSnackbarForMultipleFlights(newStatuses.size());
     }
 
     /**
@@ -113,9 +113,13 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      *
      * @param newStatus The new status.
      */
-    public void showSnackbar(final FlightStatus newStatus) {
+    public void showSnackbarForSingleFlight(final FlightStatus newStatus) {
+        //Avoid NPEs (e.g. when changing activities right as a Snackbar is supposed to show)
+        if (destinationView == null || destinationView.getContext() == null) {
+            return;
+        }
         final Context context = destinationView.getContext();
-        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()), Snackbar.LENGTH_LONG)
+        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()), Snackbar.LENGTH_LONG)    //TODO use string resource
                 .setAction(
                         R.string.action_view,
                         new View.OnClickListener() {
@@ -134,11 +138,15 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      * Shows a Snackbar notifying that {@code numUpdates} flights were updated. Includes an action
      * to go to the Flights activity.
      *
-     * @param numUpdates The number of updated flights.
+     * @param numUpdatedFlights The number of updated flights.
      */
-    public void showSnackbar(int numUpdates) {
+    public void showSnackbarForMultipleFlights(int numUpdatedFlights) {
+        //Avoid NPEs (e.g. when changing activities right as a Snackbar is supposed to show)
+        if (destinationView == null || destinationView.getContext() == null) {
+            return;
+        }
         final Context context = destinationView.getContext();
-        Snackbar.make(destinationView, numUpdates + " flights updated", Snackbar.LENGTH_LONG)    //TODO use string resource with placeholder
+        Snackbar.make(destinationView, numUpdatedFlights + " flights updated", Snackbar.LENGTH_LONG)    //TODO use string resource with placeholder
                 .setAction(
                         R.string.action_view,
                         new View.OnClickListener() {

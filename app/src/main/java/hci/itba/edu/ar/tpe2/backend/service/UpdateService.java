@@ -110,6 +110,9 @@ public class UpdateService extends IntentService {
                                 Log.d("VOLANDO", status.getFlight().toString() + " is now " + getString(newStatus.getStringResID()));
                             }
                             if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
+                                if (updatedStatuses.isEmpty()) {
+                                    Log.d("VOLANDO", "No changes");
+                                }
                                 //Done, broadcast
                                 Intent intent = new Intent(ACTION_UPDATE_COMPLETE);
                                 intent.putExtra(EXTRA_UPDATES, (Serializable) updatedStatuses);

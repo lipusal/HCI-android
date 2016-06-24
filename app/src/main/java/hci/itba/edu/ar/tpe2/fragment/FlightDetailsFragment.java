@@ -1,23 +1,24 @@
 package hci.itba.edu.ar.tpe2.fragment;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.util.Collection;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
 import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 import hci.itba.edu.ar.tpe2.backend.service.UpdateService;
 
 /**
@@ -59,33 +60,13 @@ public class FlightDetailsFragment extends Fragment {
             arrivalGateLabel,
             arrivalBaggageClaimLabel;
 
-    //    TextView extraDetail;
-    FlightStatus status;
 
-    private BroadcastReceiver refreshCompleteBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateView();
-        }
-    };
+    private FlightStatus status;
+    private UpdatePriorityReceiver updatesReceiver;
+    private IntentFilter priorityFilter;
 
     public FlightDetailsFragment() {
         // Required empty public constructor
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        //(Re-)register refresh broadcast receiver
-        updateView();
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(refreshCompleteBroadcastReceiver, new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE));
-
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        LocalBroadcastManager.getInstance(getActivity()).unregisterReceiver(refreshCompleteBroadcastReceiver);
     }
 
     @Override
@@ -93,7 +74,21 @@ public class FlightDetailsFragment extends Fragment {
         super.onCreate(savedInstanceState);
     }
 
-    private void updateView(){
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateView();
+        //(Re-)register refresh broadcast receiver
+        getActivity().registerReceiver(updatesReceiver, priorityFilter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(updatesReceiver);
+    }
+
+    public void updateView() {
 //        switch (status.getStatus()) {
 //            case "L": extraDetail.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_arriving, getActivity().getTheme()), null, getActivity().getResources().getDrawable(R.drawable.ic_flight_arriving, getActivity().getTheme()), null);
 //            case "C": extraDetail.setCompoundDrawablesWithIntrinsicBounds(getActivity().getResources().getDrawable(R.drawable.ic_flight_canceled, getActivity().getTheme()), null, getActivity().getResources().getDrawable(R.drawable.ic_flight_canceled, getActivity().getTheme()), null);;
@@ -153,9 +148,9 @@ public class FlightDetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view;
-        view = inflater.inflate(R.layout.fragment_flight_details, container, false);
+        final View view = inflater.inflate(R.layout.fragment_flight_details, container, false);
 
+        //Get the status of the parent activity -- very fragile, casts are ugly
         try {
             FlightDetailMainActivity activity = (FlightDetailMainActivity) getActivity();
             status = activity.getFlightStatus();
@@ -164,7 +159,42 @@ public class FlightDetailsFragment extends Fragment {
             status = activity.getFlightStatus();
         }
 
+        //Set up broadcast receiver with priority (needs a View to work properly)
+        priorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
+        priorityFilter.setPriority(1);
+        updatesReceiver = new UpdatePriorityReceiver(view) {
+            @Override
+            public void onSingleFlightChanged(FlightStatus newStatus, boolean manualUpdate) {
+                //If this flight was updated, refresh the view and show a special snackbar (no action, user is already in this flight's details activity), otherwise do default behavior
+                if (newStatus.getFlight().equals(status.getFlight())) {
+                    status = newStatus;
+                    Snackbar.make(view, "Flight updated", Snackbar.LENGTH_LONG).show();   //TODO stop using generic message
+                    updateView();
+                } else {
+                    super.onSingleFlightChanged(newStatus, manualUpdate);
+                }
+            }
 
+            @Override
+            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manualUpdate) {
+                //If this flight was updated, refresh the view and show a special snackbar (no action, user is already in this flight's details activity), otherwise do default behavior
+                boolean found = false;
+                for (FlightStatus updatedStatus : newStatuses) {
+                    if (updatedStatus.getFlight().equals(status.getFlight())) {
+                        found = true;
+                        status = updatedStatus;
+                        Snackbar.make(view, "Flight updated", Snackbar.LENGTH_LONG).show();   //TODO stop using generic message
+                        updateView();
+                        break;
+                    }
+                }
+                if (!found) {
+                    super.onMultipleFlightsChanged(newStatuses, manualUpdate);
+                }
+            }
+        };
+
+        //Bind all the view elements
         title = (TextView) view.findViewById(R.id.title);
         subtitle = (TextView) view.findViewById(R.id.subtitle);
         departureAirportText = (TextView) view.findViewById(R.id.departureAirport);
@@ -197,13 +227,6 @@ public class FlightDetailsFragment extends Fragment {
         arrivalTerminalLabel = (TextView) view.findViewById(R.id.arrivalTerminalLabel);
         arrivalBaggageClaimLabel = (TextView) view.findViewById(R.id.arrivalBaggageClaimLabel);
         return view;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
     }
 
     @Override
