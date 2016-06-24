@@ -24,11 +24,9 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.Correlator;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
@@ -41,15 +39,13 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
-import hci.itba.edu.ar.tpe2.backend.data.City;
 import hci.itba.edu.ar.tpe2.backend.data.Deal;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.data.Place;
@@ -58,18 +54,23 @@ import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 
 public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
+    private static final String PARAM_LAST_KNOWN_LOCATION = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.LAST_KNOWN_LOCATION";
+    private static final String PARAM_CLOSEST_AIRPORT = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.CLOSEST_AIRPORT";
+    private static final String PARAM_DEALS = "hci.itba.edu.ar.tpe2.DealsMapActivity.param.DEALS";
 
     private GoogleMap mMap;
     private List<Deal> deals;
     private GoogleApiClient mGoogleApiClient;
     private double latitude;
     private double longitude;
-    private Airport closestAirport;
+    private Airport closestAirport = null;
     private static final int PERM_LOCATION = 42;
     private boolean locationPermissionGranted = false;
     private PersistentData persistentData;
     private CoordinatorLayout coordinatorLayout;
     private UpdatePriorityReceiver updatesReceiver;
+    private Location lastKnownLocation;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,8 +78,20 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         setContentView(R.layout.activity_deals_map);
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.map_coordinator_layout);
 
-        persistentData = new PersistentData(this);
+        //Restore last known location and closest, if known
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(PARAM_LAST_KNOWN_LOCATION)) {
+                lastKnownLocation = savedInstanceState.getParcelable(PARAM_LAST_KNOWN_LOCATION);
+            }
+            if (savedInstanceState.containsKey(PARAM_CLOSEST_AIRPORT)) {
+                closestAirport = (Airport) savedInstanceState.getSerializable(PARAM_CLOSEST_AIRPORT);
+            }
+            if (savedInstanceState.containsKey(PARAM_DEALS)) {
+                deals = (List<Deal>) savedInstanceState.getSerializable(PARAM_DEALS);
+            }
+        }
 
+        persistentData = new PersistentData(this);
         //Set up the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -88,9 +101,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View view) {
                 mMap.clear();
-                Snackbar.make(coordinatorLayout,"Choose your origin airport", Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
+                Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        if(closestAirport == null){
+                            mMap.clear();
+                            return;
+                        }
                         cancelEditMap();
                         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                             @Override
@@ -101,7 +118,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     }
                 }).show();
                 Collection<Airport> airports = persistentData.getAirports().values();
-                for(Airport a : airports){
+                for (Airport a : airports) {
                     LatLng airportPosition = new LatLng(a.getLatitude(), a.getLongitude());
                     mMap.addMarker(new MarkerOptions()
                             .position(airportPosition)
@@ -111,8 +128,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
-                        findDeals(persistentData.getAirports().get(marker.getTitle()));
                         closestAirport = persistentData.getAirports().get(marker.getTitle());
+                        findDeals(closestAirport);
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + closestAirport.toString(), Toast.LENGTH_SHORT).show();
                         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                             @Override
                             public void onInfoWindowClick(Marker marker) {
@@ -187,7 +205,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             public View getInfoContents(final Marker marker) {
                 View view = getLayoutInflater().inflate(R.layout.info_window_layout, null);
                 Place place = persistentData.getCities().get(marker.getTitle());
-                if(place == null) {
+                if (place == null) {
                     place = persistentData.getAirports().get(marker.getTitle());
                 }
 
@@ -276,21 +294,33 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onConnected(Bundle connectionHint) {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
-            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
-            if (!locationPermissionGranted) {
-                Toast.makeText(DealsMapActivity.this, "Y U NO LET ME LOCATE U", Toast.LENGTH_SHORT).show();
-                return;
+        if(lastKnownLocation == null) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
+                requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
+                if (!locationPermissionGranted) {
+                    Toast.makeText(DealsMapActivity.this, "Y U NO LET ME LOCATE U", Toast.LENGTH_SHORT).show();
+                    return;
+                }
             }
-            // Consider calling ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
+            lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            onLocationObtained();
+        } else {
+            LatLng closestAirportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
+            mMap.addMarker(new MarkerOptions()
+                    .position(closestAirportPosition)
+                    .title(closestAirport.toString())
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
+            setMarkers(deals);
+            //TODO Facu acá modulariza cositas
         }
-        Location lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    /**
+     * Called when {@link #lastKnownLocation} is set via Google Location Services. It does <b>NOT</b>
+     * guarantee that it is non-null.
+     */
+    private void onLocationObtained() {
         if (lastKnownLocation != null) {
             latitude = lastKnownLocation.getLatitude();
             longitude = lastKnownLocation.getLongitude();
@@ -298,19 +328,19 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 @Override
                 public void execute(Context c, Airport[] nearbyAirports) {
                     if (nearbyAirports.length == 0) {
-                        Toast.makeText(DealsMapActivity.this, "No airport found near you =(", Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.no_airport_found), Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
                     } else if (nearbyAirports.length == 1) {
-                        Toast.makeText(DealsMapActivity.this, "Located you at " + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.located) + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
                         closestAirport = nearbyAirports[0];
                         //Got closest airport, find deals for it
                         findDeals(closestAirport);
                     } else {
-                        openDialog(nearbyAirports);
+                        chooseClosestAirport(nearbyAirports);
                     }
                 }
             });
         } else {
-            Toast.makeText(DealsMapActivity.this, "WHER U AT BOI I CAN'T FIND U", Toast.LENGTH_SHORT).show();    //TODO remove plz
+            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.oh_shit_waddap), Toast.LENGTH_SHORT).show();    //TODO remove plz
             Log.w("VOLANDO", "Location is null");
         }
     }
@@ -342,6 +372,20 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     public void onPause() {
         super.onPause();
         unregisterReceiver(updatesReceiver);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        if (lastKnownLocation != null) {
+            outState.putParcelable(PARAM_LAST_KNOWN_LOCATION, lastKnownLocation);
+        }
+        if (closestAirport != null) {
+            outState.putSerializable(PARAM_CLOSEST_AIRPORT, closestAirport);
+        }
+        if (deals != null) {
+            outState.putSerializable(PARAM_DEALS, (Serializable) deals);
+        }
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -385,39 +429,44 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         return true;
     }
 
-    private void openDialog(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+    private void chooseClosestAirport(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
+        final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        AlertDialog dialog = null;
         final String[] airportNames = new String[airports.length];
         for (int i = 0; i < airportNames.length; i++) {
             airportNames[i] = airports[i].getDescription();
         }
-        dialogBuilder.setTitle("Choose an airport");    //TODO use string resource (res/values/string.xml)
-        dialogBuilder.setSingleChoiceItems(airportNames, -1, new DialogInterface.OnClickListener() {
+        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));    //TODO use string resource (res/values/string.xml)
+        dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
                 //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
+                //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
+
             }
         });
 
-        //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
-        dialogBuilder.setPositiveButton("Aceptar", new DialogInterface.OnClickListener() {
+        dialogBuilder.setPositiveButton(getResources().getString(R.string.accept), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO make API request of getDeals() and set markers and shtuff
-                Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
-                Toast.makeText(DealsMapActivity.this, "Getting deals from " + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
-                closestAirport = selectedAirport;
-                findDeals(closestAirport);
+                    Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
+                    Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
+                    closestAirport = selectedAirport;
+                    findDeals(closestAirport);
             }
         });
+
+
         //Deberia llevarte a la actividad anterior?
-        dialogBuilder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+        dialogBuilder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            //Deberia hacer back o dejarte ahi para que puedas hacer edit?
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
             }
         });
-        AlertDialog dialog = dialogBuilder.create();
+        dialog = dialogBuilder.create();
         dialog.show();
     }
 
@@ -446,7 +495,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 List<Deal> orderedDeals = Arrays.asList(dealsArray);
                 Collections.sort(orderedDeals);
                 deals = orderedDeals;
-                LatLng aux;
+
 //                float average = 0;
 //                int i = 0;
 //                for (Deal d : deals) {
@@ -454,38 +503,32 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
 //                    i++;
 //                }
 //                average = average / i;
-                float colorValue;
-                for (Deal d : deals) {
-                    aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-                    colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-                    Marker m = mMap.addMarker(new MarkerOptions()
-                            .position(aux)
-                            .title(d.getCity().getID())
-                            .snippet("$" + Double.toString(d.getPrice()))
-                            .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
-                }
+                setMarkers(deals);
             }
         });
     }
 
-    private void cancelEditMap(){
+    private void setMarkers(List<Deal> deals){
+        LatLng aux;
+        float colorValue;
+        for (Deal d : deals) {
+            aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
+            colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
+            mMap.addMarker(new MarkerOptions()
+                    .position(aux)
+                    .title(d.getCity().getID())
+                    .snippet(getResources().getString(R.string.currency) + String.format("%.2f", d.getPrice()))
+                    .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
+        }
+    }
+
+    private void cancelEditMap() {
         mMap.clear();
         LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
         mMap.addMarker(new MarkerOptions()
                 .position(airportPosition)
                 .title(closestAirport.toString())
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        float colorValue;
-        LatLng aux;
-
-        for(Deal d: deals){
-            aux = new LatLng(d.getCity().getLatitude(), d.getCity().getLongitude());
-            colorValue = (float) (deals.indexOf(d) * 120.0 / (deals.size() - (deals.size() == 1 ? 0 : 1)));
-            Marker m = mMap.addMarker(new MarkerOptions()
-                    .position(aux)
-                    .title(d.getCity().getID())
-                    .snippet("$" + Double.toString(d.getPrice()))
-                    .icon(BitmapDescriptorFactory.defaultMarker(colorValue)));
-        }
+       setMarkers(deals);
     }
 }
