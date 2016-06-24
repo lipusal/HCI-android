@@ -3,6 +3,9 @@ package hci.itba.edu.ar.tpe2.backend.data;
 import android.content.Context;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
@@ -25,8 +28,6 @@ public class PersistentData {
     private static Map<String, City> cities;
     private static Map<String, Country> countries;
     private static Map<String, Currency> currencies;
-    @Deprecated
-    private static List<Flight> followedFlights;
     private static Map<Integer, FlightStatus> watchedStatuses;
     private static Map<String, Language> languages;
 
@@ -44,16 +45,6 @@ public class PersistentData {
      */
     public static PersistentData getContextLessInstance() {
         return new PersistentData(null);
-    }
-
-    @Deprecated
-    public List<Flight> getFollowedFlights() {
-        return followedFlights;
-    }
-
-    @Deprecated
-    private void setFollowedFlights(List<Flight> followedFlights) {
-        PersistentData.followedFlights = followedFlights;
     }
 
     public Map<String, City> getCities() {
@@ -148,27 +139,6 @@ public class PersistentData {
         }
         watchedStatuses.remove(flight.getID());
         fileManager.saveWatchedStatuses(watchedStatuses);
-    }
-
-    public void addFollowedFlight(Flight f, Context context) {
-        if (followedFlights == null) {
-            throw new IllegalStateException("Followed flights have not been set, can't add flight.");
-        }
-        if (followedFlights.contains(f)) {
-            Log.w("VOLANDO", "Flight already followed: " + f.toString());
-            return;
-
-        }
-        followedFlights.add(f);
-        fileManager.saveFollowedFlights(followedFlights);
-    }
-
-    public void removeFollowedFlight(Flight f, Context context) {
-        if (followedFlights == null) {
-            throw new IllegalStateException("Followed flights have not been set, can't remove flight.");
-        }
-        followedFlights.remove(f);
-        fileManager.saveFollowedFlights(followedFlights);
     }
 
     public boolean isInited() {
@@ -344,6 +314,23 @@ public class PersistentData {
      * Downloads airlines from network and saves them.
      */
     private void downloadAirlines(final NetworkRequestCallback<Void> doneCallback, final NetworkRequestCallback<String> errorCallback) {
+//        String json = "{\"meta\":{\"uuid\":\"ca56b436-297f-4edc-b1b2-06475c784d85\",\"time\":\"11340.121ms\"},\"page\":1,\"page_size\":30,\"total\":13,\"airlines\":[{\"id\":\"AR\",\"name\":\"Aerolineas Argentinas\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AR.png\",\"taxes\":0.17,\"charges\":0.01,\"rating\":6.41},{\"id\":\"LA\",\"name\":\"Lan\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/LA.png\",\"taxes\":0.19,\"charges\":0.06,\"rating\":6},{\"id\":\"8R\",\"name\":\"SOL\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/8R.png\",\"taxes\":0.2,\"charges\":0.04,\"rating\":null},{\"id\":\"JJ\",\"name\":\"TAM\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/JJ.png\",\"taxes\":0.17,\"charges\":0.03,\"rating\":4.33},{\"id\":\"BA\",\"name\":\"British Airways\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/BA.png\",\"taxes\":0.2,\"charges\":0.05,\"rating\":5.77},{\"id\":\"AF\",\"name\":\"Air France\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AF.png\",\"taxes\":0.18,\"charges\":0.03,\"rating\":5.87},{\"id\":\"AZ\",\"name\":\"Alitalia\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AZ.png\",\"taxes\":0.15,\"charges\":0.03,\"rating\":7.04},{\"id\":\"AA\",\"name\":\"American Airlines\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AA.png\",\"taxes\":0.17,\"charges\":0.04,\"rating\":6.25},{\"id\":\"IB\",\"name\":\"Iberia\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/IB.png\",\"taxes\":0.19,\"charges\":0.02,\"rating\":6.31},{\"id\":\"AM\",\"name\":\"Aeromexico\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AM.png\",\"taxes\":0.15,\"charges\":0.07,\"rating\":7.13},{\"id\":\"TA\",\"name\":\"Taca\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/TA.png\",\"taxes\":0.16,\"charges\":0.06,\"rating\":5},{\"id\":\"CM\",\"name\":\"Copa\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/CM.png\",\"taxes\":0.17,\"charges\":0.05,\"rating\":6.54},{\"id\":\"AV\",\"name\":\"Avianca\",\"logo\":\"http://eiffel.itba.edu.ar/hci/service4/images/AV.png\",\"taxes\":0.19,\"charges\":0.05,\"rating\":6}]}";
+//        Gson g = new Gson();
+//        JsonObject data = g.fromJson(json, JsonObject.class);
+//        Airline[] airlines = g.fromJson(data.get("airlines"), Airline[].class);
+//        Map<String, Airline> la = new HashMap<>(airlines.length);
+//        for (Airline airline : airlines) {
+//            la.put(airline.getID(), airline);
+//        }
+//        if (fileManager.saveAirlines(airlines)) {
+//            Log.d("VOLANDO", airlines.length + " airlines loaded from network.");
+//            setAirlines(la);
+//            doneCallback.execute(context, null);
+//        } else {
+//            errorCallback.execute(context, "Couldn't save airlines");
+//        }
+
+
         Log.w("VOLANDO", "Querying API for airlines");
         API.getInstance().getAllAirlines(
                 context,

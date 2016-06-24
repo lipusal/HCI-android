@@ -56,6 +56,10 @@
     <string name="not_following_flights">No followed flights</string>
     <string name="err_no_flights_found">No flights found</string>
     <string name="err_network">Network error</string>
+    <string name="downloading_data">Getting destinations and airlines</string>
+
+    <string name="startup_failed_title">Couldn\'t download data</string>
+    <string name="startup_failed_message">We couldn\'t get needed data for the app to work properly. Please make sure you have a working internet connection, restart the application and try again.</string>
 
     <string name="no_review_found">No reviews</string>
 
@@ -64,6 +68,8 @@
     <string name="err_invalid_airline_id">Invalid airline ID</string>
     <string name="err_empty_flight_number">Enter flight number</string>
     <string name="err_invalid_flight_number">Invalid valid flight number</string>
+    <string name="err_update_failed">Couldn\'t update flight status</string>
+    <string name="action_retry">Retry</string>
 
     <string name="snackbar_edit">Choose your origin airport</string>
     <string name="loading_deals">Getting deals from\u0020</string>

@@ -1,6 +1,8 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.net.Uri;
@@ -13,6 +15,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -94,12 +97,17 @@ public class FlightsActivity extends AppCompatActivity
 
         persistentData = new PersistentData(this);
         if (!persistentData.isInited()) {
-            //TODO show loading animation
+            final ProgressDialog progressDialog = new ProgressDialog(FlightsActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setTitle(getString(R.string.downloading_data) + "...");
+            progressDialog.show();
             persistentData.init(
                     new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
-                            //TODO remove loading animation
+                            progressDialog.dismiss();
                             //TODO refresh Your Flights list if necessary
                             if (!NotificationScheduler.areUpdatesEnabled()) {
                                 Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);   //Set automatic updates (NotificationScheduler will handle all the logic)
@@ -110,7 +118,18 @@ public class FlightsActivity extends AppCompatActivity
                     new NetworkRequestCallback<String>() {
                         @Override
                         public void execute(Context c, String param) {
-                            //TODO show error and quit application, it's imperative that this not fail
+                            progressDialog.dismiss();
+                            new AlertDialog.Builder(FlightsActivity.this)
+                                    .setTitle(R.string.startup_failed_title)
+                                    .setMessage(R.string.startup_failed_message)
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            FlightsActivity.this.finish();
+                                        }
+                                    }).show();
                         }
                     });
         }

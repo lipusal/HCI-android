@@ -75,14 +75,13 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
         final View view = inflater.inflate(R.layout.fragment_your_flights, container, false);
 
         //Broadcast receiver with high priority
-        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        broadcastPriorityFilter.setPriority(1);
+        broadcastPriorityFilter = UpdatePriorityReceiver.getPriorityFilter();
         updatesReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
             @Override
             public void onNoFlightsChanged(boolean manuallyTriggered) {
+                swipeRefreshLayout.setRefreshing(false);
                 //Manual update completed
                 if (manuallyTriggered) {
-                    swipeRefreshLayout.setRefreshing(false);
                     Snackbar.make(destinationView, R.string.no_changes, Snackbar.LENGTH_LONG).show();
                 }
                 //Automatic update completed, do default behavior
@@ -104,6 +103,21 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
                 refreshFlights();
                 //Same snackbar as super, but no action (user is already in Flights activity)
                 Snackbar.make(destinationView, String.format(getString(R.string.x_flights_updated), newStatuses.size()), Snackbar.LENGTH_LONG).show();
+            }
+
+            @Override
+            public void onUpdateFailed(boolean manualUpdate) {
+                swipeRefreshLayout.setRefreshing(false);
+                Snackbar.make(destinationView, getString(R.string.err_update_failed), Snackbar.LENGTH_LONG)
+                        .setAction(
+                                R.string.action_retry,
+                                new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        onRefresh();
+                                    }
+                                })
+                        .show();
             }
         };
 

@@ -160,8 +160,7 @@ public class FlightDetailsFragment extends Fragment {
         }
 
         //Set up broadcast receiver with priority (needs a View to work properly)
-        priorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        priorityFilter.setPriority(1);
+        priorityFilter = UpdatePriorityReceiver.getPriorityFilter();
         updatesReceiver = new UpdatePriorityReceiver(view) {
             @Override
             public void onSingleFlightChanged(FlightStatus newStatus, boolean manualUpdate) {
