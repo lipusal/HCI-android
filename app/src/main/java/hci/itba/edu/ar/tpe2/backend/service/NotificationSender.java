@@ -106,34 +106,36 @@ public class NotificationSender extends BroadcastReceiver {
                         buildNotificationForSatatusChange(notifBuilder, updatedStatus, context);
                         break;
                     case DEPARTURE_GATE:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_gate_changed), updatedStatus.getFlight().toString(), updatedStatus.getDepartureGate()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_gate_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.embarks_at_gate), updatedStatus.getDepartureGate()));
                         break;
                     case DEPARTURE_TERMINAL:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_terminal_changed), updatedStatus.getFlight().toString(), updatedStatus.getDepartureTerminal()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_terminal_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.embarks_at_terminal), updatedStatus.getDepartureTerminal()));
                         break;
                     case DEPARTURE_TIME:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_time_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.departs), updatedStatus.getPrettyScheduledDepartureTime()));
                         break;
                     case ARRIVAL_GATE:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_gate_changed), updatedStatus.getFlight().toString(), updatedStatus.getArrivalGate()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_gate_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.disembarks_at_gate), updatedStatus.getArrivalGate()));
                         break;
                     case ARRIVAL_TERMINAL:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_terminal_changed), updatedStatus.getFlight().toString(), updatedStatus.getArrivalTerminal()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_terminal_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.disembarks_at_terminal), updatedStatus.getArrivalTerminal()));
                         break;
                     case ARRIVAL_TIME:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_time_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives), updatedStatus.getPrettyScheduledArrivalTime()));
                         break;
                     case ARRIVAL_AIRPORT:
                         notifBuilder.setContentTitle(String.format(context.getString(R.string.diverted_to), updatedStatus.getDestinationAirport().toString()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives), updatedStatus.getPrettyScheduledArrivalTime()));
                         break;
                     case BAGGAGE_CLAIM:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.baggage_claim_changed), updatedStatus.getFlight().toString(), updatedStatus.getBaggageClaim()));
-                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.baggage_claim_changed), updatedStatus.getFlight().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.new_baggage_claim_belt_is), updatedStatus.getBaggageClaim()));
                         notifBuilder.setSmallIcon(R.drawable.ic_baggage_black);
                         notifBuilder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_baggage_black));
                         break;
@@ -165,20 +167,20 @@ public class NotificationSender extends BroadcastReceiver {
      */
     private void buildNotificationForSatatusChange(NotificationCompat.Builder notifBuilder, FlightStatus newStatus, Context context) {
         notifBuilder.setContentTitle(newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()));
-        switch (newStatus.getStatus()) {
-            case "S":   //Scheduled
-                notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), newStatus.getPrettyScheduledDepartureTime()));
+        switch (newStatus.getStringResID()) {
+            case R.string.scheduled:
+                notifBuilder.setContentText(String.format(context.getString(R.string.departs), newStatus.getPrettyScheduledDepartureTime()));
                 break;
-            case "A":   //Active
-                notifBuilder.setContentText(String.format(context.getString(R.string.departed_at), newStatus.getPrettyActualDepartureTime()));
+            case R.string.status_active:
+                notifBuilder.setContentText(String.format(context.getString(R.string.departed), newStatus.getPrettyActualDepartureTime()));
                 break;
-            case "R":   //Diverted
+            case R.string.status_diverted:
                 notifBuilder.setContentText(String.format(context.getString(R.string.diverted_to), newStatus.getDestinationAirport().getName()));
                 break;
-            case "L":   //Landed
-                notifBuilder.setContentText(String.format(context.getString(R.string.arrived_at), newStatus.getPrettyActualArrivalTime()));
+            case R.string.status_landed:
+                notifBuilder.setContentText(String.format(context.getString(R.string.arrived), newStatus.getPrettyActualArrivalTime()));
                 break;
-            case "C":   //Cancelled
+            case R.string.status_canceled:
 //                notifBuilder.setContentText("=(");  //TODO wat say?
                 break;
         }

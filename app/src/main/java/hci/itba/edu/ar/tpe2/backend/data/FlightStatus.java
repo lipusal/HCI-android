@@ -336,16 +336,16 @@ public class FlightStatus implements Serializable {
     }
 
     public int getIconID() {
-        switch (status) {
-            case "S":
+        switch (getStringResID()) {
+            case R.string.status_scheduled:
                 return R.drawable.ic_scheduled;
-            case "A":
+            case R.string.status_active:
                 return R.drawable.ic_flight_takeoff_black;
-            case "R":
+            case R.string.status_diverted:
                 return R.drawable.ic_diverted;
-            case "L":
+            case R.string.status_landed:
                 return R.drawable.ic_flight_land_black;
-            case "C":
+            case R.string.status_canceled:
                 return R.drawable.ic_cancelled;
             default:
                 return -1;
