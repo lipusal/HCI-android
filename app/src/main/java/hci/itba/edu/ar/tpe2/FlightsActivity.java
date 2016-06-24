@@ -140,7 +140,7 @@ public class FlightsActivity extends AppCompatActivity
         }
 
         if(savedInstanceState==null){
-            setTitle("null");
+
             FragmentManager fm = getSupportFragmentManager();
             FragmentTransaction ft = fm.beginTransaction();
 
