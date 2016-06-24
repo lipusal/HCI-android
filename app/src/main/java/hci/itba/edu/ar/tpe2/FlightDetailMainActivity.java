@@ -53,16 +53,19 @@ public class FlightDetailMainActivity extends AppCompatActivity
 
         setTitle(flightStatus.getAirline().getID() + "#" + flightStatus.getFlight().getNumber());
 
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
+        if(savedInstanceState==null){
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
 
-        fm.beginTransaction();
-        Fragment fragmentDetailsMain = new FlightDetailsMainFragment();
-        Bundle arguments = new Bundle();
+            fm.beginTransaction();
+            Fragment fragmentDetailsMain = new FlightDetailsMainFragment();
+            Bundle arguments = new Bundle();
 //        arguments.putString(PARAM_STATUS,flightStatus.toString());
-        fragmentDetailsMain.setArguments(arguments);
-        ft.add(R.id.fragment_container_main_details, fragmentDetailsMain);
-        ft.commit();
+            fragmentDetailsMain.setArguments(arguments);
+            ft.add(R.id.fragment_container_main_details, fragmentDetailsMain);
+            ft.commit();
+        }
+
 
 
     }
