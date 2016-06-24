@@ -18,7 +18,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -150,8 +149,6 @@ public class FlightsActivity extends AppCompatActivity
 //        fragmentDetailsMain.setArguments(arguments);
         ft.add(R.id.fragment_container_your_flight, fragmentYourFlight);
         ft.commit();
-
-
     }
 
     @Override
@@ -161,14 +158,11 @@ public class FlightsActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
-
-
     }
 
     @Override
     public void onPause() {
         super.onPause();
-
     }
 
     @Override
@@ -214,9 +208,6 @@ public class FlightsActivity extends AppCompatActivity
             MenuItem item = menu.findItem(R.id.action_review);
             item.setVisible(reviewVisiblle);
         }
-
-
-
         return true;
     }
 
@@ -290,10 +281,12 @@ public class FlightsActivity extends AppCompatActivity
     }
 
     private FlightStatus flightStatus;
-    public FlightStatus getFlightStatus(){
+
+    public FlightStatus getFlightStatus() {
         return flightStatus;
     }
-    public void setFlightStatus(FlightStatus newFlightStatus){
+
+    public void setFlightStatus(FlightStatus newFlightStatus) {
         flightStatus = newFlightStatus;
     }
 
@@ -346,8 +339,7 @@ public class FlightsActivity extends AppCompatActivity
                 reviewVisiblle = false;
                 this.invalidateOptionsMenu();
             }
-
-
+            
             fab.bringToFront();
         }
     }

@@ -138,6 +138,9 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
     public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(updatesReceiver);
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     @Override
