@@ -25,8 +25,7 @@ import hci.itba.edu.ar.tpe2.R;
  */
 public class FlightStatus implements Serializable {
     //Date/time formatters
-    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
-            prettyFormat = DateFormat.getDateTimeInstance();
+    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US);
     private static DateTimeFormatter APIDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZZ").withOffsetParsed().withLocale(Locale.getDefault());
     private static PeriodFormatter delayFormatter = new PeriodFormatterBuilder()
             .printZeroAlways()
@@ -40,7 +39,6 @@ public class FlightStatus implements Serializable {
 
     private static final Map<String, String> validStatus = new HashMap<>();
     private static final Map<String, Integer> statusResIDs = new HashMap<>();
-
     static {
         validStatus.put("S", "scheduled");
         validStatus.put("A", "active");

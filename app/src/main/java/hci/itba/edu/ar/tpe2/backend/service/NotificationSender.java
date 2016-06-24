@@ -7,16 +7,18 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
+import android.support.v4.app.TaskStackBuilder;
 
 import java.io.Serializable;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
+import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatusComparator;
@@ -27,6 +29,8 @@ import hci.itba.edu.ar.tpe2.backend.data.FlightStatusComparator;
  * the broadcast first.
  */
 public class NotificationSender extends BroadcastReceiver {
+    private static final String GROUP_NOTIFICATION_KEY = "hci.itba.edu.ar.tpe2.backend.service.NotificationSender.GROUP_NOTIFICATION_KEY";
+    private static final int GROUP_NOTIFICATION_ID = 42;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -40,25 +44,27 @@ public class NotificationSender extends BroadcastReceiver {
             return;
         }
 
-        /**
-         * Calculate differences and build notifications as appropriate
-         */
-        final Map<Integer, Notification> notifications = new HashMap<>(updatedStatuses.size());
-        for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) {
-            int id = entry.getKey();
-            notifications.put(
-                    id,
-                    buildNotification(
-                            entry.getValue(),
-                            differences.get(id),
-                            context
-                    )
-            );
+        //Build group notification or single notification
+        Notification notif = null;
+        int notifID = -1;
+        for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) { //Will only run once (at most)
+            if (updatedStatuses.size() == 1) {
+                notif = buildSingleNotification(
+                        entry.getValue(),
+                        differences.get(entry.getKey()),
+                        context
+                );
+                notifID = entry.getKey();
+            } else {    //Size > 1
+                notif = buildGroupNotification(updatedStatuses.values(), context);
+                notifID = GROUP_NOTIFICATION_ID;
+                break;
+            }
         }
-        //Notifications built, send all of them
-        NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        for (Map.Entry<Integer, Notification> entry : notifications.entrySet()) {
-            notifManager.notify(entry.getKey(), entry.getValue());
+        //If built, send
+        if (notif != null) {
+            NotificationManager notifManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+            notifManager.notify(notifID, notif);
         }
     }
 
@@ -72,90 +78,80 @@ public class NotificationSender extends BroadcastReceiver {
      * @param context       Context to build notifications.
      * @return An appropriate notification.
      */
-    private Notification buildNotification(FlightStatus updatedStatus, Map<FlightStatusComparator.ComparableField, Serializable> differences, Context context) {
-        //TODO provide big icon (i.e. for Moto X active display)
-        //TODO group notifications for various updates of the same flight
-        //TODO if the user so desires, group all notifications of the app into one
+    private Notification buildSingleNotification(FlightStatus updatedStatus, Map<FlightStatusComparator.ComparableField, Serializable> differences, Context context) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         //Build the base notification
         NotificationCompat.Builder notifBuilder = new NotificationCompat.Builder(context)
                 .setAutoCancel(true)                                                //Dismiss notification when clicking
                 .setCategory(Notification.CATEGORY_STATUS)
                 .setPriority(Notification.PRIORITY_HIGH)                            //Trigger heads-up
-                //This mouthful gets the sound as set in settings, and falls back to default notification sound if not found TODO not working, plays no sound
-                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))));
-        //Set extra parameters
+                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))))
+                .setGroup(GROUP_NOTIFICATION_KEY)
+                .setSmallIcon(updatedStatus.getIconID())
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), updatedStatus.getIconID()));
+
+        //Vibrate?
         if (preferences.getBoolean(context.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(context.getString(R.string.pref_default_vibrate_on_notify)))) {
             notifBuilder.setDefaults(Notification.DEFAULT_VIBRATE);
         }
 
-        //Build content
+        //Text content
         if (differences.size() > 1) {
-            Log.d("VOLANDO", "Multiple differences for " + updatedStatus.getFlight().toString() + ": " + differences.entrySet().toString());
-            notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " status changed");
-            notifBuilder.setContentText("Tap to see all changes");
-            notifBuilder.setSmallIcon(R.drawable.ic_flight);
+            notifBuilder.setContentTitle(String.format(context.getString(R.string.status_changed_generic), updatedStatus.getFlight().toString()));
+            notifBuilder.setContentText(String.format(context.getString(R.string.tap_to_see_details)));
         } else {
             for (Map.Entry<FlightStatusComparator.ComparableField, Serializable> difference : differences.entrySet()) {    //Should only run once, but it's the only way to iterate over a set
                 switch (difference.getKey()) {
                     case STATUS:
-                        buildNotificationForSatatusChange(notifBuilder, updatedStatus);
-                        break;
-                    case ARRIVAL_GATE:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " arrival gate is now " + updatedStatus.getArrivalGate());    //TODO use string resources for this
-                        notifBuilder.setContentText("Arrives at " + updatedStatus.getPrettyScheduledArrivalTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_land);
-                        break;
-                    case ARRIVAL_TERMINAL:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " arrival terminal is now " + updatedStatus.getArrivalTerminal());
-                        notifBuilder.setContentText("Arrives at " + updatedStatus.getPrettyScheduledArrivalTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_land);
-                        break;
-                    case ARRIVAL_TIME:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " now arrives at " + updatedStatus.getPrettyScheduledArrivalTime());
-//                        notifBuilder.setContentText("Arrives at " + updatedFlight.getPrettyArrivalDate());    TODO show delay difference?
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_land);
-                        break;
-                    case ARRIVAL_AIRPORT:
-                        //TODO shouldn't happen, if it's diverted then it's also delayed and we only allow 1 change max here
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " now arrives at " + updatedStatus.getDestinationAirport().toString());
-                        notifBuilder.setContentText("Arrives at " + updatedStatus.getPrettyScheduledArrivalTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_diverted);
-                        break;
-                    case BAGGAGE_CLAIM:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " baggage claim is now " + updatedStatus.getBaggageClaim());
-                        notifBuilder.setContentText("Arrives at " + updatedStatus.getPrettyScheduledArrivalTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_baggage_black);
+                        buildNotificationForSatatusChange(notifBuilder, updatedStatus, context);
                         break;
                     case DEPARTURE_GATE:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " departure gate is now " + updatedStatus.getDepartureGate());
-                        notifBuilder.setContentText("Takes off at " + updatedStatus.getPrettyScheduledDepartureTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_takeoff);
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_gate_changed), updatedStatus.getFlight().toString(), updatedStatus.getDepartureGate()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
                         break;
                     case DEPARTURE_TERMINAL:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " departure terminal is now " + updatedStatus.getDepartureTerminal());
-                        notifBuilder.setContentText("Takes off at " + updatedStatus.getPrettyScheduledDepartureTime());
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_takeoff);
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departure_terminal_changed), updatedStatus.getFlight().toString(), updatedStatus.getDepartureTerminal()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
                         break;
                     case DEPARTURE_TIME:
-                        notifBuilder.setContentTitle(updatedStatus.getFlight().toString() + " now takes off at " + updatedStatus.getPrettyScheduledDepartureTime());
-//                        notifBuilder.setContentText("Arrives at " + updatedFlight.getPrettyDepartureDate());  TODO show delay difference?
-                        notifBuilder.setSmallIcon(R.drawable.ic_flight_takeoff);
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.departs_at), updatedStatus.getPrettyScheduledDepartureTime()));
                         break;
-
+                    case ARRIVAL_GATE:
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_gate_changed), updatedStatus.getFlight().toString(), updatedStatus.getArrivalGate()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        break;
+                    case ARRIVAL_TERMINAL:
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrival_terminal_changed), updatedStatus.getFlight().toString(), updatedStatus.getArrivalTerminal()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        break;
+                    case ARRIVAL_TIME:
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        break;
+                    case ARRIVAL_AIRPORT:
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.diverted_to), updatedStatus.getDestinationAirport().toString()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        break;
+                    case BAGGAGE_CLAIM:
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.baggage_claim_changed), updatedStatus.getFlight().toString(), updatedStatus.getBaggageClaim()));
+                        notifBuilder.setContentText(String.format(context.getString(R.string.arrives_at), updatedStatus.getPrettyScheduledArrivalTime()));
+                        notifBuilder.setSmallIcon(R.drawable.ic_baggage_black);
+                        notifBuilder.setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_baggage_black));
+                        break;
                 }
             }
         }
 
-        //Build its action and set it to the notification
-        Intent baseIntent = new Intent(context, FlightDetailMainActivity.class);
-        baseIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, updatedStatus);
-        //Set flags to take user back to Home when navigating back from details
-        //TODO flags here
-//        baseIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_TASK_ON_HOME);
-        //Build a pending intent with the recently constructed base intent and set it to the notification
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        notifBuilder.setContentIntent(pendingIntent);
+        //Set action to Details activity, with back stack to Flights
+        Intent homeIntent = new Intent(context, FlightsActivity.class);
+        homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        Intent detailsIntent = new Intent(context, FlightDetailMainActivity.class);
+        detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, updatedStatus);
+        PendingIntent pendingIntentWithBackStack = TaskStackBuilder
+                .create(context)
+                .addNextIntent(homeIntent)
+                .addNextIntent(detailsIntent)
+                .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+        notifBuilder.setContentIntent(pendingIntentWithBackStack);
         return notifBuilder.build();
     }
 
@@ -163,35 +159,70 @@ public class NotificationSender extends BroadcastReceiver {
      * Sets the specified notification builder to prepare a notification for a flight whose status
      * changed. Will set the title to (flight) (newStatus) and the content as appropriate to the new
      * status.
-     *
-     * @param notifBuilder The Notification builder building the notification.
+     *  @param notifBuilder The Notification builder building the notification.
      * @param newStatus    The updated status.
+     * @param context
      */
-    private void buildNotificationForSatatusChange(NotificationCompat.Builder notifBuilder, FlightStatus newStatus) {
-        notifBuilder.setContentTitle(newStatus.getFlight().toString() + " " + newStatus.toString());
+    private void buildNotificationForSatatusChange(NotificationCompat.Builder notifBuilder, FlightStatus newStatus, Context context) {
+        notifBuilder.setContentTitle(newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()));
         switch (newStatus.getStatus()) {
             case "S":   //Scheduled
-                notifBuilder.setSmallIcon(R.drawable.ic_scheduled);
-                if (newStatus.getScheduledDepartureTime() != null) {
-                    notifBuilder.setContentText(newStatus.getPrettyScheduledDepartureTime());
-                }
+                notifBuilder.setContentText(String.format(context.getString(R.string.departs_at), newStatus.getPrettyScheduledDepartureTime()));
                 break;
             case "A":   //Active
-                notifBuilder.setSmallIcon(R.drawable.ic_flight_takeoff);
-                notifBuilder.setContentText("Took off at " + newStatus.getPrettyActualDepartureTime());
+                notifBuilder.setContentText(String.format(context.getString(R.string.departed_at), newStatus.getPrettyActualDepartureTime()));
                 break;
-            case "D":   //Diverted
-                notifBuilder.setSmallIcon(R.drawable.ic_diverted);
-                notifBuilder.setContentText("Lands at " + newStatus.getDestinationAirport() + " at " + newStatus.getPrettyScheduledArrivalTime());  //TODO only notify new time if different from old time
+            case "R":   //Diverted
+                notifBuilder.setContentText(String.format(context.getString(R.string.diverted_to), newStatus.getDestinationAirport().getName()));
                 break;
             case "L":   //Landed
-                notifBuilder.setSmallIcon(R.drawable.ic_flight_land);
-                notifBuilder.setContentText("Landed at " + newStatus.getPrettyActualArrivalTime());
+                notifBuilder.setContentText(String.format(context.getString(R.string.arrived_at), newStatus.getPrettyActualArrivalTime()));
                 break;
             case "C":   //Cancelled
-                notifBuilder.setSmallIcon(R.drawable.ic_cancelled);
-                notifBuilder.setContentText("=(");  //TODO wat say?
+//                notifBuilder.setContentText("=(");  //TODO wat say?
                 break;
         }
+    }
+
+    private Notification buildGroupNotification(Collection<FlightStatus> updatedStatuses, Context context) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                .setContentTitle(String.format(context.getString(R.string.x_flights_updated), updatedStatuses.size()))
+                .setAutoCancel(true)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setSound(Uri.parse(preferences.getString(context.getString(R.string.pref_key_notification_ringtone), context.getString(R.string.pref_default_ringtone))))
+                .setSmallIcon(R.drawable.ic_flight)
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.drawable.ic_flight))
+                .setNumber(updatedStatuses.size())
+                .setGroup(GROUP_NOTIFICATION_KEY)
+                .setGroupSummary(true);
+
+        //Vibration
+        if (preferences.getBoolean(context.getString(R.string.pref_key_vibrate_on_notify), Boolean.parseBoolean(context.getString(R.string.pref_default_vibrate_on_notify)))) {
+            builder.setDefaults(Notification.DEFAULT_VIBRATE);
+        }
+
+        //Summarize
+        NotificationCompat.InboxStyle style = new NotificationCompat.InboxStyle()
+                .setBigContentTitle(String.format(context.getString(R.string.x_flights_updated), updatedStatuses.size()))
+                .setSummaryText(context.getString(R.string.app_name));
+        StringBuilder subtitleBuilder = new StringBuilder();
+        for (FlightStatus status : updatedStatuses) {
+            style.addLine(status.getFlight().toString() + "   " + context.getString(status.getStringResID()));
+            subtitleBuilder.append(status.getFlight().toString() + ", ");
+        }
+        builder.setStyle(style);
+        subtitleBuilder.setLength(subtitleBuilder.length() - 2);
+        builder.setContentText(subtitleBuilder.toString());
+
+        //Set action to Flights activity, no back stack
+        Intent baseIntent = new Intent(context, FlightsActivity.class);
+        baseIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, baseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
+
+        //Done, build
+        return builder.build();
     }
 }
