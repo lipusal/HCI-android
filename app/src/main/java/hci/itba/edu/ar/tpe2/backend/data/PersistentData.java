@@ -196,7 +196,7 @@ public class PersistentData {
 
 
         //Basic data (countries, cities, airports, airlines)
-        if (fileManager.loadCountries().length == 0) {  //No persistent data stored in files, download from network
+        if (fileManager.loadCountries().length == 0) {  //No persistent data stored in files, download from network TODO consider partially available data
             NetworkRequestCallback<Void> megaCallback = new NetworkRequestCallback<Void>() {
                 AtomicInteger requestsLeft = new AtomicInteger(3);  //Number of downloads needed to complete (countries etc., airlines, languages)
 

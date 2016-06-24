@@ -13,45 +13,72 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:padding="15dp"
-        tools:context="hci.itba.edu.ar.tpe2.SearchActivity">
+        android:orientation="vertical"
+        android:paddingTop="75dp"
+        android:paddingLeft="15dp"
+        android:paddingRight="15dp">
 
-        <EditText
-            android:layout_width="150dp"
+        <!--First row - input fields -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/airline_id"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="50dp"
-            android:inputType="text"
-            android:hint="Airline id"
-            android:text="CM" />
+            android:orientation="horizontal">
 
-        <EditText
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/flight_number"
-            android:layout_alignTop="@+id/airline_id"
-            android:layout_alignParentEnd="true"
-            android:inputType="number"
-            android:hint="Flight number"
-            android:text="4704" />
+            <!--Airline ID-->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".4">
 
+                <AutoCompleteTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/airline_id"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentStart="true"
+                    android:inputType="text|textCapCharacters"
+                    android:hint="Airline id"
+                     />
+                <!--android:text="CM"-->
+                    <!-- TODO use string resource -->
+            </RelativeLayout>
 
+            <!--Blank space-->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".2">
+            </RelativeLayout>
+
+            <!--Flight #-->
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight=".4">
+
+                <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/flight_number"
+                    android:layout_alignParentEnd="true"
+                    android:inputType="number"
+                    android:hint="Flight number"
+                    android:text="4704" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <!--Second row - search button-->
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/search"
             android:id="@+id/search_button"
-            android:layout_below="@+id/flight_number"
-            android:layout_centerHorizontal="true"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="30dp" />
-    </RelativeLayout>
+    </LinearLayout>
 
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
