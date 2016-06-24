@@ -25,8 +25,6 @@ import android.view.View;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
@@ -105,16 +103,6 @@ public class FlightsActivity extends AppCompatActivity
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
-
-
-        //Configure the image loader GLOBALLY. Other activities can use it after this
-        if (!ImageLoader.getInstance().isInited()) {
-            ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
-            ImageLoader.getInstance().init(config);
-            //TODO init this in notif service?
-
-
-        }
 
         persistentData = new PersistentData(this);
         if (!persistentData.isInited()) {
