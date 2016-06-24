@@ -11,8 +11,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-
 import java.util.List;
 import java.util.Map;
 
@@ -57,8 +55,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
 
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
-        ImageLoader.getInstance().displayImage(status.getAirline().getLogoURL(), icon);
-
+        icon.setImageDrawable(parent.getContext().getDrawable(flight.getAirline().getDrawableLogoID()));
         //Text
         TextView title = (TextView) destination.findViewById(R.id.flight_text);
         title.setText(flight.toString());
