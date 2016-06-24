@@ -41,23 +41,6 @@
     <string name="err_empty_flight_number">Enter flight number</string>
     <string name="err_invalid_flight_number">Invalid valid flight number</string>
 
-    <string name="not_following_flights">No followed flights</string>
-    <string name="no_flights_found">No flights found</string>
-    <string name="searching">Searching...</string>
-
-    <string name="origin">Origen</string>
-    <string name="terminal">  Terminal  </string>
-    <string name="gate"> Puerta </string>
-    <string name="arrival">Destino</string>
-    <string name="extra_details">Otros detalles</string>
-    <string name="direct_flight">Vuelo directo</string>
-    <string name="duration">Duration: </string>
-    <string name="equipage">Equipage: </string>
-    <string name="price">Precio: </string>
-    <string name="score">Puntaje: </string>
-    <string name="action_follow">Seguir</string>
-    <string name="action_review">Comentar</string>
-    <string name="title_activity_make_review">MakeReviewActivity</string>
     <string name="snackbar_edit">Choose your origin airport</string>
     <string name="loading_deals">Getting deals from\u0020</string>
     <string name="no_airport_found">No airport found near you =(\u0020</string>

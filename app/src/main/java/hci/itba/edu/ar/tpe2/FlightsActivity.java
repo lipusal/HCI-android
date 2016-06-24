@@ -1,7 +1,5 @@
 package hci.itba.edu.ar.tpe2;
 
-import android.content.BroadcastReceiver;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -14,8 +12,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -25,8 +21,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ListView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -34,20 +28,16 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
 import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
-import hci.itba.edu.ar.tpe2.backend.service.UpdateService;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsFragment;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsMainFragment;
 import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
 import hci.itba.edu.ar.tpe2.fragment.StarInterface;
-import hci.itba.edu.ar.tpe2.fragment.TextFragment;
+import hci.itba.edu.ar.tpe2.fragment.YourFlightsFragment;
 
 public class FlightsActivity extends AppCompatActivity
         implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
@@ -153,7 +143,7 @@ public class FlightsActivity extends AppCompatActivity
         FragmentTransaction ft = fm.beginTransaction();
 
         fm.beginTransaction();
-        Fragment fragmentYourFlight = new YourFlightsFragment();
+        Fragment fragmentYourFlight = YourFlightsFragment.newInstance(coordinatorLayout);
 //        Bundle arguments = new Bundle();
 //        arguments.putString(PARAM_STATUS,flightStatus.toString());
 //        fragmentDetailsMain.setArguments(arguments);
@@ -339,7 +329,7 @@ public class FlightsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onFlightUnstared(FlightStatus status) {
+    public void onFlightUnstarred(FlightStatus status) {
         View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
         boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
         if (dualPane) {

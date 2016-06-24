@@ -13,19 +13,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 
 
 import android.content.Intent;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsFragment;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsMainFragment;
 
 public class FlightDetailMainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, FlightDetailsFragment.OnFragmentInteractionListener,  FlightDetailsMainFragment.OnFragmentInteractionListener {

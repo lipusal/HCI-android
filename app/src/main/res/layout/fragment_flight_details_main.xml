@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="hci.itba.edu.ar.tpe2.FlightDetailsMainFragment">
+    tools:context=".fragment.FlightDetailsMainFragment">
 
     <LinearLayout
         android:layout_width="match_parent"

@@ -270,22 +270,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 return view;
             }
         });
-
-
-/*        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                if (marker.getPosition().equals(new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude())) == false) {
-                    Intent searchIntent = new Intent(DealsMapActivity.this, SearchResultsActivity.class);
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, closestAirport.getID());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_TO, marker.getTitle());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, "2016-10-19");    //TODO use today + 2 days or price
-                    startActivity(searchIntent);
-                    return;
-                }
-            }
-        });*/
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
     }

@@ -2,7 +2,6 @@ package hci.itba.edu.ar.tpe2.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentTransaction;
@@ -15,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 import hci.itba.edu.ar.tpe2.FlightDetailMainActivity;
-import hci.itba.edu.ar.tpe2.FlightDetailsMainFragment;
 import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;

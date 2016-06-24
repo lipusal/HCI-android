@@ -38,11 +38,6 @@
             android:theme="@style/AppTheme.NoActionBar" />
 
         <activity
-            android:name=".SearchResultsActivity"
-            android:label="Results"
-            android:parentActivityName=".SearchActivity" />
-
-        <activity
             android:name=".DealsMapActivity"
             android:label="Deals Map"
             android:theme="@style/AppTheme.NoActionBar" />

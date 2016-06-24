@@ -3,8 +3,6 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,8 +16,6 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 import java.util.List;
 import java.util.Map;
 
-import hci.itba.edu.ar.tpe2.FlightDetailsMainFragment;
-import hci.itba.edu.ar.tpe2.FlightsActivity;
 import hci.itba.edu.ar.tpe2.R;
 import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
@@ -65,7 +61,6 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
         star.setImageResource(watchedStatuses.containsValue(status) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
-        final View finalDestination = destination;      //Need to copy to use it in inner class
         star.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -73,7 +68,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
                     persistentData.stopWatchingStatus(status);
                     FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_off_24dp);
-                    starInterface.onFlightUnstared(status);
+                    starInterface.onFlightUnstarred(status);
 
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
