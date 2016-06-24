@@ -92,4 +92,6 @@
     <string name="cancel">Cancelar</string>
     <string name="comments">Comentarios</string>
     <string name="details">Detalles</string>
+    <string name="airline_id">ID aerolínea</string>
+    <string name="flight_number">Número de vuelo</string>
 </resources>

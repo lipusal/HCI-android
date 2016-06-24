@@ -76,5 +76,7 @@
     <string name="updating">Updating</string>
     <string name="currency" translatable="false">U$S\u0020</string>
 
+    <string name="airline_id">Airline ID</string>
+    <string name="flight_number">Flight number</string>
 
 </resources>
