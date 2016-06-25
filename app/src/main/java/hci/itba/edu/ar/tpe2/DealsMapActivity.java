@@ -211,7 +211,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
                 if (!locationPermissionGranted) {
-                    Toast.makeText(DealsMapActivity.this, "You need permissions to locate", Toast.LENGTH_SHORT).show(); //TODO use string resource
+                    Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.no_permissions), Toast.LENGTH_SHORT).show(); //TODO use string resource
                     return;
                 }
             }
@@ -249,7 +249,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         } else if (closestAirport != null && deals != null) {
             setMarkers(deals, closestAirport);
         } else {
-            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.oh_shit_waddap), Toast.LENGTH_SHORT).show();    //TODO remove plz
+            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.couldnt_locate), Toast.LENGTH_SHORT).show();    //TODO remove plz
             Log.w("VOLANDO", "Location is null");
         }
     }
