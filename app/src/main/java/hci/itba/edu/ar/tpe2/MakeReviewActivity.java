@@ -3,8 +3,6 @@ package hci.itba.edu.ar.tpe2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.TextInputLayout;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -12,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,7 +20,6 @@ import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
-import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class MakeReviewActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -45,7 +43,6 @@ public class MakeReviewActivity extends AppCompatActivity
 
         //Creating for the first time
         if (savedInstanceState == null) {
-            //wat do
         }
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         reviewButton = (Button) findViewById(R.id.review_button);
@@ -57,45 +54,38 @@ public class MakeReviewActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
+                    reviewButton.setText(R.string.uploading);
+                    reviewButton.setEnabled(false);
                     String comment = reviewText.getText().toString();
-                    if(comment.length()>140){
-                        comment = comment.substring(0,140);
+                    if (comment.length() > 140) {
+                        comment = comment.substring(0, 140);
                     }
                     Review review = new Review(flightStatus.getFlight(), score * 2, comment);
-                    API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
-                        @Override
-                        public void execute(Context c, Void param) {
-                            if (isDestroyed()) {
-                                return;
-                            }
-                            MakeReviewActivity.this.finish();
-                        }
-                    }, new NetworkRequestCallback<String>(){
+                    API.getInstance().submitReview(
+                            review,
+                            MakeReviewActivity.this,
+                            new NetworkRequestCallback<Void>() {
+                                @Override
+                                public void execute(Context c, Void param) {
+                                    if (isDestroyed()) {
+                                        return;
+                                    }
+                                    MakeReviewActivity.this.finish();
+                                }
+                            },
+                            new NetworkRequestCallback<String>() {
+                                @Override
+                                public void execute(Context c, String param) {
+                                    reviewButton.setText(R.string.submit);
+                                    reviewButton.setEnabled(true);
+                                    TextView til = (TextView) findViewById(R.id.tilReview);
+                                    til.setText(R.string.err_network);
+                                }
+                            });
 
-                        @Override
-                        public void execute(Context c, String param) {
-                            TextView til =  (TextView)findViewById(R.id.tilReview);
-                            til.setText(R.string.err_network);
-                        }
-                    });
-
-                } else {
-                    //wat do
                 }
             }
         });
-
-        /**
-         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-         this, drawer, toolbar, R.string.drawer_open, R.string.drawer_close);
-         drawer.setDrawerListener(toggle);
-         toggle.syncState();
-
-         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-         navigationView.setNavigationItemSelectedListener(this);
-         */
-
 
         score = 0;
         firstStar = (ImageButton) findViewById(R.id.first_star_button);
@@ -150,7 +140,7 @@ public class MakeReviewActivity extends AppCompatActivity
     private boolean validateFields() {
         boolean valid = true;
         String text = reviewText.getText().toString();
-        TextView til =  (TextView)findViewById(R.id.tilReview);
+        TextView til = (TextView) findViewById(R.id.tilReview);
 
         if (score == 0) {
             valid = false;
@@ -161,7 +151,7 @@ public class MakeReviewActivity extends AppCompatActivity
             til.setText(R.string.review_err_string);
             valid = false;
         }
-        if(valid){
+        if (valid) {
             til.setText("");
         }
 
@@ -209,7 +199,6 @@ public class MakeReviewActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.

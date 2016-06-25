@@ -112,5 +112,7 @@
     <string name="located">Localizado en\u0020</string>
     <string name="no_airport_found">No se encontraron aerpuertos cerca tuyo\u0020</string>
     <string name="snackbar_edit">Elige tu aeropuerto de origen</string>
+    <string name="submit">Enviar</string>
+    <string name="uploading">Subiendo</string>
 
 </resources>

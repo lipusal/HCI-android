@@ -100,7 +100,7 @@
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Dejar comentario"
+            android:text="@string/submit"
             android:id="@+id/review_button"
             android:layout_below="@+id/first_star_button"
             android:layout_centerHorizontal="true"
