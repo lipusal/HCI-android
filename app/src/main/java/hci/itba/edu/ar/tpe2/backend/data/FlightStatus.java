@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -117,14 +118,12 @@ public class FlightStatus implements Serializable {
     }
 
     private DateTime parseDate(JsonObject arrivalOrDepartureObject, String dateTimeKey, String timezoneStr) {
-        Calendar cal = Calendar.getInstance();
         DateTime la;
         try {
             JsonElement date = arrivalOrDepartureObject.get(dateTimeKey);
             if (date.isJsonNull()) {
                 return null;
             }
-            cal.setTime(APIdateFormat.parse(date.getAsString() + " " + timezoneStr));
             la = APIDateTimeFormatter.parseDateTime(date.getAsString() + timezoneStr);
         } catch (Exception e) {
             e.printStackTrace();
@@ -354,7 +353,18 @@ public class FlightStatus implements Serializable {
 
     private String localizeDateTime(DateTime date) {
         String full = DateTimeFormat.shortDateTime().print(date);
-        return full.replaceFirst(" ", "\n");
+        return full.replaceFirst(" ", "\n") + "\n" + getPrettyTimezone(date);
+    }
+
+    public String getPrettyTimezone(DateTime datetime) {
+        StringBuilder fullStr = new StringBuilder(datetime.toString("Z"));
+        if (fullStr.charAt(0) != '-') {
+            fullStr.insert(0, '+');
+        }
+        if (fullStr.charAt(1) == '0') {
+            fullStr.deleteCharAt(1);
+        }
+        return "UTC" + (fullStr.equals("+0") ? "" : " " + fullStr.substring(0, 2));
     }
 
     /**
