@@ -130,7 +130,7 @@ public class NotificationSender extends BroadcastReceiver {
                         notifBuilder.setContentText(String.format(context.getString(R.string.arrives), updatedStatus.getPrettyScheduledArrivalTime()));
                         break;
                     case ARRIVAL_AIRPORT:
-                        notifBuilder.setContentTitle(String.format(context.getString(R.string.diverted_to), updatedStatus.getDestinationAirport().toString()));
+                        notifBuilder.setContentTitle(String.format(context.getString(R.string.diverted_to), updatedStatus.getFlight().toString(), updatedStatus.getDestinationAirport().toString()));
                         notifBuilder.setContentText(String.format(context.getString(R.string.arrives), updatedStatus.getPrettyScheduledArrivalTime()));
                         break;
                     case BAGGAGE_CLAIM:
@@ -175,7 +175,7 @@ public class NotificationSender extends BroadcastReceiver {
                 notifBuilder.setContentText(String.format(context.getString(R.string.departed), newStatus.getPrettyActualDepartureTime()));
                 break;
             case R.string.status_diverted:
-                notifBuilder.setContentText(String.format(context.getString(R.string.diverted_to), newStatus.getDestinationAirport().getName()));
+                notifBuilder.setContentText(String.format(context.getString(R.string.diverted_to), newStatus.getFlight().toString(), newStatus.getDestinationAirport().getName()));
                 break;
             case R.string.status_landed:
                 notifBuilder.setContentText(String.format(context.getString(R.string.arrived), newStatus.getPrettyActualArrivalTime()));

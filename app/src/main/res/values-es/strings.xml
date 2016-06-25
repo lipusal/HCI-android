@@ -66,7 +66,7 @@
     <string name="scheduled">Programado</string>
     <string name="actual">Real</string>
     <string name="delay">Demora</string>
-    <string name="diverted_to">Desviado a %1$s</string>
+    <string name="diverted_to">%1$s desviado a %2$s</string>
     <string name="arrival_gate_changed">Puerta de llegada %1$s cambiada</string>
     <string name="arrival_terminal_changed">Terminal de llegada %1$s cambiada</string>
     <string name="arrived">Aterrizado %1$s</string>
