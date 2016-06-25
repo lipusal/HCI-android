@@ -75,12 +75,13 @@
     <string name="loading_deals">Getting deals from\u0020</string>
     <string name="no_airport_found">No airport found near you =(\u0020</string>
     <string name="located">Located you at\u0020</string>
-    <string name="oh_shit_waddap">WHER U AT BOI I CAN\'T FIND U</string>
+    <string name="couldnt_locate">Try turning on your GPS</string>
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="updating">Updating</string>
     <string name="currency" translatable="false">U$S\u0020</string>
+    <string name="no_permissions">"You need permissions to locate"</string>
 
     <string name="airline_id">Airline ID</string>
     <string name="flight_number">Flight number</string>
