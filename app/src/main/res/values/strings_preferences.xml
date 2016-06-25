@@ -51,6 +51,4 @@
 
     <!-- General -->
     <string name="pref_header_general">General</string>
-    <string name="pref_title_example_switch">Get rekt?</string> <!-- TODO remove plz -->
-    <string name="pref_description_example_switch">o shit boi whaddup!</string>
 </resources>
