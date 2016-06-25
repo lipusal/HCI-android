@@ -270,22 +270,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 return view;
             }
         });
-
-
-/*        googleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-
-            @Override
-            public void onInfoWindowClick(Marker marker) {
-                if (marker.getPosition().equals(new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude())) == false) {
-                    Intent searchIntent = new Intent(DealsMapActivity.this, SearchResultsActivity.class);
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_FROM, closestAirport.getID());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_TO, marker.getTitle());
-                    searchIntent.putExtra(SearchResultsActivity.PARAM_DEPARTURE_DATE, "2016-10-19");    //TODO use today + 2 days or price
-                    startActivity(searchIntent);
-                    return;
-                }
-            }
-        });*/
         mMap = googleMap;
         mMap.getUiSettings().setMapToolbarEnabled(false);
     }
@@ -414,7 +398,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         } else if (id == R.id.drawer_map) {
             i = new Intent(this, DealsMapActivity.class);
         } else if (id == R.id.drawer_settings) {
-
+            i = new Intent(this, SettingsActivity.class);
         } else if (id == R.id.drawer_help) {
 
         }
@@ -436,7 +420,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         for (int i = 0; i < airportNames.length; i++) {
             airportNames[i] = airports[i].getDescription();
         }
-        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));    //TODO use string resource (res/values/string.xml)
+        dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));
         dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual

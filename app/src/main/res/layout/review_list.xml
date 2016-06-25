@@ -73,7 +73,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="hci.itba.edu.ar.tpe2.FlightReviewsFragment">
+    tools:context="hci.itba.edu.ar.tpe2.fragment.FlightReviewsFragment">
 
     <TextView
         android:id="@+id/textReview"

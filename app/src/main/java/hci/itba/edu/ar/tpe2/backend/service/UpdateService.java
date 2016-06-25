@@ -78,6 +78,7 @@ public class UpdateService extends IntentService {
      * with respect to the old ones.
      */
     private void checkForUpdates(final boolean manuallyTriggered) {
+        final boolean[] failed = {false};
         final PersistentData persistentData = new PersistentData(this);
         final Map<Integer, FlightStatus> statuses = persistentData.getWatchedStatuses();
         if (statuses.size() > 0) {
@@ -107,22 +108,32 @@ public class UpdateService extends IntentService {
                                 updatedStatuses.put(newStatus.getFlight().getID(), newStatus);
                                 differences.put(newStatus.getFlight().getID(), statusDifferences);
                                 persistentData.updateStatus(newStatus);
-                                Log.d("VOLANDO", status.getFlight().toString() + " is now " + newStatus.toString());
+                                Log.d("VOLANDO", status.getFlight().toString() + " is now " + getString(newStatus.getStringResID()));
                             }
                             if (requestsLeft.decrementAndGet() == 0) {   //Decrement and check atomically to avoid race condition
-                                //Done, broadcast
-                                Intent intent = new Intent(ACTION_UPDATE_COMPLETE);
-                                intent.putExtra(EXTRA_UPDATES, (Serializable) updatedStatuses);
-                                intent.putExtra(EXTRA_DIFFERENCES, (Serializable) differences);
-                                intent.putExtra(EXTRA_MANUAL_UPDATE, manuallyTriggered);
-                                sendOrderedBroadcast(intent, null);
+                                if (updatedStatuses.isEmpty()) {
+                                    Log.d("VOLANDO", "No changes");
+                                }
+                                if(failed[0] == false) {
+                                    //Done with no errors, broadcast success
+                                    Intent intent = new Intent(ACTION_UPDATE_COMPLETE);
+                                    intent.putExtra(EXTRA_UPDATES, (Serializable) updatedStatuses);
+                                    intent.putExtra(EXTRA_DIFFERENCES, (Serializable) differences);
+                                    intent.putExtra(EXTRA_MANUAL_UPDATE, manuallyTriggered);
+                                    sendOrderedBroadcast(intent, null);
+                                }
                             }
                         }
                     },
                     new NetworkRequestCallback<String>() {
                         @Override
                         public void execute(Context c, String param) {
-                            Log.w("VOLANDO", "Error getting status updates for " + status.toString() + ":\n" + param);  //TODO notify user? Try again right away? Broadcast? Wait?
+                            Log.w("VOLANDO", "Error getting status updates for " + status.getFlight().toString() + ":\n" + param);
+                            failed[0] = true;
+                            //Failed, broadcast error
+                            Intent intent = new Intent(ACTION_UPDATE_FAILED);
+                            intent.putExtra(EXTRA_MANUAL_UPDATE, manuallyTriggered);
+                            sendOrderedBroadcast(intent, null);
                         }
                     });
         }

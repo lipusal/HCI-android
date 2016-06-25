@@ -1,59 +1,55 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
-import android.widget.ListView;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.NotificationScheduler;
-import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
-import hci.itba.edu.ar.tpe2.backend.service.UpdateService;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsFragment;
+import hci.itba.edu.ar.tpe2.fragment.FlightDetailsMainFragment;
 import hci.itba.edu.ar.tpe2.fragment.FlightStatusListFragment;
-import hci.itba.edu.ar.tpe2.fragment.TextFragment;
+import hci.itba.edu.ar.tpe2.fragment.StarInterface;
+import hci.itba.edu.ar.tpe2.fragment.YourFlightsFragment;
 
 public class FlightsActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
+        implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
 
-    private PersistentData persistentData;
-    private FlightStatusListFragment flightsFragment;
-    private SwipeRefreshLayout swipeRefreshLayout;
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+        //Do nothing for now
+    }
+
     private CoordinatorLayout coordinatorLayout;
-    /**
-     * Broadcast receiver, reacts differently to manual and automatic updates.
-     */
-    private UpdatePriorityReceiver updatesReceiver;
-    private IntentFilter broadcastPriorityFilter;
+    private Toolbar toolbar;
+    private Menu menu;
+    private PersistentData persistentData;
+    private boolean reviewVisiblle;
+    YourFlightsFragment yourFlightsFragment;
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -61,15 +57,22 @@ public class FlightsActivity extends AppCompatActivity
      */
     private GoogleApiClient client;
 
+    private FloatingActionButton fab;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getResources().getBoolean(R.bool.landscape_only)) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        }
+        reviewVisiblle = false;
         setContentView(R.layout.activity_flights);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,29 +95,19 @@ public class FlightsActivity extends AppCompatActivity
 
         coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresh_layout);
-        swipeRefreshLayout.setOnRefreshListener(this);
-        swipeRefreshLayout.setColorSchemeColors(
-                ContextCompat.getColor(this, R.color.colorAccent),
-                ContextCompat.getColor(this, R.color.colorPrimary));
-
-        //Configure the image loader GLOBALLY. Other activities can use it after this
-        if (!ImageLoader.getInstance().isInited()) {
-            ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(this).build();
-            ImageLoader.getInstance().init(config);
-            //TODO init this in notif service?
-
-
-        }
-
         persistentData = new PersistentData(this);
         if (!persistentData.isInited()) {
-            //TODO show loading animation
+            final ProgressDialog progressDialog = new ProgressDialog(FlightsActivity.this);
+            progressDialog.setIndeterminate(true);
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setTitle(getString(R.string.downloading_data) + "...");
+            progressDialog.show();
             persistentData.init(
                     new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
-                            //TODO remove loading animation
+                            progressDialog.dismiss();
                             //TODO refresh Your Flights list if necessary
                             if (!NotificationScheduler.areUpdatesEnabled()) {
                                 Intent i = new Intent(NotificationScheduler.ACTION_UPDATE_FREQUENCY_SETTING_CHANGED);   //Set automatic updates (NotificationScheduler will handle all the logic)
@@ -125,42 +118,36 @@ public class FlightsActivity extends AppCompatActivity
                     new NetworkRequestCallback<String>() {
                         @Override
                         public void execute(Context c, String param) {
-                            //TODO show error and quit application, it's imperative that this not fail
+                            progressDialog.dismiss();
+                            new AlertDialog.Builder(FlightsActivity.this)
+                                    .setTitle(R.string.startup_failed_title)
+                                    .setMessage(R.string.startup_failed_message)
+                                    .setCancelable(false)
+                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
+                                            FlightsActivity.this.finish();
+                                        }
+                                    }).show();
                         }
                     });
         }
 
-        //Register receiver with high priority
-        broadcastPriorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        broadcastPriorityFilter.setPriority(1);
-        updatesReceiver = new UpdatePriorityReceiver(coordinatorLayout) {
-            @Override
-            public void onNoFlightsChanged(boolean manuallyTriggered) {
-                //Manual update completed
-                if (manuallyTriggered) {
-                    swipeRefreshLayout.setRefreshing(false);
-                    Snackbar.make(coordinatorLayout, R.string.no_changes, Snackbar.LENGTH_LONG).show();
-                }
-                //Automatic update completed, do default behavior
-                else {
-                    super.onNoFlightsChanged(manuallyTriggered);
-                }
-            }
+        if (savedInstanceState == null) {
 
-            @Override
-            public void onSingleFlightChanged(FlightStatus newStatus, boolean manuallyTriggered) {
-                super.onSingleFlightChanged(newStatus, manuallyTriggered);
-                swipeRefreshLayout.setRefreshing(false);
-                refreshFlights();
-            }
+            FragmentManager fm = getSupportFragmentManager();
+            FragmentTransaction ft = fm.beginTransaction();
 
-            @Override
-            public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
-                swipeRefreshLayout.setRefreshing(false);
-                refreshFlights();
-                Snackbar.make(destinationView, newStatuses.size() + " flights updated", Snackbar.LENGTH_LONG).show();    //TODO use string resource with placeholder
-            }
-        };
+            fm.beginTransaction();
+            yourFlightsFragment = YourFlightsFragment.newInstance(coordinatorLayout);
+//        Bundle arguments = new Bundle();
+//        arguments.putString(PARAM_STATUS,flightStatus.toString());
+//        detailsFragment.setArguments(arguments);
+            ft.add(R.id.fragment_container_your_flight, yourFlightsFragment);
+            ft.commit();
+        }
+
     }
 
     @Override
@@ -170,17 +157,11 @@ public class FlightsActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);       //Set the flights option as selected TODO I don't think this is Android standard
-
-        refreshFlights();
-
-        //(Re-)register updates receiver
-        registerReceiver(updatesReceiver, broadcastPriorityFilter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        unregisterReceiver(updatesReceiver);
     }
 
     @Override
@@ -217,24 +198,37 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.flights, menu);
+        this.menu = menu;
+
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if (dualPane) {
+            getMenuInflater().inflate(R.menu.flight, menu);
+            MenuItem item = menu.findItem(R.id.action_review);
+            item.setVisible(reviewVisiblle);
+        }
         return true;
     }
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_review) {
+            Intent reviewIntent = new Intent(this, MakeReviewActivity.class);
+            reviewIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, flightStatus);
+            reviewIntent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+
+            startActivity(reviewIntent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -264,16 +258,6 @@ public class FlightsActivity extends AppCompatActivity
         return true;
     }
 
-    @Override
-    public void onRefresh() {
-        //Send intent to fetch updates now
-        Intent intent = new Intent(this, UpdateService.class);
-        intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
-        intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, true);
-        swipeRefreshLayout.setRefreshing(true);
-        startService(intent);
-    }
-
 
     @Override
     public void onStop() {
@@ -295,50 +279,65 @@ public class FlightsActivity extends AppCompatActivity
         client.disconnect();
     }
 
-    /**
-     * (Re-)fills the fragment container with the latest info in the followed flights. If there are
-     * no watched flights, places a text fragment to show this. Otherwise, places a list fragment
-     * listing the status of all watched flights with their latest available status.
-     */
-    private void refreshFlights() {
-        //Add/refresh the flights fragment, enable/disable swipe to refresh
-        Map<Integer, FlightStatus> watchedFlights = persistentData.getWatchedStatuses();
-        if (watchedFlights == null || watchedFlights.isEmpty()) {
-            //No watched flights, put text fragment in the fragment container
-            swipeRefreshLayout.setEnabled(false);
-            TextFragment textFragment = TextFragment.newInstance(getString(R.string.not_following_flights));
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, textFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, textFragment).commit();
-                flightsFragment = null;
-            }
+    private FlightStatus flightStatus;
+
+    public FlightStatus getFlightStatus() {
+        return flightStatus;
+    }
+
+    public void setFlightStatus(FlightStatus newFlightStatus) {
+        flightStatus = newFlightStatus;
+    }
+
+    @Override
+    public void onFlightClicked(FlightStatus clickedStatus) {
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+
+
+        if (dualPane) {
+            FlightDetailsMainFragment details = (FlightDetailsMainFragment) this.getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+            //TODO no crearlo si es el mismo que antes
+            details = new FlightDetailsMainFragment();
+            this.setFlightStatus(clickedStatus);
+
+            reviewVisiblle = true;
+//            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
+//            item.setVisible(true);
+            invalidateOptionsMenu();
+
+            FragmentTransaction ft = this.getSupportFragmentManager().beginTransaction();
+            ft.replace(R.id.fragment_container_flight_details, details);
+            ft.commit();
+
+            fab.bringToFront();
+
         } else {
-            //Watched flights, put text flights list fragment in the fragment container
-            List<FlightStatus> list = new ArrayList<>(watchedFlights.size());
-            list.addAll(watchedFlights.values());
-            flightsFragment = FlightStatusListFragment.newInstance(list);
-            if (flightsFragment == null) {    //Creating for the first time
-                getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, flightsFragment).commit();
-            } else {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, flightsFragment).commit();
+            Intent detailsIntent = new Intent(this, FlightDetailMainActivity.class);
+            detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, clickedStatus);
+            startActivity(detailsIntent);
+        }
+    }
+
+    @Override
+    public void onFlightUnstarred(FlightStatus status) {
+        View detailsFrame = this.findViewById(R.id.fragment_container_flight_details);
+        boolean dualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if (dualPane) {
+            FlightDetailsMainFragment details = (FlightDetailsMainFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
+//            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
+//            item.setVisible(false);
+            if (details == null) {
+                return;
             }
-
-            //Override scroll behavior for swipe-to-refresh to work properly: http://stackoverflow.com/a/35779571/2333689
-            getSupportFragmentManager().executePendingTransactions();   //Otherwise the view in the next line might not yet exist
-            final ListView flightsFragmentListView = flightsFragment.getListView();
-            flightsFragmentListView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                }
-
-                @Override
-                public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    if (flightsFragmentListView.getChildAt(0) != null) {
-                        swipeRefreshLayout.setEnabled(flightsFragmentListView.getFirstVisiblePosition() == 0 && flightsFragmentListView.getChildAt(0).getTop() == 0);
-                    }
-                }
-            });
+            if (status == getFlightStatus()) {
+                FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+                ft.remove(details);
+                ft.commit();
+                reviewVisiblle = false;
+                this.invalidateOptionsMenu();
+            }
+            fab.bringToFront();
         }
     }
 }

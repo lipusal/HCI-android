@@ -1,5 +1,7 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import android.text.Html;
+
 import com.google.gson.JsonObject;
 
 import java.io.Serializable;
@@ -18,7 +20,7 @@ public class Airport extends Place implements Serializable {
     public static Airport fromJson(JsonObject json) {
         return new Airport(
                 json.get("id").getAsString(),
-                json.get("description").getAsString(),
+                Html.fromHtml(json.get("description").getAsString().replace("\uFFFD", "ñ")).toString(),       //The replace() fixes España bug
                 json.get("time_zone").getAsString(),
                 PersistentData.getContextLessInstance().getCities().get(json.getAsJsonObject("city").get("id").getAsString())
         );

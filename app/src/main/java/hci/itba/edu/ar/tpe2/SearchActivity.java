@@ -1,9 +1,10 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
@@ -12,26 +13,41 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
+import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 
 public class SearchActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private EditText flightField, airlineField;
+    private EditText flightField;
+    private AutoCompleteTextView airlineField;
     private Button searchButton;
     private Toolbar toolbar;
     private CoordinatorLayout coordinatorLayout;
-
     private UpdatePriorityReceiver updatesReceiver;
+
+    private PersistentData persistentData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,11 +56,22 @@ public class SearchActivity extends AppCompatActivity
 
         //Creating for the first time
         if (savedInstanceState == null) {
-            //wat do
         }
-        searchButton = (Button) findViewById(R.id.search_button);
-        airlineField = (EditText) findViewById(R.id.airline_id);
+
+        //Set up autocomplete airline field
+        persistentData = new PersistentData(this);
+        List<Airline> airlines = new ArrayList<>(persistentData.getAirlines().values());
+        String[] airlineIDs = new String[airlines.size()];
+        for (int i = 0; i < airlineIDs.length; i++) {
+            airlineIDs[i] = airlines.get(i).getID();
+        }
+        airlineField = (AutoCompleteTextView) findViewById(R.id.airline_id);
+        airlineField.setAdapter(new AirlineAdapter(this, airlineIDs));
+        airlineField.setThreshold(1);
+
         flightField = (EditText) findViewById(R.id.flight_number);
+        searchButton = (Button) findViewById(R.id.search_button);
+
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.title_activity_search);
         setSupportActionBar(toolbar);
@@ -55,8 +82,13 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
-                    final Snackbar searchingSnackbar = Snackbar.make(coordinatorLayout, R.string.searching, Snackbar.LENGTH_INDEFINITE);
-                    searchingSnackbar.show();
+                    final ProgressDialog progressDialog = new ProgressDialog(SearchActivity.this);
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setCancelable(false);
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.setTitle(getString(R.string.searching) + "...");
+                    progressDialog.show();
+
                     searchButton.setEnabled(false);
                     searchButton.setText(R.string.searching);
                     //Search and go if found
@@ -69,7 +101,7 @@ public class SearchActivity extends AppCompatActivity
                             new NetworkRequestCallback<FlightStatus>() {
                                 @Override
                                 public void execute(Context context, FlightStatus fetchedStatus) {
-                                    searchingSnackbar.dismiss();
+                                    progressDialog.dismiss();
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
                                     searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, fetchedStatus);
                                     startActivity(searchIntent);
@@ -78,23 +110,20 @@ public class SearchActivity extends AppCompatActivity
                             new NetworkRequestCallback<String>() {
                                 @Override
                                 public void execute(Context c, String param) {
-                                    //Dismiss current snackbar, and only when done show the new one
-//                                    searchingSnackbar.setCallback(new Snackbar.Callback() {
-//                                        @Override
-//                                        public void onDismissed(Snackbar snackbar, int event) {
-//                                            super.onDismissed(snackbar, event);
-//                                        }
-//                                    });
-                                    searchingSnackbar.dismiss();
-                                    Snackbar.make(coordinatorLayout, R.string.err_no_flights_found, Snackbar.LENGTH_LONG).show();
+                                    String msg;
+                                    if(param.equals(APIRequest.ERR_STRING)) {
+                                        msg = getString(R.string.err_network);
+                                    }
+                                    else {
+                                        msg = getString(R.string.err_no_flights_found);
+                                    }
+                                    progressDialog.dismiss();
+                                    Toast.makeText(SearchActivity.this, msg, Toast.LENGTH_LONG).show();
                                     searchButton.setEnabled(true);
                                     searchButton.setText(R.string.search);
-                                    //Wait until the "Searching" snackbar has been dismissed, then show the new one
                                 }
                             });
 
-                } else {
-                    //TODO wat do
                 }
             }
         });
@@ -174,7 +203,7 @@ public class SearchActivity extends AppCompatActivity
         } else if (id == R.id.drawer_search) {
             i = new Intent(this, SearchActivity.class);
         } else if (id == R.id.drawer_map) {
-
+            i = new Intent(this, DealsMapActivity.class);
         } else if (id == R.id.drawer_settings) {
             i = new Intent(this, SettingsActivity.class);
         } else if (id == R.id.drawer_help) {
@@ -210,5 +239,30 @@ public class SearchActivity extends AppCompatActivity
 
 
         return valid;
+    }
+
+    /**
+     * Adapter to fill the autocomplete Airlines drop-down
+     */
+    private class AirlineAdapter extends ArrayAdapter<String> {
+        public AirlineAdapter(Context context, String[] objects) {
+            super(context, 0, objects);
+        }
+
+        @Override
+        public View getView(final int position, View destinationView, final ViewGroup parent) {
+            if (destinationView == null) {  //Item hasn't been created, inflate it from Android's default layout
+                destinationView = LayoutInflater.from(SearchActivity.this).inflate(R.layout.list_item_airline, parent, false);
+            }
+            Airline airline = persistentData.getAirlines().get(getItem(position));
+
+            ImageView logo = (ImageView) destinationView.findViewById(R.id.logo);
+            logo.setImageDrawable(getDrawable(airline.getDrawableLogoID()));
+
+            TextView text = (TextView) destinationView.findViewById(R.id.text);
+            text.setText(airline.getID() + " - " + airline.getName());
+
+            return destinationView;
+        }
     }
 }

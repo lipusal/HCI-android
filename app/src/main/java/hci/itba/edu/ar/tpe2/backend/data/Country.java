@@ -1,5 +1,9 @@
 package hci.itba.edu.ar.tpe2.backend.data;
 
+import android.text.Html;
+
+import com.google.gson.JsonObject;
+
 import java.io.Serializable;
 
 public class Country implements Serializable {
@@ -7,17 +11,20 @@ public class Country implements Serializable {
     private double longitude, latitude;
     private boolean hasCoords;
 
-    public Country(String id, String name, double longitude, double latitude) {
+    private Country(String id, String name, double longitude, double latitude) {
         this.id = id;
         this.name = name;
         this.longitude = longitude;
         this.latitude = latitude;
-        this.hasCoords = true;
     }
 
-    public Country(String id) {
-        this(id, null, 0, 0);
-        hasCoords = false;
+    public static Country fromJson(JsonObject json) {
+        return new Country(
+                json.get("id").getAsString(),
+                Html.fromHtml(json.get("name").getAsString()).toString(),
+                json.get("longitude").getAsDouble(),
+                json.get("latitude").getAsDouble()
+        );
     }
 
     public String getID() {
@@ -28,28 +35,10 @@ public class Country implements Serializable {
         return name;
     }
 
-    /**
-     * Returns whether this object was constructed with coordinates or not.
-     *
-     * @return <code>true</code> if this object was instatiated with coordinates, <code>false</code>
-     * otherwise.
-     */
-    public boolean hasCoords() {
-        return hasCoords;
-    }
-
-    /**
-     * @return This country's longitude. If 0, may indicate it was constructed without coordinates.
-     * @see #hasCoords()
-     */
     public double getLongitude() {
         return longitude;
     }
 
-    /**
-     * @return This country's latitude. If 0, may indicate it was constructed without coordinates.
-     * @see #hasCoords()
-     */
     public double getLatitude() {
         return latitude;
     }

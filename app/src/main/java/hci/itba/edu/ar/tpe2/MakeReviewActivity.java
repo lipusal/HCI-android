@@ -58,6 +58,9 @@ public class MakeReviewActivity extends AppCompatActivity
                     API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
+                            if (isDestroyed()) {
+                                return;
+                            }
                             MakeReviewActivity.this.finish();
                         }
                     });
@@ -136,7 +139,7 @@ public class MakeReviewActivity extends AppCompatActivity
 
         if (score == 0) {
             valid = false;
-            reviewText.setError("Ingrese el puntaje. Mover de lugar el error");
+            reviewText.setError("Ingrese el puntaje");
         }
 
         if (text.isEmpty()) {

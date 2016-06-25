@@ -25,8 +25,7 @@ import hci.itba.edu.ar.tpe2.R;
  */
 public class FlightStatus implements Serializable {
     //Date/time formatters
-    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US),
-            prettyFormat = DateFormat.getDateTimeInstance();
+    private static DateFormat APIdateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss ZZZZZ", Locale.US);
     private static DateTimeFormatter APIDateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ssZZ").withOffsetParsed().withLocale(Locale.getDefault());
     private static PeriodFormatter delayFormatter = new PeriodFormatterBuilder()
             .printZeroAlways()
@@ -38,22 +37,14 @@ public class FlightStatus implements Serializable {
             .appendMinutes()
             .toFormatter();
 
-    private static final Map<String, String> validStatus = new HashMap<>();
     private static final Map<String, Integer> statusResIDs = new HashMap<>();
 
     static {
-        validStatus.put("S", "scheduled");
-        validStatus.put("A", "active");
-        validStatus.put("R", "diverted");
-        validStatus.put("L", "landed");
-        validStatus.put("C", "canceled");
-
         statusResIDs.put("S", R.string.status_scheduled);
         statusResIDs.put("A", R.string.status_active);
         statusResIDs.put("R", R.string.status_diverted);
         statusResIDs.put("L", R.string.status_landed);
         statusResIDs.put("C", R.string.status_canceled);
-
     }
 
 
@@ -64,7 +55,6 @@ public class FlightStatus implements Serializable {
     private DateTime scheduledDepartureTime, actualDepartureTime, scheduledDepartureGateTime, actualDepartureGateTime, scheduledDepartureRunwayTime, actualDepartureRunwayTime,
             scheduledArrivalTime, actualArrivalTime, scheduledArrivalGateTime, actualArrivalGateTime, scheduledArrivalRunwayTime, actualArrivalRunwayTime;
     private Integer originGateDelay, originRunwayDelay, arrivalRunwayDelay, arrivalGateDelay;
-    //TODO incorporate delays
 
     private FlightStatus() {
     }
@@ -164,7 +154,9 @@ public class FlightStatus implements Serializable {
     }
 
     public Period getDepartureDelay() {
-        if (actualDepartureTime == null) {   //Hasn't taken off yet
+        if (getStringResID() == R.string.status_canceled) {
+            return null;
+        } else if (actualDepartureTime == null) {   //Hasn't taken off yet
             DateTime now = DateTime.now();
             if (now.isBefore(scheduledDepartureTime)) {
                 return null;
@@ -172,8 +164,12 @@ public class FlightStatus implements Serializable {
                 return new Period(scheduledDepartureTime, now);
             }
         } else {
-            long delayMinutes = (originGateDelay == null ? 0 : originGateDelay) + (originRunwayDelay == null ? 0 : originRunwayDelay);
-            return new Period(delayMinutes * 60 * 1000);
+            if (actualDepartureTime.equals(scheduledDepartureTime)) {
+                return null;
+            } else {
+                long delayMinutes = (originGateDelay == null ? 0 : originGateDelay) + (originRunwayDelay == null ? 0 : originRunwayDelay);
+                return new Period(delayMinutes * 60 * 1000);
+            }
         }
     }
 
@@ -247,7 +243,9 @@ public class FlightStatus implements Serializable {
     }
 
     public Period getArrivalDelay() {
-        if (actualArrivalTime == null) {   //Hasn't landed yet
+        if (getStringResID() == R.string.status_canceled) {
+            return null;
+        } else if (actualArrivalTime == null) {   //Hasn't landed yet
             DateTime now = DateTime.now();
             if (now.isBefore(scheduledArrivalTime)) {
                 return null;
@@ -255,8 +253,12 @@ public class FlightStatus implements Serializable {
                 return new Period(scheduledArrivalTime, now);
             }
         } else {
-            long delayMinutes = (arrivalGateDelay == null ? 0 : arrivalGateDelay) + (arrivalRunwayDelay == null ? 0 : arrivalRunwayDelay);
-            return new Period(delayMinutes * 60 * 1000);
+            if (actualArrivalTime.equals(scheduledArrivalTime)) {
+                return null;
+            } else {
+                long delayMinutes = (arrivalGateDelay == null ? 0 : arrivalGateDelay) + (arrivalRunwayDelay == null ? 0 : arrivalRunwayDelay);
+                return new Period(delayMinutes * 60 * 1000);
+            }
         }
     }
 
@@ -334,16 +336,16 @@ public class FlightStatus implements Serializable {
     }
 
     public int getIconID() {
-        switch (status) {
-            case "S":
+        switch (getStringResID()) {
+            case R.string.status_scheduled:
                 return R.drawable.ic_scheduled;
-            case "A":
+            case R.string.status_active:
                 return R.drawable.ic_flight_takeoff_black;
-            case "R":
+            case R.string.status_diverted:
                 return R.drawable.ic_diverted;
-            case "L":
+            case R.string.status_landed:
                 return R.drawable.ic_flight_land_black;
-            case "C":
+            case R.string.status_canceled:
                 return R.drawable.ic_cancelled;
             default:
                 return -1;
@@ -370,11 +372,6 @@ public class FlightStatus implements Serializable {
         FlightStatus that = (FlightStatus) o;
         return this.flight.equals(that.flight);
 
-    }
-
-    @Override
-    public String toString() {
-        return validStatus.get(status);
     }
 
     @Override

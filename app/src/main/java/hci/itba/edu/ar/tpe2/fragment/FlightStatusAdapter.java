@@ -11,8 +11,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nostra13.universalimageloader.core.ImageLoader;
-
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +26,27 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
     private CoordinatorLayout mCoordinatorLayout;
     private final PersistentData persistentData;
     private Map<Integer, FlightStatus> watchedStatuses;
+    private StarInterface starInterface;
+    private boolean setBottomPadding;
 
-    FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB) {
+    FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB, StarInterface starInterface) {
         super(context, 0, objects);
         persistentData = new PersistentData(context);
         mCoordinatorLayout = layoutWithFAB;
         watchedStatuses = persistentData.getWatchedStatuses();
+        this.starInterface = starInterface;
+        setBottomPadding = false;
     }
 
     @Override
     public View getView(final int position, View destination, final ViewGroup parent) {
+        if (!setBottomPadding) {     //Add bottom padding to not cover up last item with FAB
+            float scale = parent.getContext().getResources().getDisplayMetrics().density;
+            int bottomPaddingDP = (int) ((56 + 16 + 5) * scale + 0.5f);   //56dp FAB size + 16dp FAB margin + 5dp for wiggle room
+            parent.setPadding(0, 0, 0, bottomPaddingDP);
+            parent.setClipToPadding(false);                 //http://stackoverflow.com/questions/28916426/last-item-of-listview-fab-hides-it
+            setBottomPadding = true;
+        }
         if (destination == null) {  //Item hasn't been created, inflate it from Android's default layout
             destination = LayoutInflater.from(getContext()).inflate(R.layout.list_item_flight_status, parent, false);
         }
@@ -46,8 +55,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
 
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);
-        ImageLoader.getInstance().displayImage(status.getAirline().getLogoURL(), icon);
-
+        icon.setImageDrawable(parent.getContext().getDrawable(flight.getAirline().getDrawableLogoID()));
         //Text
         TextView title = (TextView) destination.findViewById(R.id.flight_text);
         title.setText(flight.toString());
@@ -59,32 +67,37 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
         star.setImageResource(watchedStatuses.containsValue(status) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
-        final View finalDestination = destination;      //Need to copy to use it in inner class
         star.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (watchedStatuses.containsValue(status)) {
                     persistentData.stopWatchingStatus(status);
-                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_off_24dp);
+                    remove(status);
+                    notifyDataSetChanged();
+                    starInterface.onFlightUnstarred(status);
+
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.watchStatus(status);
-                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_on_24dp);
+                            add(status);
+                            notifyDataSetChanged();
                         }
                     }).show();
                 } else {
                     persistentData.watchStatus(status);
-                    FlightStatusAdapter.this.notifyDataSetChanged();
                     star.setImageResource(R.drawable.ic_star_on_24dp);
+                    add(status);
+                    notifyDataSetChanged();
                     Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.stopWatchingStatus(status);
-                            FlightStatusAdapter.this.notifyDataSetChanged();
                             star.setImageResource(R.drawable.ic_star_off_24dp);
+                            remove(status);
+                            notifyDataSetChanged();
                         }
                     }).show();
                 }
