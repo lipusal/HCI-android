@@ -155,23 +155,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-      /* mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                marker.
-                ImageView image = (ImageView) view.findViewById(R.id.image);
-                String url;
-                API.getInstance().getFlickrImg("Buenos Aires", DealsMapActivity.this, new NetworkRequestCallback<String>() {
-                    @Override
-                    public void execute(Context c, String param) {
-                        url = param;
-                        ImageLoader.getInstance().displayImage(url,image);
-                    }
-                });
-
-            }
-        });*/
-
         // Create an instance of GoogleAPIClient.
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -208,65 +191,11 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 if (place == null) {
                     place = persistentData.getAirports().get(marker.getTitle());
                 }
-
-
                 TextView title = (TextView) view.findViewById(R.id.title);
                 title.setText(place == null ? marker.getTitle() : place.getName());   //Marker for closest airport will cause NPE, take its title directly
 
                 TextView price = (TextView) view.findViewById(R.id.price);
                 price.setText(marker.getSnippet());
-
-
-
-                /*if(city.getFlickrUrl() == null) {
-                    image.setImageDrawable(getResources().getDrawable(R.drawable.ic_flight, getTheme()));
-                }
-                else {
-                   // Bitmap bm = ImageLoader.getInstance().loadImageSync(city.getFlickrUrl());
-                    ImageLoader.getInstance().displayImage(city.getFlickrUrl(), image, new ImageLoadingListener() {
-                        @Override
-                        public void onLoadingStarted(String imageUri, View view) {
-                            Log.d("VOLANDO", "Downloading " + city.getFlickrUrl());
-                        }
-
-                        @Override
-                        public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                            Log.d("VOLANDO", "Failed to download " + city.getFlickrUrl());
-                        }
-
-                        @Override
-                        public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-                            ((ImageView) view).setImageBitmap(loadedImage);
-                            Log.d("VOLANDO", "Finished downloading " + city.getFlickrUrl());
-                            if(marker.isInfoWindowShown()) {
-                                Log.d("VOLANDO", "Re-showing info window for " + city.getID());
-                                marker.hideInfoWindow();
-                                marker.showInfoWindow();
-                            }
-                        }
-
-                        @Override
-                        public void onLoadingCancelled(String imageUri, View view) {
-                            Log.d("VOLANDO", "Cancelled download of " + city.getFlickrUrl());
-                        }
-                    });
-                   // image.setImageBitmap(bm);
-                }*/
-
-                //marker.setSnippet(city.getName());
-              /*  if (arg0.getTitle().compareTo("ITBA") == 0) {
-                    image.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.itba));
-                } else {
-                    image.setImageBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.buenos_aires));
-            }*/
-
-/*                LatLng latLng = arg0.getPosition();
-                TextView latitude = (TextView) view.findViewById(R.id.latitude);
-                latitude.setText(Double.toString(latLng.latitude));
-
-                TextView longitude = (TextView) view.findViewById(R.id.longitude);
-                longitude.setText(Double.toString(latLng.longitude));*/
-
                 return view;
             }
         });
@@ -280,22 +209,16 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     public void onConnected(Bundle connectionHint) {
         if(lastKnownLocation == null) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Facu, lee esto para pedirle permisos al usuario si no los dio y qué hacer si no da permiso:
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
                 if (!locationPermissionGranted) {
-                    Toast.makeText(DealsMapActivity.this, "Y U NO LET ME LOCATE U", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(DealsMapActivity.this, "You need permissions to locate", Toast.LENGTH_SHORT).show(); //TODO use string resource
                     return;
                 }
             }
             lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             onLocationObtained();
-        } else {
-            LatLng closestAirportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
-            mMap.addMarker(new MarkerOptions()
-                    .position(closestAirportPosition)
-                    .title(closestAirport.toString())
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-            setMarkers(deals);
+        } else if (closestAirport != null) {
+            setMarkers(deals, closestAirport);
             //TODO Facu acá modulariza cositas
         }
     }
@@ -323,6 +246,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                     }
                 }
             });
+        } else if (closestAirport != null && deals != null) {
+            setMarkers(deals, closestAirport);
         } else {
             Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.oh_shit_waddap), Toast.LENGTH_SHORT).show();    //TODO remove plz
             Log.w("VOLANDO", "Location is null");
@@ -332,12 +257,12 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
 
     @Override
     public void onConnectionSuspended(int i) {
-        //TODO wat do jier?
+
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        //TODO wat do jier?
+
     }
 
     @Override
@@ -382,12 +307,13 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERM_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
+            lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            onLocationObtained();
         }
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
         int id = item.getItemId();
         Intent i = null;
         if (id == R.id.drawer_flights) {
@@ -407,13 +333,12 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             i.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             startActivity(i);
         }
-        //else, unrecognized option selected, close drawer
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
-    private void chooseClosestAirport(final Airport[] airports) { //Agregar lista de aeropuertos conseguida despues de llamar a la API
+    private void chooseClosestAirport(final Airport[] airports) {
         final AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
         AlertDialog dialog = null;
         final String[] airportNames = new String[airports.length];
@@ -423,9 +348,9 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));
         dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int which) { //which es el que se acaba de seleccionar. Supongo que la logica va a estar en el boton de aceptar igual
+            public void onClick(DialogInterface dialog, int which) {
                 //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
-                //El boton de aceptar no deberia hacer nada si no se selecciono ningun aeropuerto
+
 
             }
         });
@@ -434,20 +359,18 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO make API request of getDeals() and set markers and shtuff
-                    Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
-                    Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
-                    closestAirport = selectedAirport;
-                    findDeals(closestAirport);
+                Airport selectedAirport = airports[((AlertDialog) dialog).getListView().getCheckedItemPosition()];
+                Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + selectedAirport.toString(), Toast.LENGTH_SHORT).show();   //TODO remove?
+                closestAirport = selectedAirport;
+                findDeals(closestAirport);
             }
         });
 
 
-        //Deberia llevarte a la actividad anterior?
         dialogBuilder.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
             //Deberia hacer back o dejarte ahi para que puedas hacer edit?
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //Toast.makeText(DealsMapActivity.this, "Cosa", Toast.LENGTH_SHORT).show();
             }
         });
         dialog = dialogBuilder.create();
@@ -462,16 +385,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
      */
     private void findDeals(Airport origin) {
         mMap.clear();
-        //Add special marker in origin airport
-        //TODO consider using a bigger, different marker rather than a differently-colored one (or use a contrasting color, see Material Design color guidelines)
         LatLng airportPosition = new LatLng(origin.getLatitude(), origin.getLongitude());
-        mMap.addMarker(new MarkerOptions()
-                .position(airportPosition)
-                .title(origin.toString())
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-        //Move the camera to it
         mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
-        //Now query deals
         API.getInstance().getDeals(origin, this, new NetworkRequestCallback<Deal[]>() {
             @Override
             public void execute(Context c, Deal[] param) {
@@ -479,20 +394,17 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 List<Deal> orderedDeals = Arrays.asList(dealsArray);
                 Collections.sort(orderedDeals);
                 deals = orderedDeals;
-
-//                float average = 0;
-//                int i = 0;
-//                for (Deal d : deals) {
-//                    average += d.getPrice();
-//                    i++;
-//                }
-//                average = average / i;
-                setMarkers(deals);
+                setMarkers(deals, closestAirport);
             }
         });
     }
 
-    private void setMarkers(List<Deal> deals){
+    private void setMarkers(List<Deal> deals, Airport airport) {
+        LatLng airportPosition = new LatLng(airport.getLatitude(), airport.getLongitude());
+        mMap.addMarker(new MarkerOptions()
+                .position(airportPosition)
+                .title(airport.toString())
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
         LatLng aux;
         float colorValue;
         for (Deal d : deals) {
@@ -508,11 +420,6 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
 
     private void cancelEditMap() {
         mMap.clear();
-        LatLng airportPosition = new LatLng(closestAirport.getLatitude(), closestAirport.getLongitude());
-        mMap.addMarker(new MarkerOptions()
-                .position(airportPosition)
-                .title(closestAirport.toString())
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_CYAN)));
-       setMarkers(deals);
+        setMarkers(deals, closestAirport);
     }
 }
