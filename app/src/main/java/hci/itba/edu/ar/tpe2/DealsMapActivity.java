@@ -101,10 +101,11 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View view) {
                 mMap.clear();
-                Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_INDEFINITE).setAction(R.string.cancel, new View.OnClickListener() {
+                final Snackbar cancelSnackbar = Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_INDEFINITE);
+                cancelSnackbar.setAction(R.string.cancel, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if(closestAirport == null){
+                        if (closestAirport == null) {
                             mMap.clear();
                             return;
                         }
@@ -116,7 +117,8 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                             }
                         });
                     }
-                }).show();
+                });
+                cancelSnackbar.show();
                 Collection<Airport> airports = persistentData.getAirports().values();
                 for (Airport a : airports) {
                     LatLng airportPosition = new LatLng(a.getLatitude(), a.getLongitude());
@@ -128,6 +130,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                     @Override
                     public void onInfoWindowClick(Marker marker) {
+                        cancelSnackbar.dismiss();
                         closestAirport = persistentData.getAirports().get(marker.getTitle());
                         findDeals(closestAirport);
                         Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.loading_deals) + closestAirport.toString(), Toast.LENGTH_SHORT).show();
@@ -207,7 +210,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onConnected(Bundle connectionHint) {
-        if(lastKnownLocation == null) {
+        if (lastKnownLocation == null) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, PERM_LOCATION);
                 if (!locationPermissionGranted) {
@@ -307,6 +310,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == PERM_LOCATION && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             locationPermissionGranted = true;
+            //noinspection MissingPermission
             lastKnownLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
             onLocationObtained();
         }
@@ -344,7 +348,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             airportNames[i] = airports[i].getDescription();
         }
         dialogBuilder.setTitle(getResources().getString(R.string.choose_an_airport));
-        dialogBuilder.setSingleChoiceItems(airportNames,0, new DialogInterface.OnClickListener() {
+        dialogBuilder.setSingleChoiceItems(airportNames, 0, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO consider not using "accept" button and accepting the clicked option here. Can't undo this way, though
@@ -386,18 +390,19 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         LatLng airportPosition = new LatLng(origin.getLatitude(), origin.getLongitude());
         mMap.moveCamera(CameraUpdateFactory.newLatLng(airportPosition));
         API.getInstance().getDeals(origin, this, new NetworkRequestCallback<Deal[]>() {
-            @Override
-            public void execute(Context c, Deal[] param) {
-                Deal[] dealsArray = param;
-                List<Deal> orderedDeals = Arrays.asList(dealsArray);
-                Collections.sort(orderedDeals);
-                deals = orderedDeals;
-                setMarkers(deals, closestAirport);
-            }},
+                    @Override
+                    public void execute(Context c, Deal[] param) {
+                        Deal[] dealsArray = param;
+                        List<Deal> orderedDeals = Arrays.asList(dealsArray);
+                        Collections.sort(orderedDeals);
+                        deals = orderedDeals;
+                        setMarkers(deals, closestAirport);
+                    }
+                },
                 new NetworkRequestCallback<String>() {
                     @Override
                     public void execute(Context c, String param) {
-                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.error_api), Toast.LENGTH_LONG).show();
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.err_network), Toast.LENGTH_LONG).show();
                     }
                 });
 

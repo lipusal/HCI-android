@@ -59,8 +59,9 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
 
     /**
      * Reacts to flights being updated. Updates the statuses in persistent data and calls
-     * {@link #onNoFlightsChanged(boolean)}, {@link #onSingleFlightChanged(FlightStatus, boolean)} or
-     * {@link #onMultipleFlightsChanged(Collection, boolean)} as appropriate.
+     * {@link #onUpdateFailed(boolean)}, {@link #onNoFlightsChanged(boolean)},
+     * {@link #onSingleFlightChanged(FlightStatus, boolean)} or {@link #onMultipleFlightsChanged(Collection, boolean)}
+     * as appropriate.
      *
      * @param context Received broadcast context.
      * @param intent  Received broadcast intent.

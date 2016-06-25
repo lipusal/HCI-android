@@ -20,7 +20,7 @@
     <string name="gate">Puerta</string>
     <string name="help">Ayuda</string>
     <string name="map">Mapa de ofertas</string>
-    <string name="not_following_flights">No está siguiendo ningún vuelo</string>
+    <string name="not_following_flights">No estás siguiendo ningún vuelo</string>
     <string name="origin">Origen</string>
     <string name="pref_header_data_sync">Actualizaciones</string>
     <string name="pref_header_general">General</string>
@@ -93,10 +93,10 @@
     <string name="comments">Comentarios</string>
     <string name="details">Detalles</string>
     <string name="airline_id">ID aerolínea</string>
-    <string name="flight_number">Número de vuelo</string>
+    <string name="flight_number"># de vuelo</string>
 
     <string name="leave_review">Escribir comentario</string>
-    <string name="review_err_string">Debe llenar todos los campos</string>
+    <string name="review_err_string">Completá todos los campos</string>
 
     <string name="err_update_failed">No se pudieron actualizar los estados</string>
     <string name="action_retry">Reintentar</string>
@@ -107,15 +107,14 @@
     <string name="following_flight">Siguiendo %1$s</string>
     <string name="removed_flight">%1$s borrado</string>
     <string name="undo">Deshacer</string>
-    <string name="choose_an_airport">Elige un aeropuerto</string>
+    <string name="choose_an_airport">Elegí un aeropuerto</string>
     <string name="loading_deals">Obteniendo ofertas de\u0020</string>
-    <string name="located">Localizado en\u0020</string>
+    <string name="located">Ubicado en\u0020</string>
     <string name="no_airport_found">No se encontraron aerpuertos cerca tuyo\u0020</string>
-    <string name="snackbar_edit">Elige tu aeropuerto de origen</string>
+    <string name="snackbar_edit">Elegí tu aeropuerto de origen</string>
     <string name="submit">Enviar</string>
     <string name="uploading">Subiendo</string>
-    <string name="no_permissions">Necesitas permisos para que te localicemos</string>
-    <string name="couldnt_locate">No se pudo localizarte, intentá encender el GPS.</string>
-    <string name="error_api">No pudimos obtener las ofertas de internet. Por favor, vuelva a intentar luego.</string>
+    <string name="no_permissions">Permiso de ubicación no otorgado</string>
+    <string name="couldnt_locate">No se te pudo ubicar. Asegurate que Servicios de Ubicación están activados.</string>
 
 </resources>
