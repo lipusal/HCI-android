@@ -119,7 +119,6 @@ public class FlightDetailsFragment extends Fragment {
             arrivalBaggageClaimLabel.setVisibility(View.GONE);
         } else {
             String firstPartDetailStr = status.getAirline().getName() + " (" + status.getAirline().getID() + ") #" + status.getFlight().getNumber();
-            String firstPartDetailStr2 = "Desde: " + departureAirport.getID() + " con destino a " + arrivalAirport.getID();
             //Title
             title.setText(firstPartDetailStr);
             subtitle.setText(status.getStringResID());
