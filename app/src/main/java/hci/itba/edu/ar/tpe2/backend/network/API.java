@@ -1,7 +1,6 @@
 package hci.itba.edu.ar.tpe2.backend.network;
 
 import android.content.Context;
-import android.net.Network;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -9,8 +8,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
-import org.json.JSONObject;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -20,7 +17,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import hci.itba.edu.ar.tpe2.backend.FileManager;
 import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.Airport;
 import hci.itba.edu.ar.tpe2.backend.data.City;
