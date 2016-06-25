@@ -20,7 +20,7 @@
     <string name="gate">Puerta</string>
     <string name="help">Ayuda</string>
     <string name="map">Mapa de ofertas</string>
-    <string name="not_following_flights">No hay vuelos seguidos</string>
+    <string name="not_following_flights">No está siguiendo ningún vuelo</string>
     <string name="origin">Origen</string>
     <string name="pref_header_data_sync">Actualizaciones</string>
     <string name="pref_header_general">General</string>
@@ -98,7 +98,7 @@
     <string name="leave_review">Escribir comentario</string>
     <string name="review_err_string">Debe llenar todos los campos</string>
 
-    <string name="err_update_failed">No se pudo actualizar los estados</string>
+    <string name="err_update_failed">No se pudieron actualizar los estados</string>
     <string name="action_retry">Reintentar</string>
     <string name="downloading_data">Consiguiendo destinos y aerolíneas</string>
     <string name="startup_failed_title">No se pudo bajar información</string>
@@ -114,5 +114,8 @@
     <string name="snackbar_edit">Elige tu aeropuerto de origen</string>
     <string name="submit">Enviar</string>
     <string name="uploading">Subiendo</string>
+    <string name="no_permissions">Necesitas permisos para que te localicemos</string>
+    <string name="couldnt_locate">No se pudo localizarte, intentá encender el GPS.</string>
+    <string name="error_api">No pudimos obtener las ofertas de internet. Por favor, vuelva a intentar luego.</string>
 
 </resources>
