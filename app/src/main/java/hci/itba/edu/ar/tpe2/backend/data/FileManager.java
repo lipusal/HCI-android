@@ -1,4 +1,4 @@
-package hci.itba.edu.ar.tpe2.backend;
+package hci.itba.edu.ar.tpe2.backend.data;
 
 import android.content.Context;
 import android.util.Log;
