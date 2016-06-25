@@ -166,7 +166,7 @@ public class PersistentData {
 
 
         //Basic data (countries, cities, airports, airlines)
-        if (fileManager.loadCountries().length == 0) {  //No persistent data stored in files, download from network TODO consider partially available data
+        if (fileManager.loadCountries().length == 0 || fileManager.loadCities().length == 0 || fileManager.loadAirports().length == 0 || fileManager.loadAirlines().length == 0) {
             NetworkRequestCallback<Void> megaCallback = new NetworkRequestCallback<Void>() {
                 AtomicInteger requestsLeft = new AtomicInteger(3);  //Number of downloads needed to complete (countries etc., airlines, languages)
 
@@ -179,7 +179,6 @@ public class PersistentData {
                     }
                 }
             };
-            Log.w("VOLANDO", "Querying API for data");
             downloadCountries(megaCallback, errorCallback);     //Will download cities and airports in chain
             downloadAirlines(megaCallback, errorCallback);      //Will download airlines independently of countries, cities, airports
             downloadLanguages(megaCallback, errorCallback);     //Will download languages independently

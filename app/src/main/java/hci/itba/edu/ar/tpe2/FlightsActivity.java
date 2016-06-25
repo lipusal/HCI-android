@@ -49,6 +49,7 @@ public class FlightsActivity extends AppCompatActivity
     private Menu menu;
     private PersistentData persistentData;
     private boolean reviewVisiblle;
+    private boolean isFailDialogDisplayed;
     YourFlightsFragment yourFlightsFragment;
 
     /**
@@ -119,17 +120,20 @@ public class FlightsActivity extends AppCompatActivity
                         @Override
                         public void execute(Context c, String param) {
                             progressDialog.dismiss();
-                            new AlertDialog.Builder(FlightsActivity.this)
-                                    .setTitle(R.string.startup_failed_title)
-                                    .setMessage(R.string.startup_failed_message)
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            dialog.dismiss();
-                                            FlightsActivity.this.finish();
-                                        }
-                                    }).show();
+                            if (!isFailDialogDisplayed) {
+                                new AlertDialog.Builder(FlightsActivity.this)
+                                        .setTitle(R.string.startup_failed_title)
+                                        .setMessage(R.string.startup_failed_message)
+                                        .setCancelable(false)
+                                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                                FlightsActivity.this.finish();
+                                            }
+                                        }).show();
+                                isFailDialogDisplayed = true;
+                            }
                         }
                     });
         }
