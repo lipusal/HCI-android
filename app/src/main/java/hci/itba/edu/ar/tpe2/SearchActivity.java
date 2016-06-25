@@ -1,6 +1,8 @@
 package hci.itba.edu.ar.tpe2;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -22,6 +24,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +33,7 @@ import hci.itba.edu.ar.tpe2.backend.data.Airline;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.API;
+import hci.itba.edu.ar.tpe2.backend.network.APIRequest;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
 import hci.itba.edu.ar.tpe2.backend.service.UpdatePriorityReceiver;
 
@@ -78,8 +82,13 @@ public class SearchActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
-                    final Snackbar searchingSnackbar = Snackbar.make(coordinatorLayout, R.string.searching, Snackbar.LENGTH_INDEFINITE);
-                    searchingSnackbar.show();
+                    final ProgressDialog progressDialog = new ProgressDialog(SearchActivity.this);
+                    progressDialog.setIndeterminate(true);
+                    progressDialog.setCancelable(false);
+                    progressDialog.setCanceledOnTouchOutside(false);
+                    progressDialog.setTitle(getString(R.string.searching) + "...");
+                    progressDialog.show();
+
                     searchButton.setEnabled(false);
                     searchButton.setText(R.string.searching);
                     //Search and go if found
@@ -92,7 +101,7 @@ public class SearchActivity extends AppCompatActivity
                             new NetworkRequestCallback<FlightStatus>() {
                                 @Override
                                 public void execute(Context context, FlightStatus fetchedStatus) {
-                                    searchingSnackbar.dismiss();
+                                    progressDialog.dismiss();
                                     Intent searchIntent = new Intent(SearchActivity.this, FlightDetailMainActivity.class);
                                     searchIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, fetchedStatus);
                                     startActivity(searchIntent);
@@ -101,23 +110,20 @@ public class SearchActivity extends AppCompatActivity
                             new NetworkRequestCallback<String>() {
                                 @Override
                                 public void execute(Context c, String param) {
-                                    //Dismiss current snackbar, and only when done show the new one
-//                                    searchingSnackbar.setCallback(new Snackbar.Callback() {
-//                                        @Override
-//                                        public void onDismissed(Snackbar snackbar, int event) {
-//                                            super.onDismissed(snackbar, event);
-//                                        }
-//                                    });
-                                    searchingSnackbar.dismiss();
-                                    Snackbar.make(coordinatorLayout, R.string.err_no_flights_found, Snackbar.LENGTH_LONG).show();
+                                    String msg;
+                                    if(param.equals(APIRequest.ERR_STRING)) {
+                                        msg = getString(R.string.err_network);
+                                    }
+                                    else {
+                                        msg = getString(R.string.err_no_flights_found);
+                                    }
+                                    progressDialog.dismiss();
+                                    Toast.makeText(SearchActivity.this, msg, Toast.LENGTH_LONG).show();
                                     searchButton.setEnabled(true);
                                     searchButton.setText(R.string.search);
-                                    //Wait until the "Searching" snackbar has been dismissed, then show the new one
                                 }
                             });
 
-                } else {
-                    //TODO wat do
                 }
             }
         });

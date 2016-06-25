@@ -1,11 +1,13 @@
 package hci.itba.edu.ar.tpe2.backend.service;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.View;
 
 import java.util.Collection;
@@ -40,10 +42,19 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
      */
     public static UpdatePriorityReceiver registerNewInstance(Context context, View destinationView) {
         UpdatePriorityReceiver result = new UpdatePriorityReceiver(destinationView);
-        IntentFilter priorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        priorityFilter.setPriority(1);
-        context.registerReceiver(result, priorityFilter);
+        context.registerReceiver(result, getPriorityFilter());
         return result;
+    }
+
+    /**
+     * @return An {@link IntentFilter} with the filters to listen to broadcasts with priority.
+     */
+    public static IntentFilter getPriorityFilter() {
+        IntentFilter priorityFilter = new IntentFilter();
+        priorityFilter.addAction(UpdateService.ACTION_UPDATE_COMPLETE);
+        priorityFilter.addAction(UpdateService.ACTION_UPDATE_FAILED);
+        priorityFilter.setPriority(1);
+        return priorityFilter;
     }
 
     /**
@@ -58,31 +69,45 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
     public final void onReceive(final Context context, Intent intent) {
         abortBroadcast();   //So notification isn't sent
         boolean manuallyTriggered = intent.getBooleanExtra(UpdateService.EXTRA_MANUAL_UPDATE, false);
-        Map<Integer, FlightStatus> updatedStatuses = (Map<Integer, FlightStatus>) intent.getSerializableExtra(UpdateService.EXTRA_UPDATES);
-        if (updatedStatuses.isEmpty()) {
-            onNoFlightsChanged(manuallyTriggered);
-            return;
+        if(intent.getAction().equals(UpdateService.ACTION_UPDATE_FAILED)) {
+            onUpdateFailed(manuallyTriggered);
         }
-        //Find the old statuses and update them
-        FlightStatus newStatus = null;
-        for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) {
-            newStatus = entry.getValue();
-        }
-        if (updatedStatuses.size() == 1) {      //newStatus has the only status in the Map
-            onSingleFlightChanged(newStatus, manuallyTriggered);
-        } else {
-            onMultipleFlightsChanged(updatedStatuses.values(), manuallyTriggered);
+        else {
+            Map<Integer, FlightStatus> updatedStatuses = (Map<Integer, FlightStatus>) intent.getSerializableExtra(UpdateService.EXTRA_UPDATES);
+            if (updatedStatuses.isEmpty()) {
+                onNoFlightsChanged(manuallyTriggered);
+                return;
+            }
+            //Find the old statuses and update them
+            FlightStatus newStatus = null;
+            for (Map.Entry<Integer, FlightStatus> entry : updatedStatuses.entrySet()) {
+                newStatus = entry.getValue();
+            }
+            if (updatedStatuses.size() == 1) {      //newStatus has the only status in the Map
+                onSingleFlightChanged(newStatus, manuallyTriggered);
+            } else {
+                onMultipleFlightsChanged(updatedStatuses.values(), manuallyTriggered);
+            }
         }
     }
 
     /**
-     * Called when no flights were updated.
+     * Called when no flights were updated. If this was from a manual update, shows a Snackbar
+     * explicitly telling the user that there were no changes.
      *
      * @param manualUpdate Whether this occurred from a manual update (e.g. pull to refresh in
      *                     Flights activity)
      */
     public void onNoFlightsChanged(boolean manualUpdate) {
-        //Do nothing
+        if (manualUpdate) {
+            if (destinationView == null || destinationView.getContext() == null) {
+                return;
+            }
+            final Context context = destinationView.getContext();
+            Snackbar.make(destinationView, context.getString(R.string.no_changes), Snackbar.LENGTH_LONG)
+                    //No action
+                    .show();
+        }
     }
 
     /**
@@ -108,6 +133,15 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
     }
 
     /**
+     * Called when updates fail.
+     *
+     * @param manualUpdate Whether this occurred from a manual update.
+     */
+    public void onUpdateFailed(boolean manualUpdate) {
+        showFailedSnackbar(manualUpdate);
+    }
+
+    /**
      * Shows a Snackbar notifying the flight that was updated. Includes an action to see details of
      * said flight.
      *
@@ -119,16 +153,23 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
             return;
         }
         final Context context = destinationView.getContext();
-        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()), Snackbar.LENGTH_LONG)    //TODO use string resource
+        Snackbar.make(destinationView, newStatus.getFlight().toString() + " " + context.getString(newStatus.getStringResID()), Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.action_view,
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent i = new Intent(context, FlightDetailMainActivity.class);
-                                i.putExtra(FlightDetailMainActivity.PARAM_STATUS, newStatus);
-                                //TODO flags?
-                                context.startActivity(i);
+                                //Take user to Flight Details activity, with back stack to Home
+                                Intent homeIntent = new Intent(context, FlightsActivity.class);
+                                homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                Intent detailsIntent = new Intent(context, FlightDetailMainActivity.class);
+                                detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, newStatus);
+                                PendingIntent pendingIntentWithBackStack = TaskStackBuilder
+                                        .create(context)
+                                        .addNextIntent(homeIntent)
+                                        .addNextIntent(detailsIntent)
+                                        .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                                context.startActivity(detailsIntent);
                             }
                         })
                 .show();
@@ -146,15 +187,40 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
             return;
         }
         final Context context = destinationView.getContext();
-        Snackbar.make(destinationView, numUpdatedFlights + " flights updated", Snackbar.LENGTH_LONG)    //TODO use string resource with placeholder
+        Snackbar.make(destinationView, String.format(context.getString(R.string.x_flights_updated), numUpdatedFlights ), Snackbar.LENGTH_LONG)
                 .setAction(
                         R.string.action_view,
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
                                 Intent i = new Intent(context, FlightsActivity.class);
-                                //TODO flags?
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                 context.startActivity(i);
+                            }
+                        })
+                .show();
+    }
+
+    /**
+     * Shows a Snackbar notifying that the last update failed. Gives the user the option to retry
+     * right away instead of waiting until next trigger.
+     */
+    public void showFailedSnackbar(final boolean manualUpdate) {
+        //Avoid NPEs (e.g. when changing activities right as a Snackbar is supposed to show)
+        if (destinationView == null || destinationView.getContext() == null) {
+            return;
+        }
+        final Context context = destinationView.getContext();
+        Snackbar.make(destinationView, context.getString(R.string.err_update_failed), Snackbar.LENGTH_LONG)
+                .setAction(
+                        R.string.action_retry,
+                        new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(context, UpdateService.class);
+                                intent.setAction(UpdateService.ACTION_CHECK_FOR_UPDATES);
+                                intent.putExtra(UpdateService.EXTRA_MANUAL_UPDATE, true);
+                                context.startService(intent);
                             }
                         })
                 .show();

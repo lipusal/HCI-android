@@ -51,12 +51,19 @@
     <string name="x_flights_updated">%1$d flights updated</string>
     <string name="status_changed_generic">%1$s status changed</string>
     <string name="tap_to_see_details">Tap to see details</string>
+    <string name="flight_updated">Flight updated</string>
+    <string name="removed_flight">Removed %1$s</string>
+    <string name="following_flight">Following %1$s</string>
+    <string name="undo">Undo</string>
 
     <string name="searching">Searching</string>
     <string name="not_following_flights">No followed flights</string>
     <string name="err_no_flights_found">No flights found</string>
     <string name="err_network">Network error</string>
+    <string name="downloading_data">Getting destinations and airlines</string>
 
+    <string name="startup_failed_title">Couldn\'t download data</string>
+    <string name="startup_failed_message">We couldn\'t get needed data for the app to work properly. Please make sure you have a working internet connection, restart the application and try again.</string>
     <string name="no_review_found">No reviews</string>
 
 
@@ -64,17 +71,20 @@
     <string name="err_invalid_airline_id">Invalid airline ID</string>
     <string name="err_empty_flight_number">Enter flight number</string>
     <string name="err_invalid_flight_number">Invalid valid flight number</string>
+    <string name="err_update_failed">Couldn\'t update flight status</string>
+    <string name="action_retry">Retry</string>
 
     <string name="snackbar_edit">Choose your origin airport</string>
     <string name="loading_deals">Getting deals from\u0020</string>
     <string name="no_airport_found">No airport found near you =(\u0020</string>
     <string name="located">Located you at\u0020</string>
-    <string name="oh_shit_waddap">WHER U AT BOI I CAN\'T FIND U</string>
+    <string name="couldnt_locate">Try turning on your GPS</string>
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="updating">Updating</string>
     <string name="currency" translatable="false">U$S\u0020</string>
+    <string name="no_permissions">"You need permissions to locate"</string>
 
     <string name="airline_id">Airline ID</string>
     <string name="flight_number">Flight number</string>

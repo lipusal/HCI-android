@@ -160,15 +160,14 @@ public class FlightDetailsFragment extends Fragment {
         }
 
         //Set up broadcast receiver with priority (needs a View to work properly)
-        priorityFilter = new IntentFilter(UpdateService.ACTION_UPDATE_COMPLETE);
-        priorityFilter.setPriority(1);
+        priorityFilter = UpdatePriorityReceiver.getPriorityFilter();
         updatesReceiver = new UpdatePriorityReceiver(view) {
             @Override
             public void onSingleFlightChanged(FlightStatus newStatus, boolean manualUpdate) {
                 //If this flight was updated, refresh the view and show a special snackbar (no action, user is already in this flight's details activity), otherwise do default behavior
                 if (newStatus.getFlight().equals(status.getFlight())) {
                     status = newStatus;
-                    Snackbar.make(view, "Flight updated", Snackbar.LENGTH_LONG).show();   //TODO stop using generic message
+                    Snackbar.make(view, R.string.flight_updated, Snackbar.LENGTH_LONG).show();
                     updateView();
                 } else {
                     super.onSingleFlightChanged(newStatus, manualUpdate);
@@ -183,7 +182,7 @@ public class FlightDetailsFragment extends Fragment {
                     if (updatedStatus.getFlight().equals(status.getFlight())) {
                         found = true;
                         status = updatedStatus;
-                        Snackbar.make(view, "Flight updated", Snackbar.LENGTH_LONG).show();   //TODO stop using generic message
+                        Snackbar.make(view, R.string.flight_updated, Snackbar.LENGTH_LONG).show();
                         updateView();
                         break;
                     }

@@ -33,9 +33,8 @@ import hci.itba.edu.ar.tpe2.backend.network.API;
  * languages, currencies) in the device's internal storage.
  */
 public class FileManager {
-    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, FLIGHTS, AIRLINES, STATUSES}
+    public enum StorageFile {CITIES, COUNTRIES, AIRPORTS, LANGUAGES, CURRENCIES, AIRLINES, STATUSES}
 
-    ;
     private Context context;
 
     public FileManager(Context c) {
@@ -100,26 +99,6 @@ public class FileManager {
             return new Language[0];
         }
         return result.toArray(new Language[0]);
-    }
-
-    public boolean saveFollowedFlights(Collection<Flight> flights) {
-        try {
-            return saveObjects(flights.toArray(new Flight[]{}), StorageFile.FLIGHTS);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public List<Flight> loadFollowedFlights() {
-        List<Flight> result = new ArrayList<>();
-        try {
-            loadObjects(context, StorageFile.FLIGHTS, result);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Collections.EMPTY_LIST;
-        }
-        return result;
     }
 
     public boolean saveAirports(Airport[] airports) {
