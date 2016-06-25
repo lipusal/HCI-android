@@ -78,5 +78,9 @@
 
     <string name="airline_id">Airline ID</string>
     <string name="flight_number">Flight number</string>
+    <string name="leave_review">Write review</string>
+
+    <string name="review_err_string">Must fill all fields</string>
+
 
 </resources>

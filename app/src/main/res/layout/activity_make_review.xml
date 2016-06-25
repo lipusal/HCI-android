@@ -20,17 +20,18 @@
         android:layout_centerHorizontal="true"
         tools:context="hci.itba.edu.ar.tpe2.MakeReviewActivity">
 
+
         <EditText
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/review_text"
+            android:layout_marginTop="50dp"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="50dp"
-            android:inputType="text"
-            android:layout_centerHorizontal="true"
-            android:hint="Texto"
-            android:text="Points = 10!" />
+            android:inputType="textMultiLine"
+
+            android:lines="4"
+            android:text="@string/leave_review" />
 
 
         <ImageButton
@@ -88,6 +89,14 @@
             android:layout_centerVertical="true" />
 
 
+        <TextView
+            android:textColor="#FF0000"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/review_button"
+            android:id="@+id/tilReview"/>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -96,6 +105,14 @@
             android:layout_below="@+id/first_star_button"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="30dp" />
+
+
+
+
+
+
+
+
     </RelativeLayout>
 
     <android.support.design.widget.NavigationView

@@ -3,6 +3,7 @@ package hci.itba.edu.ar.tpe2;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,11 +15,13 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.Review;
 import hci.itba.edu.ar.tpe2.backend.network.API;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
+import hci.itba.edu.ar.tpe2.fragment.TextFragment;
 
 public class MakeReviewActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -54,7 +57,11 @@ public class MakeReviewActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 if (validateFields()) {
-                    Review review = new Review(flightStatus.getFlight(), score * 2, reviewText.getText().toString());
+                    String comment = reviewText.getText().toString();
+                    if(comment.length()>140){
+                        comment = comment.substring(0,140);
+                    }
+                    Review review = new Review(flightStatus.getFlight(), score * 2, comment);
                     API.getInstance().submitReview(review, MakeReviewActivity.this, new NetworkRequestCallback<Void>() {
                         @Override
                         public void execute(Context c, Void param) {
@@ -62,6 +69,13 @@ public class MakeReviewActivity extends AppCompatActivity
                                 return;
                             }
                             MakeReviewActivity.this.finish();
+                        }
+                    }, new NetworkRequestCallback<String>(){
+
+                        @Override
+                        public void execute(Context c, String param) {
+                            TextView til =  (TextView)findViewById(R.id.tilReview);
+                            til.setText(R.string.err_network);
                         }
                     });
 
@@ -136,15 +150,19 @@ public class MakeReviewActivity extends AppCompatActivity
     private boolean validateFields() {
         boolean valid = true;
         String text = reviewText.getText().toString();
+        TextView til =  (TextView)findViewById(R.id.tilReview);
 
         if (score == 0) {
             valid = false;
-            reviewText.setError("Ingrese el puntaje");
+            til.setText(R.string.review_err_string);
         }
 
         if (text.isEmpty()) {
-            reviewText.setError("Ingrese un comentario");
+            til.setText(R.string.review_err_string);
             valid = false;
+        }
+        if(valid){
+            til.setText("");
         }
 
         return valid;

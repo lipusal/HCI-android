@@ -93,6 +93,13 @@ public class FlightReviewsFragment extends Fragment {
                 }
 
             }
+        }, new NetworkRequestCallback<String>() {
+            @Override
+            public void execute(Context c, String param) {
+                title.setText(R.string.err_network);
+            }
+
+
         });
     }
 
@@ -142,7 +149,11 @@ public class FlightReviewsFragment extends Fragment {
             //Fill in the list item with data
             TextView text = (TextView) destination.findViewById(R.id.textReview);//,
 
-            text.setText(review.getComment() + " \n" + review.getOverall() + "/5");
+            String comment =review.getComment();
+            if(comment.length()>140){
+                comment = comment.substring(0,140);
+            }
+            text.setText(comment.substring(0,255) + " \n");
             int overall = review.getOverall();
 
             ImageView firstStar = (ImageView) destination.findViewById(R.id.firstStar);
