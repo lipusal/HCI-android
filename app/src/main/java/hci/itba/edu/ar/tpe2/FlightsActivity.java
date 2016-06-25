@@ -71,6 +71,7 @@ public class FlightsActivity extends AppCompatActivity
         setContentView(R.layout.activity_flights);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.title_activity_flights);
         setSupportActionBar(toolbar);
 
         fab = (FloatingActionButton) findViewById(R.id.fab);

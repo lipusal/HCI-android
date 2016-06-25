@@ -38,7 +38,7 @@
 
         <activity
             android:name=".DealsMapActivity"
-            android:label="Deals Map"
+            android:label="@string/title_activity_deals_map"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <receiver
