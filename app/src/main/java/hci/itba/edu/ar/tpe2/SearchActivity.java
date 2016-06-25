@@ -67,7 +67,7 @@ public class SearchActivity extends AppCompatActivity
         }
         airlineField = (AutoCompleteTextView) findViewById(R.id.airline_id);
         airlineField.setAdapter(new AirlineAdapter(this, airlineIDs));
-        airlineField.setThreshold(1);
+//        airlineField.setThreshold(1);
 
         flightField = (EditText) findViewById(R.id.flight_number);
         searchButton = (Button) findViewById(R.id.search_button);

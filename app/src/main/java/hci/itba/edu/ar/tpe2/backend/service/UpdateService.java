@@ -65,8 +65,26 @@ public class UpdateService extends IntentService {
         if (intent != null) {
             switch (intent.getAction()) {
                 case ACTION_CHECK_FOR_UPDATES:
-                    boolean manuallyTriggered = intent.getBooleanExtra(EXTRA_MANUAL_UPDATE, false);
-                    checkForUpdates(manuallyTriggered);
+                    final boolean manuallyTriggered = intent.getBooleanExtra(EXTRA_MANUAL_UPDATE, false);
+                    PersistentData persistentData = new PersistentData(this);
+                    if(!persistentData.isInited()) {
+                        persistentData.init(
+                                new NetworkRequestCallback<Void>() {
+                                    @Override
+                                    public void execute(Context c, Void param) {
+                                        checkForUpdates(manuallyTriggered);
+                                    }
+                                },
+                                new NetworkRequestCallback<String>() {
+                                    @Override
+                                    public void execute(Context c, String param) {
+                                        Log.w("VOLANDO", "Couldn't init persistent data to check for updates, aborting.");
+                                    }
+                                });
+                    }
+                    else {
+                        checkForUpdates(manuallyTriggered);
+                    }
                     break;
             }
         }

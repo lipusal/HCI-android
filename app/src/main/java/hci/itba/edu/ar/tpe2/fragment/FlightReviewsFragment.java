@@ -55,7 +55,7 @@ public class FlightReviewsFragment extends Fragment {
 
     private void updateView() {
         if (firstTime) {
-            title.setText(R.string.searching);
+            title.setText(getString(R.string.searching) + "...");
             firstTime = false;
         } else {
             title.setText(R.string.updating);
@@ -153,7 +153,7 @@ public class FlightReviewsFragment extends Fragment {
             if(comment.length()>140){
                 comment = comment.substring(0,140);
             }
-            text.setText(comment.substring(0,255) + " \n");
+            text.setText(comment.isEmpty() ? "" : comment.substring(0, Math.min(comment.length(), 255)) + " \n");
             int overall = review.getOverall();
 
             ImageView firstStar = (ImageView) destination.findViewById(R.id.firstStar);
