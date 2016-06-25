@@ -313,7 +313,15 @@ public class FlightsActivity extends AppCompatActivity
     private View selectedView;
 
     public FlightStatus getFlightStatus() {
-        return flightStatus;
+        View detailsFrame = findViewById(R.id.fragment_container_flight_details);
+        boolean isDualPaneEnabled = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if(isDualPaneEnabled){
+            return flightStatus;
+        }else{
+            return null;
+        }
+
+
     }
     @Deprecated
     public View getSelectedView() { return selectedView;  }
