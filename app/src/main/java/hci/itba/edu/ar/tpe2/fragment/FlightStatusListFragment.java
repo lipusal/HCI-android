@@ -2,6 +2,8 @@ package hci.itba.edu.ar.tpe2.fragment;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.FragmentTransaction;
@@ -30,6 +32,7 @@ public class FlightStatusListFragment extends ListFragment {
 
     private OnFragmentInteractionListener interactionListener;
     private List<FlightStatus> statuses;
+    private View lastClickedView;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -85,9 +88,17 @@ public class FlightStatusListFragment extends ListFragment {
         interactionListener = null;
     }
 
+
     @Override
     public void onListItemClick(ListView listView, View view, int position, long id) {
+        //view.getBackground().setColorFilter(Color.parseColor("#00FF00"), PorterDuff.Mode.DARKEN);
+//        FlightsActivity flightsActivity = (FlightsActivity)getActivity();
+//        lastClickedView=flightsActivity.getSelectedView();
+//        if(lastClickedView!=null) lastClickedView.setBackgroundColor(0xFFFFFFFF);
+//        view.setBackgroundColor(0xFF00CCFF);
+//        flightsActivity.setSelectedView(view);
         interactionListener.onFlightClicked((FlightStatus) listView.getItemAtPosition(position));
+        listView.invalidateViews();
     }
 
     /**
@@ -109,12 +120,14 @@ public class FlightStatusListFragment extends ListFragment {
         @Override
         public void onFlightClicked(FlightStatus clickedStatus) {
             boolean dualPane;
+
 // = ((getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) == Configuration.SCREENLAYOUT_SIZE_LARGE);
             View detailsFrame = getActivity().findViewById(R.id.fragment_container_flight_details);
             dualPane = detailsFrame !=null && detailsFrame.getVisibility() == View.VISIBLE;
 
 
             if(dualPane){
+
                 FlightDetailsMainFragment details = (FlightDetailsMainFragment) getActivity().getSupportFragmentManager().findFragmentById(R.id.fragment_container_flight_details);
                 //TODO no crearlo si es el mismo que antes
                 details = new FlightDetailsMainFragment();
