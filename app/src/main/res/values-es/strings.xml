@@ -94,6 +94,10 @@
     <string name="details">Detalles</string>
     <string name="airline_id">ID aerolínea</string>
     <string name="flight_number">Número de vuelo</string>
+
+    <string name="leave_review">Escribir comentario</string>
+    <string name="review_err_string">Debe llenar todos los campos</string>
+
     <string name="err_update_failed">No se pudo actualizar los estados</string>
     <string name="action_retry">Reintentar</string>
     <string name="downloading_data">Consiguiendo destinos y aerolíneas</string>
@@ -108,4 +112,5 @@
     <string name="located">Localizado en\u0020</string>
     <string name="no_airport_found">No se encontraron aerpuertos cerca tuyo\u0020</string>
     <string name="snackbar_edit">Elige tu aeropuerto de origen</string>
+
 </resources>

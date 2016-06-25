@@ -393,8 +393,14 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
                 Collections.sort(orderedDeals);
                 deals = orderedDeals;
                 setMarkers(deals, closestAirport);
-            }
-        });
+            }},
+                new NetworkRequestCallback<String>() {
+                    @Override
+                    public void execute(Context c, String param) {
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.error_api), Toast.LENGTH_LONG).show();
+                    }
+                });
+
     }
 
     private void setMarkers(List<Deal> deals, Airport airport) {

@@ -85,8 +85,13 @@
     <string name="updating">Updating</string>
     <string name="currency" translatable="false">U$S\u0020</string>
     <string name="no_permissions">"You need permissions to locate"</string>
+    <string name="error_api">"Couldn't get dels from network"</string>
 
     <string name="airline_id">Airline ID</string>
     <string name="flight_number">Flight number</string>
+    <string name="leave_review">Write review</string>
+
+    <string name="review_err_string">Must fill all fields</string>
+
 
 </resources>
