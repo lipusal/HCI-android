@@ -206,8 +206,6 @@ public class MakeReviewActivity extends AppCompatActivity
             i = new Intent(this, DealsMapActivity.class);
         } else if (id == R.id.drawer_settings) {
             i = new Intent(this, SettingsActivity.class);
-        } else if (id == R.id.drawer_help) {
-
         }
 
         if (i != null) {
