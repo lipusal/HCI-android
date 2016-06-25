@@ -121,7 +121,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_make_review"
-        app:menu="@menu/activity_make_review_drawer" />
+        app:headerLayout="@layout/drawer_header_flights"
+        app:menu="@menu/drawer_options" />
 
 </android.support.v4.widget.DrawerLayout>
