@@ -101,7 +101,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
             @Override
             public void onClick(View view) {
                 mMap.clear();
-                Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_LONG).setAction("Cancel", new View.OnClickListener() {
+                Snackbar.make(coordinatorLayout, getResources().getString(R.string.snackbar_edit), Snackbar.LENGTH_INDEFINITE).setAction(R.string.cancel, new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         if(closestAirport == null){
