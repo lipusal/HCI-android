@@ -42,7 +42,8 @@
                     android:inputType="textNoSuggestions|text|textCapCharacters"
                     android:hint="@string/airline_id"
                     android:dropDownWidth="wrap_content"
-                    android:completionThreshold="1" />
+                    android:completionThreshold="1"
+                    android:maxLength="2" />
             </RelativeLayout>
 
             <!--Blank space-->

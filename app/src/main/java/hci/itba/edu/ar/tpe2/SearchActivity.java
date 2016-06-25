@@ -67,7 +67,6 @@ public class SearchActivity extends AppCompatActivity
         }
         airlineField = (AutoCompleteTextView) findViewById(R.id.airline_id);
         airlineField.setAdapter(new AirlineAdapter(this, airlineIDs));
-//        airlineField.setThreshold(1);
 
         flightField = (EditText) findViewById(R.id.flight_number);
         searchButton = (Button) findViewById(R.id.search_button);
@@ -220,23 +219,32 @@ public class SearchActivity extends AppCompatActivity
 
     private boolean validateFields() {
         boolean valid = true;
-        String airline = airlineField.getText().toString(),
-                flight = flightField.getText().toString();
-        if (airline.isEmpty()) {
+        String enteredAirlineID = airlineField.getText().toString(),
+                enteredFlightNumber = flightField.getText().toString();
+        if (enteredAirlineID.isEmpty()) {
             airlineField.setError(getString(R.string.err_empty_airline_id));
             valid = false;
-        } else if (false) {    //TODO handle invalid input
-
+        } else if (!persistentData.getAirlines().keySet().contains(enteredAirlineID)) {
+            airlineField.setError(getString(R.string.err_invalid_airline_id));
+            valid = false;
         }
-        if (flight.isEmpty()) {
+        if (enteredFlightNumber.isEmpty()) {
             flightField.setError(getString(R.string.err_empty_flight_number));
             valid = false;
-        } else if (false) {    //TODO handle invalid input
-
+        } else if (!isNumeric(enteredFlightNumber)) {
+            flightField.setError(getString(R.string.err_invalid_flight_number));
+            valid = false;
         }
-
-
         return valid;
+    }
+
+    private boolean isNumeric(String s) {
+        try {
+            double la = Double.parseDouble(s);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return true;
     }
 
     /**
