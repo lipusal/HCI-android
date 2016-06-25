@@ -51,6 +51,10 @@
     <string name="x_flights_updated">%1$d flights updated</string>
     <string name="status_changed_generic">%1$s status changed</string>
     <string name="tap_to_see_details">Tap to see details</string>
+    <string name="flight_updated">Flight updated</string>
+    <string name="removed_flight">Removed %1$s</string>
+    <string name="following_flight">Following %1$s</string>
+    <string name="undo">Undo</string>
 
     <string name="searching">Searching</string>
     <string name="not_following_flights">No followed flights</string>
@@ -60,7 +64,6 @@
 
     <string name="startup_failed_title">Couldn\'t download data</string>
     <string name="startup_failed_message">We couldn\'t get needed data for the app to work properly. Please make sure you have a working internet connection, restart the application and try again.</string>
-
     <string name="no_review_found">No reviews</string>
 
 

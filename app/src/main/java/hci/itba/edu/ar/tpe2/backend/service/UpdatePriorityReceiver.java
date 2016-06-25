@@ -1,11 +1,13 @@
 package hci.itba.edu.ar.tpe2.backend.service;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.TaskStackBuilder;
 import android.view.View;
 
 import java.util.Collection;
@@ -157,10 +159,17 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
                         new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
-                                Intent i = new Intent(context, FlightDetailMainActivity.class);
-                                i.putExtra(FlightDetailMainActivity.PARAM_STATUS, newStatus);
-                                //TODO flags?
-                                context.startActivity(i);
+                                //Take user to Flight Details activity, with back stack to Home
+                                Intent homeIntent = new Intent(context, FlightsActivity.class);
+                                homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                                Intent detailsIntent = new Intent(context, FlightDetailMainActivity.class);
+                                detailsIntent.putExtra(FlightDetailMainActivity.PARAM_STATUS, newStatus);
+                                PendingIntent pendingIntentWithBackStack = TaskStackBuilder
+                                        .create(context)
+                                        .addNextIntent(homeIntent)
+                                        .addNextIntent(detailsIntent)
+                                        .getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+                                context.startActivity(detailsIntent);
                             }
                         })
                 .show();
@@ -185,7 +194,7 @@ public class UpdatePriorityReceiver extends BroadcastReceiver {
                             @Override
                             public void onClick(View v) {
                                 Intent i = new Intent(context, FlightsActivity.class);
-                                //TODO flags?
+                                i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
                                 context.startActivity(i);
                             }
                         })

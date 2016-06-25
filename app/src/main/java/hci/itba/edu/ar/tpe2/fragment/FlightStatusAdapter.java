@@ -77,7 +77,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
                     notifyDataSetChanged();
                     starInterface.onFlightUnstarred(status);
 
-                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Removed " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, String.format(getContext().getString(R.string.removed_flight), flight.toString()), Snackbar.LENGTH_INDEFINITE).setAction(R.string.undo, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.watchStatus(status);
@@ -91,7 +91,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
                     star.setImageResource(R.drawable.ic_star_on_24dp);
                     add(status);
                     notifyDataSetChanged();
-                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, "Following " + flight.toString(), Snackbar.LENGTH_INDEFINITE).setAction("Undo", new View.OnClickListener() {
+                    Snackbar.make(mCoordinatorLayout == null ? v : mCoordinatorLayout, String.format(getContext().getString(R.string.following_flight), flight.toString()), Snackbar.LENGTH_INDEFINITE).setAction(R.string.undo, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             persistentData.stopWatchingStatus(status);

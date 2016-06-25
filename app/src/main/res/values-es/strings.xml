@@ -99,6 +99,10 @@
     <string name="downloading_data">Consiguiendo destinos y aerolíneas</string>
     <string name="startup_failed_title">No se pudo bajar información</string>
     <string name="startup_failed_message">No pudimos conseguir información necesaria para que la aplicación funcione correctamente.  Por favor asegurate de tener conexión a Internet, reiniciá la aplicación y volvé a intentar.</string>
+    <string name="flight_updated">Vuelo actualizado</string>
+    <string name="following_flight">Siguiendo %1$s</string>
+    <string name="removed_flight">%1$s borrado</string>
+    <string name="undo">Deshacer</string>
     <string name="choose_an_airport">Elige un aeropuerto</string>
     <string name="loading_deals">Obteniendo ofertas de\u0020</string>
     <string name="located">Localizado en\u0020</string>
