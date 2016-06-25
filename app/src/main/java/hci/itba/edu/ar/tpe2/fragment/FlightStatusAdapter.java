@@ -29,6 +29,7 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
     private StarInterface starInterface;
     private boolean setBottomPadding;
 
+
     FlightStatusAdapter(Context context, List<FlightStatus> objects, CoordinatorLayout layoutWithFAB, StarInterface starInterface) {
         super(context, 0, objects);
         persistentData = new PersistentData(context);
@@ -52,6 +53,19 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         }
         final FlightStatus status = getItem(position);
         final Flight flight = status.getFlight();
+
+        FlightStatus flightLastClicked = starInterface.getFlightStatus();
+
+        //BackgroundColor
+        if(flightLastClicked!=null){
+            if(flightLastClicked.equals(status)){
+                //starInterface.setSelectedView(destination);
+                destination.setBackgroundColor(0xFF00CCFF);
+            }else{
+                destination.setBackgroundColor(0xFFFFFFFF);
+            }
+
+        }
 
         //Logo
         ImageView icon = (ImageView) destination.findViewById(R.id.icon);

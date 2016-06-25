@@ -26,6 +26,7 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
+import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -38,6 +39,9 @@ import hci.itba.edu.ar.tpe2.fragment.YourFlightsFragment;
 
 public class FlightsActivity extends AppCompatActivity
         implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
+
+    private static final String PARAM_STATUS = "FlightStatusClicked";
+    private static final String PARAM_VIEW = "ViewClicked";
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -52,6 +56,14 @@ public class FlightsActivity extends AppCompatActivity
     private boolean isFailDialogDisplayed;
     YourFlightsFragment yourFlightsFragment;
 
+//    private FlightStatus lastFlightClicked;
+//    public FlightStatus getLastFlightClicked(){
+//        return lastFlightClicked;
+//    }
+//    public void setLastFlightCLicked(FlightStatus lastFlightCLicked){
+//        this.lastFlightClicked=lastFlightCLicked;
+//    }
+
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -64,10 +76,14 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getResources().getBoolean(R.bool.landscape_only)) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        if(savedInstanceState!=null){
+            setFlightStatus((FlightStatus)savedInstanceState.getSerializable(PARAM_STATUS));
         }
+//        if (getResources().getBoolean(R.bool.landscape_only)) {
+//            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+//        }
         reviewVisiblle = false;
+//        lastFlightClicked=null;
         setContentView(R.layout.activity_flights);
 
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -139,6 +155,7 @@ public class FlightsActivity extends AppCompatActivity
                     });
         }
 
+
         if (savedInstanceState == null) {
 
             FragmentManager fm = getSupportFragmentManager();
@@ -152,6 +169,13 @@ public class FlightsActivity extends AppCompatActivity
             ft.add(R.id.fragment_container_your_flight, yourFlightsFragment);
             ft.commit();
         }
+
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState){
+        super.onSaveInstanceState(outState);
+        outState.putSerializable(PARAM_STATUS,getFlightStatus());
 
     }
 
@@ -285,13 +309,29 @@ public class FlightsActivity extends AppCompatActivity
     }
 
     private FlightStatus flightStatus;
+    @Deprecated
+    private View selectedView;
 
     public FlightStatus getFlightStatus() {
-        return flightStatus;
+        View detailsFrame = findViewById(R.id.fragment_container_flight_details);
+        boolean isDualPaneEnabled = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
+        if(isDualPaneEnabled){
+            return flightStatus;
+        }else{
+            return null;
+        }
+
+
     }
+    @Deprecated
+    public View getSelectedView() { return selectedView;  }
 
     public void setFlightStatus(FlightStatus newFlightStatus) {
         flightStatus = newFlightStatus;
+    }
+    @Deprecated
+    public void setSelectedView(View newSelectedView) {
+        selectedView = newSelectedView;
     }
 
     @Override
