@@ -31,7 +31,7 @@
             android:inputType="textMultiLine"
 
             android:lines="4"
-            android:text="@string/leave_review" />
+            android:hint="@string/leave_review" />
 
 
         <ImageButton
