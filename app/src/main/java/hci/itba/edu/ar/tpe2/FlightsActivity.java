@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
@@ -26,7 +25,6 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import hci.itba.edu.ar.tpe2.backend.data.Flight;
 import hci.itba.edu.ar.tpe2.backend.data.FlightStatus;
 import hci.itba.edu.ar.tpe2.backend.data.PersistentData;
 import hci.itba.edu.ar.tpe2.backend.network.NetworkRequestCallback;
@@ -41,7 +39,7 @@ public class FlightsActivity extends AppCompatActivity
         implements StarInterface, NavigationView.OnNavigationItemSelectedListener, FlightStatusListFragment.OnFragmentInteractionListener, YourFlightsFragment.OnFragmentInteractionListener, FlightDetailsFragment.OnFragmentInteractionListener, FlightDetailsMainFragment.OnFragmentInteractionListener {
 
     private static final String PARAM_STATUS = "FlightStatusClicked";
-    private static final String PARAM_VIEW = "ViewClicked";
+    private static final String PARAM_REVIEW_VISIBLE = "ReviewVisible";
 
     @Override
     public void onFragmentInteraction(Uri uri) {
@@ -52,7 +50,7 @@ public class FlightsActivity extends AppCompatActivity
     private Toolbar toolbar;
     private Menu menu;
     private PersistentData persistentData;
-    private boolean reviewVisiblle;
+    private boolean reviewVisible;
     private boolean isFailDialogDisplayed;
     YourFlightsFragment yourFlightsFragment;
 
@@ -76,13 +74,15 @@ public class FlightsActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState!=null){
-            setFlightStatus((FlightStatus)savedInstanceState.getSerializable(PARAM_STATUS));
+        if (savedInstanceState != null) {
+            setFlightStatus((FlightStatus) savedInstanceState.getSerializable(PARAM_STATUS));
+            reviewVisible = savedInstanceState.getBoolean(PARAM_REVIEW_VISIBLE);
+        } else {
+            reviewVisible = false;
         }
 //        if (getResources().getBoolean(R.bool.landscape_only)) {
 //            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 //        }
-        reviewVisiblle = false;
 //        lastFlightClicked=null;
         setContentView(R.layout.activity_flights);
 
@@ -173,10 +173,10 @@ public class FlightsActivity extends AppCompatActivity
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState){
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putSerializable(PARAM_STATUS, getFlightStatus());
+        outState.putBoolean(PARAM_REVIEW_VISIBLE, reviewVisible);
         super.onSaveInstanceState(outState);
-        outState.putSerializable(PARAM_STATUS,getFlightStatus());
-
     }
 
     @Override
@@ -234,7 +234,7 @@ public class FlightsActivity extends AppCompatActivity
         if (dualPane) {
             getMenuInflater().inflate(R.menu.flight, menu);
             MenuItem item = menu.findItem(R.id.action_review);
-            item.setVisible(reviewVisiblle);
+            item.setVisible(reviewVisible);
         }
         return true;
     }
@@ -315,20 +315,24 @@ public class FlightsActivity extends AppCompatActivity
     public FlightStatus getFlightStatus() {
         View detailsFrame = findViewById(R.id.fragment_container_flight_details);
         boolean isDualPaneEnabled = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-        if(isDualPaneEnabled){
+        if (isDualPaneEnabled) {
             return flightStatus;
-        }else{
+        } else {
             return null;
         }
 
 
     }
+
     @Deprecated
-    public View getSelectedView() { return selectedView;  }
+    public View getSelectedView() {
+        return selectedView;
+    }
 
     public void setFlightStatus(FlightStatus newFlightStatus) {
         flightStatus = newFlightStatus;
     }
+
     @Deprecated
     public void setSelectedView(View newSelectedView) {
         selectedView = newSelectedView;
@@ -346,7 +350,7 @@ public class FlightsActivity extends AppCompatActivity
             details = new FlightDetailsMainFragment();
             this.setFlightStatus(clickedStatus);
 
-            reviewVisiblle = true;
+            reviewVisible = true;
 //            MenuItem item = toolbar.getMenu().findItem(R.id.action_review);
 //            item.setVisible(true);
             invalidateOptionsMenu();
@@ -379,7 +383,7 @@ public class FlightsActivity extends AppCompatActivity
                 FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
                 ft.remove(details);
                 ft.commit();
-                reviewVisiblle = false;
+                reviewVisible = false;
                 this.invalidateOptionsMenu();
             }
             fab.bringToFront();
