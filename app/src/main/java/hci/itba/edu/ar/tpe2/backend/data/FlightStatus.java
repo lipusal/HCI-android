@@ -358,13 +358,10 @@ public class FlightStatus implements Serializable {
 
     public String getPrettyTimezone(DateTime datetime) {
         StringBuilder fullStr = new StringBuilder(datetime.toString("Z"));
-        if (fullStr.charAt(0) != '-') {
-            fullStr.insert(0, '+');
-        }
         if (fullStr.charAt(1) == '0') {
             fullStr.deleteCharAt(1);
         }
-        return "UTC" + (fullStr.equals("+0") ? "" : " " + fullStr.substring(0, 2));
+        return "UTC" + (fullStr.toString().startsWith("+0") ? "" : " " + fullStr.substring(0, 2));
     }
 
     /**

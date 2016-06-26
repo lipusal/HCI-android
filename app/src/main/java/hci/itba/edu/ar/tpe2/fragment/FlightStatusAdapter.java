@@ -3,6 +3,7 @@ package hci.itba.edu.ar.tpe2.fragment;
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,11 +58,11 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         FlightStatus flightLastClicked = starInterface.getFlightStatus();
 
         //BackgroundColor
-        if(flightLastClicked!=null){
-            if(flightLastClicked.equals(status)){
+        if (flightLastClicked != null) {
+            if (flightLastClicked.equals(status)) {
                 //starInterface.setSelectedView(destination);
-                destination.setBackgroundColor(0xFF00CCFF);
-            }else{
+                destination.setBackgroundColor(0xE0E0E0E0);
+            } else {
                 destination.setBackgroundColor(0xFFFFFFFF);
             }
 
