@@ -116,5 +116,6 @@
     <string name="uploading">Subiendo</string>
     <string name="no_permissions">Permiso de ubicación no otorgado</string>
     <string name="couldnt_locate">No se te pudo ubicar. Asegurate que Servicios de Ubicación están activados.</string>
+    <string name="finding_airports_near_you">Buscando aeropuertos cercanos...</string>
 
 </resources>

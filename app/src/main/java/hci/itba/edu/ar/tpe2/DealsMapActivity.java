@@ -234,13 +234,14 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         if (lastKnownLocation != null) {
             latitude = lastKnownLocation.getLatitude();
             longitude = lastKnownLocation.getLongitude();
+            Toast.makeText(DealsMapActivity.this, R.string.finding_airports_near_you, Toast.LENGTH_LONG).show();
             API.getInstance().getAirportsByLocation(latitude, longitude, 100, this, new NetworkRequestCallback<Airport[]>() {   //TODO use smaller radius, or let the user set it in settings
                 @Override
                 public void execute(Context c, Airport[] nearbyAirports) {
                     if (nearbyAirports.length == 0) {
-                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.no_airport_found), Toast.LENGTH_SHORT).show();    //TODO remove this, for debugging
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.no_airport_found), Toast.LENGTH_SHORT).show();
                     } else if (nearbyAirports.length == 1) {
-                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.located) + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();    //TODO remove?
+                        Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.located) + nearbyAirports[0].toString(), Toast.LENGTH_SHORT).show();
                         closestAirport = nearbyAirports[0];
                         //Got closest airport, find deals for it
                         findDeals(closestAirport);
@@ -252,7 +253,7 @@ public class DealsMapActivity extends AppCompatActivity implements OnMapReadyCal
         } else if (closestAirport != null && deals != null) {
             setMarkers(deals, closestAirport);
         } else {
-            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.couldnt_locate), Toast.LENGTH_SHORT).show();    //TODO remove plz
+            Toast.makeText(DealsMapActivity.this, getResources().getString(R.string.couldnt_locate), Toast.LENGTH_SHORT).show();
             Log.w("VOLANDO", "Location is null");
         }
     }

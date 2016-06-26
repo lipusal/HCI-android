@@ -78,6 +78,7 @@
     <string name="loading_deals">Getting deals from\u0020</string>
     <string name="no_airport_found">No airport found near you =(\u0020</string>
     <string name="located">Located you at\u0020</string>
+    <string name="finding_airports_near_you">Finding airports near you...</string>
     <string name="couldnt_locate">Unable to locate you. Make sure Location Services are enabled.</string>
     <string name="choose_an_airport">Choose an airport</string>
     <string name="accept">Accept</string>
