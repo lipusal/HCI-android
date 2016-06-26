@@ -74,11 +74,29 @@ public class FlightStatusAdapter extends ArrayAdapter<FlightStatus> {
         //Text
         TextView title = (TextView) destination.findViewById(R.id.flight_text);
         title.setText(flight.toString());
-
-        //Status
+        //Status icon
         ImageView statusIcon = (ImageView) destination.findViewById(R.id.status_icon);
         statusIcon.setImageDrawable(getContext().getDrawable(status.getIconID()));
-
+        //Extra time field (only in landscape mode)
+        TextView extraTime = (TextView) destination.findViewById(R.id.extra_time);
+        if (extraTime != null) {
+            switch (status.getStringResID()) {
+                case R.string.status_scheduled:
+                    extraTime.setText(status.getPrettyScheduledDepartureTime().replace('\n', ' '));
+                    break;
+                case R.string.status_active:
+                case R.string.status_diverted:
+                    extraTime.setText(status.getPrettyScheduledArrivalTime().replace('\n', ' '));
+                    break;
+                case R.string.status_landed:
+                    extraTime.setText(status.getPrettyActualArrivalTime().replace('\n', ' '));
+                    break;
+                case R.string.status_canceled:
+                    extraTime.setText("");
+                    break;
+            }
+            title.setText(flight.toString());
+        }
         //Star
         final ImageButton star = (ImageButton) destination.findViewById(R.id.follow);
         star.setImageResource(watchedStatuses.containsValue(status) ? R.drawable.ic_star_on_24dp : R.drawable.ic_star_off_24dp);
