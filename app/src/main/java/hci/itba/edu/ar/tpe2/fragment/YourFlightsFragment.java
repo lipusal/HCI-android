@@ -94,23 +94,29 @@ public class YourFlightsFragment extends Fragment implements SwipeRefreshLayout.
             public void onMultipleFlightsChanged(Collection<FlightStatus> newStatuses, boolean manuallyTriggered) {
                 swipeRefreshLayout.setRefreshing(false);
                 refreshFlights();
-                //Same snackbar as super, but no action (user is already in Flights activity)
-                Snackbar.make(destinationView, String.format(getString(R.string.x_flights_updated), newStatuses.size()), Snackbar.LENGTH_LONG).show();
+                //Avoid NPEs
+                if (destinationView != null && destinationView.getContext() != null) {
+                    //Same snackbar as super, but no action (user is already in Flights activity)
+                    Snackbar.make(destinationView, String.format(getString(R.string.x_flights_updated), newStatuses.size()), Snackbar.LENGTH_LONG).show();
+                }
             }
 
             @Override
             public void onUpdateFailed(boolean manualUpdate) {
                 swipeRefreshLayout.setRefreshing(false);
-                Snackbar.make(destinationView, getString(R.string.err_update_failed), Snackbar.LENGTH_LONG)
-                        .setAction(
-                                R.string.action_retry,
-                                new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        onRefresh();
-                                    }
-                                })
-                        .show();
+                //Avoid NPEs
+                if (destinationView != null && destinationView.getContext() != null) {
+                    Snackbar.make(destinationView, getString(R.string.err_update_failed), Snackbar.LENGTH_LONG)
+                            .setAction(
+                                    R.string.action_retry,
+                                    new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            onRefresh();
+                                        }
+                                    })
+                            .show();
+                }
             }
         };
 
