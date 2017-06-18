@@ -6,3 +6,4 @@ gradle/
 **.DS_Store
 build/
 captures/
+android/
