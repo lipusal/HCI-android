@@ -21,7 +21,7 @@ import java.net.URLEncoder;
  */
 public abstract class FlickrRequest {
     public static final String ERR_STRING = "Connection error";
-    private static final String API_KEY = "9a5f81e1e267f943ba8bbc71ae056840";
+    private static final String API_KEY = "TODO read this from an environment variable";
     private static final String FLICKR_API_BASE_URL = "https://api.flickr.com/services/rest/?method=flickr.photos.search&" +
             "tags=landscape&" +
             "media=photos&" +
